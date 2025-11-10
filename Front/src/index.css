@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* AIMentor Dark Theme */
+    --background: 222 14% 5%;  /* #0E0E10 */
+    --foreground: 0 0% 92%;    /* #EAEAEA */
+
+    --card: 220 8% 10%;        /* #1A1A1D */
+    --card-foreground: 0 0% 92%;
+
+    --popover: 220 8% 10%;
+    --popover-foreground: 0 0% 92%;
+
+    --primary: 246 81% 70%;    /* #6C63FF - Purple */
+    --primary-foreground: 0 0% 92%;
+
+    --secondary: 194 100% 50%;  /* #00E5FF - Cyan Accent */
+    --secondary-foreground: 222 14% 5%;
+
+    --muted: 220 8% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 194 100% 50%;    /* #00E5FF */
+    --accent-foreground: 222 14% 5%;
+
+    --success: 162 100% 39%;   /* #00C896 */
+    --success-foreground: 0 0% 92%;
+
+    --warning: 43 100% 50%;    /* #FFB400 */
+    --warning-foreground: 222 14% 5%;
+
+    --destructive: 0 100% 65%;  /* #FF4D4D */
+    --destructive-foreground: 0 0% 92%;
+
+    --border: 220 8% 20%;
+    --input: 220 8% 20%;
+    --ring: 246 81% 70%;
+
+    --radius: 1.25rem;
+
+    --sidebar-background: 220 8% 10%;
+    --sidebar-foreground: 0 0% 92%;
+    --sidebar-primary: 246 81% 70%;
+    --sidebar-primary-foreground: 0 0% 92%;
+    --sidebar-accent: 220 8% 15%;
+    --sidebar-accent-foreground: 0 0% 92%;
+    --sidebar-border: 220 8% 20%;
+    --sidebar-ring: 246 81% 70%;
+
+    /* Custom gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(246 81% 70%), hsl(194 100% 50%));
+    --gradient-glow: radial-gradient(circle at center, hsl(246 81% 70% / 0.3), transparent);
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(246 81% 70% / 0.4);
+    --shadow-glow-accent: 0 0 40px hsl(194 100% 50% / 0.4);
+    --shadow-elevated: 0 10px 30px -10px hsl(222 14% 5% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+}
+
+@layer utilities {
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--secondary) / 0.5);
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+}
