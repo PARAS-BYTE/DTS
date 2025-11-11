@@ -17,6 +17,7 @@ dotenv.config();
 import authRoutes from './routes/authRoutes.js';
 import courseRouter from './routes/CourseRouter.js';
 import calendarRouter from './routes/CalendarRoutes.js';
+import QuizRouter from './routes/QuizRouter.js';
 // import aiRoutes from './routes/AiRoutes.js';
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -34,7 +35,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/nova_learn', {
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRouter);
 app.use('/api/calendar', calendarRouter);
-// app.use('/api/ai', aiRoutes);
+
+app.use('/api/quiz', QuizRouter);
 
 app.post("/trans", async (req, res) => {
     try {

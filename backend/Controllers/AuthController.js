@@ -70,7 +70,7 @@ export const loginUser = asyncHandler(async (req, res) => {
       role: user.role,
     });
   } catch (error) {
-    console.error("Login Error:", error.message);
+    console.error("Login Error:", error);
     res.status(500).json({ message: "Server error while logging in" });
   }
 });

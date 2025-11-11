@@ -71,7 +71,7 @@ const quizSchema = new Schema(
     course: {
       type: Schema.Types.ObjectId,
       ref: "Course",
-      required: true,
+      // required: true,
     },
 
     module: {

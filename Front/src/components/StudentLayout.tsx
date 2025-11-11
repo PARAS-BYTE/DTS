@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
-import { Home, Calendar, BookOpen, FileQuestion, Trophy, BarChart3, Settings, Sparkles, LucideBatteryWarning } from 'lucide-react';
+import { Home, Calendar, BookOpen, FileQuestion, Trophy, BarChart3, Settings, Sparkles, LucideBatteryWarning, Icon, History, Bot } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 
@@ -23,7 +23,9 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
     { name: 'Arena', href: '/student/arena', icon: Trophy },
     { name: 'Reports', href: '/student/reports', icon: BarChart3 },
     { name: 'Settings', href: '/student/settings', icon: Settings },
-    { name: "My Learning", href: '/student/learning', icon: LucideBatteryWarning }
+    {name :'History' ,href: "/student/hist",icon:History},
+    { name: "My Learning", href: '/student/learning', icon: LucideBatteryWarning },
+    {name :"ChatBot",href:"/student/chatbot",icon :Bot}
   ];
 
   const isActive = (path: string) => {

@@ -106,9 +106,8 @@ const userSchema = new Schema(
     ],
     quizAttempts: [
       {
-        quizId: { type: Schema.Types.ObjectId, ref: "Quiz" },
-        score: Number,
-        accuracy: Number,
+        quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz" },
+        resultData: { type: Object, required: true }, // ✅ store entire frontend-style result
         attemptDate: { type: Date, default: Date.now },
       },
     ],

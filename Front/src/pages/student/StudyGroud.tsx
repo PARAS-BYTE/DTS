@@ -2,12 +2,6 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +12,7 @@ import {
   ChevronRight,
   ChevronDown,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const StudyGround = () => {
   const { state: courseId } = useLocation();
@@ -27,7 +22,6 @@ const StudyGround = () => {
   const [expandedModule, setExpandedModule] = useState<number | null>(0);
   const [transcript, setTranscript] = useState<string>("");
 
-  // ─── Fetch Course Data ───────────────────────────────
   const fetchCourse = async () => {
     try {
       setLoading(true);
@@ -50,20 +44,12 @@ const StudyGround = () => {
     }
   };
 
-  useEffect(() => {
-    fetchCourse();
-  }, []);
-
-  // ─── Fetch Transcript from Backend ────────────────────────
   const fetchTranscript = async (videoUrl: string) => {
     try {
       setTranscript("Loading transcript...");
-      const { data } = await axios.post(
-        "http://localhost:5000/trans",
-        { videoUrl },
-        { withCredentials: true }
-      );
-
+      const { data } = await axios.post("http://localhost:5000/trans", {
+        videoUrl,
+      });
       setTranscript(data.transcript || "Transcript not available.");
     } catch (err) {
       console.error("⚠️ Transcript Fetch Error:", err);
@@ -71,17 +57,18 @@ const StudyGround = () => {
     }
   };
 
-  // ─── When user selects another lesson ─────────────────────
+  useEffect(() => {
+    fetchCourse();
+  }, []);
+
   const handleLessonSelect = (lesson: any) => {
     setActiveVideo(lesson);
     fetchTranscript(lesson.videoUrl);
   };
 
-  // ─── Move to next lesson ─────────────────────────────
   const handleNextLesson = () => {
     if (!course) return;
     let foundNext = false;
-
     for (let i = 0; i < course.modules.length; i++) {
       const lessons = course.modules[i].lessons;
       for (let j = 0; j < lessons.length; j++) {
@@ -119,102 +106,81 @@ const StudyGround = () => {
     );
 
   return (
-    <div className="p-8 space-y-8">
-      {/* ─── Header Info ───────────────────────────── */}
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        <div className="lg:w-1/3">
-          <img
-            src={course.thumbnail}
-            alt={course.title}
-            className="w-full rounded-2xl shadow-lg object-cover"
-          />
+    <div className="p-6 lg:p-10 bg-background">
+      {/* ─── Top Section ───────────────────────────── */}
+      <div className="flex flex-col gap-3 mb-6">
+        <h1 className="text-3xl font-bold">{course.title}</h1>
+        <p className="text-muted-foreground">{course.description}</p>
+
+        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4" /> {course.category}
+          </span>
+          <span className="flex items-center gap-2">
+            <Clock className="w-4 h-4" /> {course.duration} hrs
+          </span>
+          <span className="font-medium">{course.level}</span>
         </div>
 
-        <div className="lg:w-2/3 space-y-4">
-          <h1 className="text-4xl font-bold">{course.title}</h1>
-          <p className="text-muted-foreground text-lg">{course.description}</p>
-
-          <div className="flex flex-wrap gap-4 text-muted-foreground text-sm">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" /> {course.category}
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" /> {course.duration} hrs
-            </div>
-            <span className="font-medium">{course.level}</span>
-          </div>
-
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Your Progress</span>
-              <span className="font-medium text-primary">
-                {course.userProgress.progress}%
-              </span>
-            </div>
-            <Progress value={course.userProgress.progress} className="h-2" />
+        <div className="mt-3">
+          <Progress value={course.userProgress.progress} className="h-2" />
+          <div className="flex justify-between text-xs mt-1">
+            <span>Your Progress</span>
+            <span className="font-medium text-primary">
+              {course.userProgress.progress}%
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ─── Main Learning Area ───────────────────────── */}
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Video Player Section */}
-        <Card className="lg:w-2/3 border-primary/20 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-2xl flex justify-between items-center">
-              <span>{activeVideo?.title || "Select a Lesson"}</span>
-              {activeVideo && (
-                <Button
-                  onClick={handleNextLesson}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  Next <ChevronRight className="w-4 h-4" />
-                </Button>
-              )}
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            {activeVideo ? (
-              <div>
-                <div className="aspect-video rounded-xl overflow-hidden bg-black mb-4">
+      {/* ─── Video + Sidebar Layout ───────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
+        {/* Video Player + Transcript */}
+        <div className="space-y-6">
+          <Card className="border-none shadow-lg">
+            <CardContent className="p-0">
+              {activeVideo ? (
+                <div className="rounded-xl overflow-hidden">
                   <iframe
                     src={activeVideo.videoUrl.replace("watch?v=", "embed/")}
                     title={activeVideo.title}
                     allowFullScreen
-                    className="w-full h-full"
+                    className="w-full h-[450px]"
                   ></iframe>
                 </div>
-
-                {/* Transcript Section */}
-                <div className="p-4 bg-muted/30 rounded-lg max-h-[350px] overflow-y-auto">
-                  <h3 className="text-lg font-semibold mb-2 text-primary">
-                    Transcript
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-                    {transcript}
-                  </p>
+              ) : (
+                <div className="h-[450px] flex justify-center items-center text-muted-foreground">
+                  Select a lesson to begin
                 </div>
-              </div>
-            ) : (
-              <div className="flex justify-center items-center h-[400px] text-muted-foreground">
-                Select a lesson to start learning
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Sidebar: Modules + Lessons */}
-        <div className="lg:w-1/3 space-y-4">
+          {/* Transcript Section */}
+          <Card className="border border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-primary">
+                Transcript
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm leading-relaxed text-muted-foreground max-h-[300px] overflow-y-auto whitespace-pre-line">
+                {transcript}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar - Modules and Lessons */}
+        <div className="space-y-4">
           {course.modules.map((mod: any, modIndex: number) => (
             <motion.div
               key={modIndex}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: modIndex * 0.1 }}
+              transition={{ duration: 0.3, delay: modIndex * 0.1 }}
             >
-              <Card className="border-primary/10 hover:border-primary/30 transition-all">
+              <Card className="border border-primary/10 hover:border-primary/30 transition-all shadow-sm">
                 <CardHeader
                   className="cursor-pointer flex flex-row justify-between items-center"
                   onClick={() =>
@@ -223,7 +189,7 @@ const StudyGround = () => {
                     )
                   }
                 >
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
                     {expandedModule === modIndex ? (
                       <ChevronDown className="w-4 h-4" />
                     ) : (
@@ -243,7 +209,7 @@ const StudyGround = () => {
                             ? "default"
                             : "outline"
                         }
-                        className="justify-between w-full"
+                        className="w-full justify-between"
                         onClick={() => handleLessonSelect(lesson)}
                       >
                         <div className="flex items-center gap-2">
@@ -263,9 +229,9 @@ const StudyGround = () => {
         </div>
       </div>
 
-      {/* ─── Completion Info ─────────────────────────── */}
+      {/* ─── Completion Banner ───────────────────────────── */}
       {course.userProgress.completed && (
-        <div className="text-center py-6">
+        <div className="text-center mt-8">
           <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-2" />
           <p className="text-primary font-semibold text-lg">
             🎉 Congratulations! You’ve completed this course!

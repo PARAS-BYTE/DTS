@@ -16,7 +16,7 @@ const router = express.Router();
 router.get("/", getAllCourses);
 // router.get("/:id", getCourseById);
 
-router.get("/my", getAllCourses);
+router.get("/my", getMyCourses);
 router.post("/getsingle",getCourseDetails)
 router.post("/enroll", enrollInCourse);
 

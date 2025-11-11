@@ -1,28 +1,16 @@
 import express from "express";
-import {
-  getAllQuizzes,
-  getQuizById,
-  createQuiz,
-  updateQuiz,
-  deleteQuiz,
-  getQuizzesByCourse,
-  attemptQuiz,
-} from "../Controllers/QuizController.js";
-// import { protect, adminOnly } from "../middleware/authMiddleware.js";
+
+import { evaluateQuiz, generateAIQuiz, getAllQuizzes, getQuizDetails, getUserQuizAttempts } from "../Controllers/QuizController.js";
+// import { getAllQuizzes, getQuizDetails } from "../Controllers/QuizController";
+// import { getAllQuizzes, getQuizDetails } from "../controllers/quizController.js";
 
 const router = express.Router();
 
-// Public routes
+// 🔐 Both routes require JWT-authenticated users
 router.get("/", getAllQuizzes);
-router.get("/:id", protect, getQuizById);
-router.get("/course/:courseId", getQuizzesByCourse);
-
-// Admin/instructor routes
-router.post("/", createQuiz);
-router.put("/:id", updateQuiz);
-router.delete("/:id", deleteQuiz);
-
-// Student routes
-router.post("/:id/attempt",  attemptQuiz);
+router.post("/single", getQuizDetails);
+router.post("/evaluate",evaluateQuiz)
+router.post("/genai",generateAIQuiz)
+router.get("/getquizattempts",getUserQuizAttempts)
 
 export default router;

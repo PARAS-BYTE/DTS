@@ -29,6 +29,10 @@ import Analytics from "./pages/admin/Analytics";
 import AdminSettings from "./pages/admin/Settings";
 import MyLearning from "./pages/student/MyLearning";
 import StudyGroud from "./pages/student/StudyGroud";
+import TakeQuiz from "./pages/student/TakeQuiz";
+import QuizAnalyzed from "./pages/student/QuizAnalyzed";
+import History from "./pages/student/History";
+import ChatBot from "./pages/student/ChatBot";
 
 const queryClient = new QueryClient();
 
@@ -54,10 +58,42 @@ const App = () => (
             }
           />
           <Route
+            path="/student/chatbot"
+            element={
+              <StudentLayout>
+                <ChatBot />
+              </StudentLayout>
+            }
+          />
+          <Route
             path="/student/calendar"
             element={
               <StudentLayout>
                 <Calendar />
+              </StudentLayout>
+            }
+          />
+          <Route
+            path="/student/hist"
+            element={
+              <StudentLayout>
+                <History />
+              </StudentLayout>
+            }
+          />
+          <Route
+            path="/student/quizresult"
+            element={
+              <StudentLayout>
+                <QuizAnalyzed/>
+              </StudentLayout>
+            }
+          />
+          <Route
+            path="/student/takequiz"
+            element={
+              <StudentLayout>
+                <TakeQuiz />
               </StudentLayout>
             }
           />

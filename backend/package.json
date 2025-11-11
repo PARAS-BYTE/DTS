@@ -11,6 +11,7 @@
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.13.2",
     "axois": "^0.0.1-security",
     "bcryptjs": "^2.4.3",

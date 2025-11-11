@@ -1,167 +1,93 @@
 import asyncHandler from "express-async-handler";
+import jwt from "jsonwebtoken";
 import User from "../Models/User.js";
+// import User from "../models/userModel.js";
 
-//
-// ─── GET ALL TASKS (USER CALENDAR) ─────────────────────────────
-// @route   GET /api/calendar
-// @access  Private (Student)
-//
-export const getCalendarTasks = asyncHandler(async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+// ─── AUTH HELPER ───────────────────────────────
+const authenticateUser = async (req) => {
+  let token;
+  if (req.cookies?.jwt) token = req.cookies.jwt;
+  else if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  )
+    token = req.headers.authorization.split(" ")[1];
+  if (!token) throw new Error("Not authorized, no token");
 
-    res.status(200).json({
-      calendarData: user.calendarData || [],
-      upcomingTasks: user.upcomingTasks || [],
-      completedTasks: user.completedTasks || [],
-    });
-  } catch (error) {
-    console.error("Get Calendar Tasks Error:", error.message);
-    res.status(500).json({ message: "Server error while fetching calendar tasks" });
-  }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decoded.userId);
+  if (!user) throw new Error("User not found");
+
+  return user;
+};
+
+// ─── GET CALENDAR TASKS ───────────────────────────────
+export const getCalendar = asyncHandler(async (req, res) => {
+  const user = await authenticateUser(req);
+  res.status(200).json({ calendarData: user.calendarData });
 });
 
-//
-// ─── ADD NEW TASK ───────────────────────────────────────────────
-// @route   POST /api/calendar/add
-// @access  Private (Student)
-//
+// ─── GET SUMMARY ───────────────────────────────
+export const getCalendarSummary = asyncHandler(async (req, res) => {
+  const user = await authenticateUser(req);
+  const totalTasks = user.calendarData.length;
+  const completedTasks = user.calendarData.filter((t) => t.status === "completed").length;
+  const pendingTasks = totalTasks - completedTasks;
+
+  res.status(200).json({ totalTasks, completedTasks, pendingTasks });
+});
+
+// ─── ADD TASK ───────────────────────────────
 export const addCalendarTask = asyncHandler(async (req, res) => {
-  try {
-    const { title, description, dueDate, priority, category, type } = req.body;
+  const user = await authenticateUser(req);
+  const { title, description, date, priority, category } = req.body;
 
-    if (!title || !dueDate) {
-      return res.status(400).json({ message: "Title and due date are required" });
-    }
+  const newTask = {
+    taskId: new Date().getTime().toString(),
+    title,
+    description,
+    date: new Date(date),
+    priority: priority || "medium",
+    category: category || "General",
+    status: "pending",
+  };
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+  user.addCalendarTask(newTask);
+  await user.save();
 
-    const newTask = {
-      taskId: new Date().getTime().toString(),
-      title,
-      description: description || "",
-      date: dueDate,
-      status: "pending",
-      type: type || "task",
-      priority: priority || "medium",
-      category: category || "General",
-    };
-
-    user.calendarData.push(newTask);
-    user.upcomingTasks.push({
-      title,
-      dueDate,
-      course: category || "",
-      type: type || "task",
-    });
-
-    await user.save();
-
-    res.status(201).json({ message: "Task added successfully", task: newTask });
-  } catch (error) {
-    console.error("Add Task Error:", error.message);
-    res.status(500).json({ message: "Server error while adding task" });
-  }
+  res.status(201).json({ message: "Task added successfully", task: newTask });
 });
 
-//
-// ─── MARK TASK AS COMPLETED ─────────────────────────────────────
-// @route   PATCH /api/calendar/complete/:taskId
-// @access  Private (Student)
-//
-export const markTaskCompleted = asyncHandler(async (req, res) => {
-  try {
-    const { taskId } = req.params;
+// ─── MARK TASK COMPLETE ───────────────────────────────
+export const completeTask = asyncHandler(async (req, res) => {
+  const user = await authenticateUser(req);
+  const { taskId } = req.params;
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+  user.recordCompletion(taskId);
+  await user.save();
 
-    const task = user.calendarData.find((t) => t.taskId === taskId);
-    if (!task) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    if (task.status === "completed") {
-      return res.status(400).json({ message: "Task already completed" });
-    }
-
-    // Update task status
-    task.status = "completed";
-    user.completedTasks.push({ taskId, completedAt: new Date() });
-
-    // Remove from upcomingTasks if present
-    user.upcomingTasks = user.upcomingTasks.filter((t) => t.title !== task.title);
-
-    await user.save();
-
-    res.status(200).json({ message: "Task marked as completed", task });
-  } catch (error) {
-    console.error("Mark Task Complete Error:", error.message);
-    res.status(500).json({ message: "Server error while completing task" });
-  }
+  res.status(200).json({ message: "Task marked as completed" });
 });
 
-//
-// ─── DELETE TASK ────────────────────────────────────────────────
-// @route   DELETE /api/calendar/:taskId
-// @access  Private (Student)
-//
-export const deleteTask = asyncHandler(async (req, res) => {
-  try {
-    const { taskId } = req.params;
+// ─── UPDATE STREAK (on marking today’s task) ───────────────────────────────
+export const updateDailyStreak = asyncHandler(async (req, res) => {
+  const user = await authenticateUser(req);
+  const today = new Date();
+  const hasTaskToday = user.calendarData.some(
+    (t) =>
+      new Date(t.date).toDateString() === today.toDateString() &&
+      t.status === "completed"
+  );
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+  user.updateStreak(hasTaskToday);
+  await user.save();
 
-    user.calendarData = user.calendarData.filter((t) => t.taskId !== taskId);
-    user.upcomingTasks = user.upcomingTasks.filter((t) => t.taskId !== taskId);
-    user.completedTasks = user.completedTasks.filter((t) => t.taskId !== taskId);
-
-    await user.save();
-
-    res.status(200).json({ message: "Task deleted successfully" });
-  } catch (error) {
-    console.error("Delete Task Error:", error.message);
-    res.status(500).json({ message: "Server error while deleting task" });
-  }
-});
-
-//
-// ─── TODAY'S SUMMARY ────────────────────────────────────────────
-// @route   GET /api/calendar/summary
-// @access  Private (Student)
-//
-export const getTodaySummary = asyncHandler(async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const totalTasks = user.calendarData.length;
-    const completedTasks = user.completedTasks.length;
-    const pendingTasks = totalTasks - completedTasks;
-
-    res.status(200).json({
-      totalTasks,
-      completedTasks,
-      pendingTasks,
-      today: new Date(),
-    });
-  } catch (error) {
-    console.error("Get Summary Error:", error.message);
-    res.status(500).json({ message: "Server error while fetching summary" });
-  }
+  res.status(200).json({
+    message: hasTaskToday
+      ? "Streak updated successfully!"
+      : "No completed task today — streak reset.",
+    streakDays: user.streakDays,
+    personalBestStreak: user.personalBestStreak,
+  });
 });

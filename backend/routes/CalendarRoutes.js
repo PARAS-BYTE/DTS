@@ -1,24 +1,18 @@
 import express from "express";
 import {
-  getCalendarTasks,
+  getCalendar,
   addCalendarTask,
-  markTaskCompleted,
-  deleteTask,
-  getTodaySummary,
-} from "../Controllers/CalendarController.js";
-// import { protect } from "../middleware/authMiddleware.js";
+  completeTask,
+  getCalendarSummary,
+  updateDailyStreak,
+} from "../controllers/calendarController.js";
 
 const router = express.Router();
 
-router.get("/", getCalendarTasks);
+router.get("/", getCalendar);
+router.get("/summary", getCalendarSummary);
 router.post("/add", addCalendarTask);
-router.patch("/complete/:taskId", markTaskCompleted);
-router.delete("/:taskId", deleteTask);
-router.get("/summary", getTodaySummary);
-// router.route("/").get(protect, getCalendarTasks);
-// router.route("/add").post(protect, addCalendarTask);
-// router.route("/complete/:taskId").patch(protect, markTaskCompleted);
-// router.route("/:taskId").delete(protect, deleteTask);
-// router.route("/summary").get(protect, getTodaySummary);
+router.patch("/complete/:taskId", completeTask);
+router.patch("/streak", updateDailyStreak);
 
 export default router;
