@@ -131,3 +131,100 @@ export const getUserProfile = asyncHandler(async (req, res) => {
     res.status(401).json({ message: "Invalid or expired token" });
   }
 });
+
+
+
+const authenticateUser = async (req) => {
+  let token;
+
+  // 1️⃣ Extract token
+  if (req.cookies?.jwt) token = req.cookies.jwt;
+  else if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  )
+    token = req.headers.authorization.split(" ")[1];
+
+  if (!token) throw new Error("Not authorized, no token");
+
+  // 2️⃣ Verify token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  // 3️⃣ Get user
+  const user = await User.findById(decoded.userId);
+  if (!user) throw new Error("User not found");
+
+  return user;
+};
+
+//
+// ─── GET USER PROFILE (AUTH REQUIRED) ───────────────────────────────
+//
+export const getUserProfilesetting = asyncHandler(async (req, res) => {
+  try {
+    const user = await authenticateUser(req);
+    res.status(200).json({
+      _id: user._id,
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      xp: user.xp,
+      level: user.level,
+      streakDays: user.streakDays,
+      masteryScore: user.masteryScore,
+      focusScore: user.focusScore,
+      accuracyScore: user.accuracyScore,
+      coins: user.coins,
+      badges: user.badges.length,
+      learningPreferences: user.learningPreferences,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+  } catch (error) {
+    console.error("❌ Get Profile Error:", error.message);
+    res.status(401).json({ message: error.message || "Unauthorized request" });
+  }
+});
+
+//
+// ─── UPDATE USER PROFILE (AUTH REQUIRED) ───────────────────────────────
+//
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  try {
+    const user = await authenticateUser(req);
+
+    // Only allow safe fields to update
+    const allowedFields = [
+      "username",
+      "name",
+      "avatarUrl",
+      "learningPreferences",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        user[field] = req.body[field];
+      }
+    });
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      message: "✅ Profile updated successfully",
+      user: {
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        avatarUrl: updatedUser.avatarUrl,
+        learningPreferences: updatedUser.learningPreferences,
+        xp: updatedUser.xp,
+        level: updatedUser.level,
+        coins: updatedUser.coins,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Update Profile Error:", error.message);
+    res.status(401).json({ message: error.message || "Unauthorized request" });
+  }
+});

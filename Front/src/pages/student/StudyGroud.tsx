@@ -66,31 +66,6 @@ const StudyGround = () => {
     fetchTranscript(lesson.videoUrl);
   };
 
-  const handleNextLesson = () => {
-    if (!course) return;
-    let foundNext = false;
-    for (let i = 0; i < course.modules.length; i++) {
-      const lessons = course.modules[i].lessons;
-      for (let j = 0; j < lessons.length; j++) {
-        if (lessons[j].videoUrl === activeVideo.videoUrl) {
-          if (lessons[j + 1]) {
-            setActiveVideo(lessons[j + 1]);
-            fetchTranscript(lessons[j + 1].videoUrl);
-          } else if (course.modules[i + 1]) {
-            const nextMod = course.modules[i + 1];
-            if (nextMod.lessons[0]) {
-              setActiveVideo(nextMod.lessons[0]);
-              fetchTranscript(nextMod.lessons[0].videoUrl);
-            }
-          }
-          foundNext = true;
-          break;
-        }
-      }
-      if (foundNext) break;
-    }
-  };
-
   if (loading)
     return (
       <div className="flex justify-center items-center h-[80vh] text-muted-foreground">
@@ -106,38 +81,39 @@ const StudyGround = () => {
     );
 
   return (
-    <div className="p-6 lg:p-10 bg-background">
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6 lg:p-10">
       {/* ─── Top Section ───────────────────────────── */}
-      <div className="flex flex-col gap-3 mb-6">
-        <h1 className="text-3xl font-bold">{course.title}</h1>
-        <p className="text-muted-foreground">{course.description}</p>
+      <div className="flex flex-col gap-3 mb-6 border-b border-gray-800 pb-4">
+        <h1 className="text-3xl font-bold text-white">{course.title}</h1>
+        <p className="text-gray-400">{course.description}</p>
 
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-wrap gap-4 text-sm text-gray-400">
           <span className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4" /> {course.category}
+            <BookOpen className="w-4 h-4 text-blue-400" /> {course.category}
           </span>
           <span className="flex items-center gap-2">
-            <Clock className="w-4 h-4" /> {course.duration} hrs
+            <Clock className="w-4 h-4 text-yellow-400" /> {course.duration} hrs
           </span>
-          <span className="font-medium">{course.level}</span>
+          <span className="text-purple-400 font-medium">{course.level}</span>
         </div>
 
         <div className="mt-3">
           <Progress value={course.userProgress.progress} className="h-2" />
-          <div className="flex justify-between text-xs mt-1">
+          <div className="flex justify-between text-xs mt-1 text-gray-400">
             <span>Your Progress</span>
-            <span className="font-medium text-primary">
+            <span className="font-medium text-blue-400">
               {course.userProgress.progress}%
             </span>
           </div>
         </div>
       </div>
 
-      {/* ─── Video + Sidebar Layout ───────────────────── */}
+      {/* ─── Course Layout: Video + Sidebar ───────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
-        {/* Video Player + Transcript */}
+        {/* Video + Transcript Section */}
         <div className="space-y-6">
-          <Card className="border-none shadow-lg">
+          {/* Video Player */}
+          <Card className="border-none shadow-xl bg-gray-900/60 backdrop-blur-md">
             <CardContent className="p-0">
               {activeVideo ? (
                 <div className="rounded-xl overflow-hidden">
@@ -149,58 +125,58 @@ const StudyGround = () => {
                   ></iframe>
                 </div>
               ) : (
-                <div className="h-[450px] flex justify-center items-center text-muted-foreground">
+                <div className="h-[450px] flex justify-center items-center text-gray-500">
                   Select a lesson to begin
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Transcript Section */}
-          <Card className="border border-primary/20">
+          {/* Transcript */}
+          <Card className="border border-gray-800 bg-gray-900/60 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-primary">
+              <CardTitle className="text-lg font-semibold text-blue-400">
                 Transcript
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm leading-relaxed text-muted-foreground max-h-[300px] overflow-y-auto whitespace-pre-line">
+              <div className="text-sm leading-relaxed text-gray-300 max-h-[300px] overflow-y-auto whitespace-pre-line scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
                 {transcript}
-              </p>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar - Modules and Lessons */}
-        <div className="space-y-4">
+        {/* ─── Sidebar (Scrollable Modules List) ───────────────────────────── */}
+        <div className="lg:h-[calc(100vh-180px)] overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
           {course.modules.map((mod: any, modIndex: number) => (
             <motion.div
               key={modIndex}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: modIndex * 0.1 }}
+              transition={{ duration: 0.3, delay: modIndex * 0.05 }}
             >
-              <Card className="border border-primary/10 hover:border-primary/30 transition-all shadow-sm">
+              <Card className="border border-gray-800 bg-gray-900/50 hover:border-blue-500/40 transition-all duration-200">
                 <CardHeader
-                  className="cursor-pointer flex flex-row justify-between items-center"
+                  className="cursor-pointer flex flex-row justify-between items-center p-4"
                   onClick={() =>
                     setExpandedModule(
                       expandedModule === modIndex ? null : modIndex
                     )
                   }
                 >
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2 text-white">
                     {expandedModule === modIndex ? (
-                      <ChevronDown className="w-4 h-4" />
+                      <ChevronDown className="w-4 h-4 text-blue-400" />
                     ) : (
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-4 h-4 text-gray-400" />
                     )}
                     {mod.title}
                   </CardTitle>
                 </CardHeader>
 
                 {expandedModule === modIndex && (
-                  <CardContent className="space-y-2">
+                  <CardContent className="space-y-2 pt-2">
                     {mod.lessons.map((lesson: any, index: number) => (
                       <Button
                         key={index}
@@ -209,14 +185,18 @@ const StudyGround = () => {
                             ? "default"
                             : "outline"
                         }
-                        className="w-full justify-between"
+                        className={`w-full justify-between text-left text-sm ${
+                          activeVideo?.videoUrl === lesson.videoUrl
+                            ? "bg-blue-600 hover:bg-blue-700 text-white"
+                            : "bg-gray-800 hover:bg-gray-700 text-gray-200"
+                        }`}
                         onClick={() => handleLessonSelect(lesson)}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 truncate">
                           <Play className="w-4 h-4" />
-                          <span>{lesson.title}</span>
+                          <span className="truncate">{lesson.title}</span>
                         </div>
-                        <span className="text-muted-foreground text-xs">
+                        <span className="text-gray-400 text-xs">
                           {lesson.duration} mins
                         </span>
                       </Button>
@@ -231,10 +211,10 @@ const StudyGround = () => {
 
       {/* ─── Completion Banner ───────────────────────────── */}
       {course.userProgress.completed && (
-        <div className="text-center mt-8">
+        <div className="text-center mt-10 p-6 bg-green-900/20 rounded-xl border border-green-700/40">
           <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-2" />
-          <p className="text-primary font-semibold text-lg">
-            🎉 Congratulations! You’ve completed this course!
+          <p className="text-green-400 font-semibold text-lg">
+            Congratulations! You’ve completed this course!
           </p>
         </div>
       )}

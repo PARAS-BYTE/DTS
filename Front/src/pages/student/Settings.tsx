@@ -1,215 +1,284 @@
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useStore } from '@/store/useStore';
-import { User, Bell, Shield, Palette, Database } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  User,
+  Mail,
+  Image,
+  Settings,
+  Save,
+  BarChart2,
+  Brain,
+  CheckCircle2,
+  Star,
+  Award,
+  Zap,
+} from "lucide-react";
 
-const Settings = () => {
-  const user = useStore((state) => state.user);
+const UserProfile = () => {
+  const [user, setUser] = useState<any>(null);
+  const [editData, setEditData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const fetchProfile = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:5000/api/auth/getuserprofile",
+        { withCredentials: true }
+      );
+      setUser(data);
+      setEditData({
+        username: data.username,
+        name: data.name,
+        avatarUrl: data.avatarUrl,
+        learningPreferences: data.learningPreferences || {},
+        email: data.email,
+      });
+    } catch (err) {
+      console.error("Profile Fetch Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const handlePreferenceChange = (key, value) => {
+    setEditData({
+      ...editData,
+      learningPreferences: {
+        ...editData.learningPreferences,
+        [key]: value,
+      },
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      const { data } = await axios.post(
+        "http://localhost:5000/api/auth/update",
+        editData,
+        { withCredentials: true }
+      );
+      setMessage(data.message);
+      setUser(data.user);
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  if (loading)
+    return (
+      <div className="h-[80vh] flex justify-center items-center text-gray-400">
+        Loading profile...
+      </div>
+    );
+
+  if (!user)
+    return (
+      <div className="h-[80vh] flex justify-center items-center text-red-400">
+        Failed to load profile.
+      </div>
+    );
 
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold mb-2 text-gradient">Settings</h1>
-        <p className="text-muted-foreground text-lg">Manage your account and preferences</p>
+    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col items-center py-12 px-6">
+      {/* ─── TOP XP SUMMARY ─────────────────────── */}
+      <div className="w-full max-w-5xl bg-gray-900/80 border border-gray-800 rounded-2xl shadow-lg mb-8">
+        <div className="grid md:grid-cols-3 text-center p-6 gap-4">
+          {[
+            { icon: Star, label: "Level", value: user.level },
+            { icon: Zap, label: "XP", value: user.xp },
+            { icon: Award, label: "Coins", value: user.coins },
+          ].map((stat, i) => (
+            <div key={i} className="flex flex-col items-center justify-center">
+              <div className="flex items-center gap-2 mb-1">
+                <stat.icon className="w-5 h-5 text-blue-400" />
+                <span className="font-semibold text-lg text-white">
+                  {stat.value}
+                </span>
+              </div>
+              <p className="text-gray-400 text-sm">{stat.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Profile Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="lg:col-span-1"
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Profile
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col items-center gap-4">
-                <Avatar className="w-24 h-24 border-4 border-primary">
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white text-2xl">
-                    {user?.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <Button variant="outline" size="sm">
-                  Change Avatar
-                </Button>
-              </div>
-              <div className="space-y-2 pt-4 border-t border-border">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Level</span>
-                  <span className="font-medium text-primary">{user?.level}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Rank</span>
-                  <span className="font-medium text-success">{user?.rank}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total XP</span>
-                  <span className="font-medium">{user?.xp.toLocaleString()}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {/* ─── MAIN PROFILE SECTION ─────────────────────── */}
+      <Card className="w-full max-w-5xl bg-gray-900/60 border border-gray-800 shadow-xl">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold flex items-center gap-2 text-white">
+            <User className="w-6 h-6 text-blue-400" /> Profile Overview
+          </CardTitle>
+        </CardHeader>
 
-        {/* Settings Forms */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="lg:col-span-2 space-y-6"
-        >
-          {/* Account Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Account Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <CardContent className="grid lg:grid-cols-[1fr_2fr] gap-10 p-8">
+          {/* ─── LEFT: AVATAR + INFO ─────────────── */}
+          <div className="flex flex-col items-center text-center space-y-5">
+            <div className="relative">
+              <img
+                src={
+                  editData.avatarUrl ||
+                  "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                }
+                alt="Avatar"
+                className="w-40 h-40 rounded-full object-cover border-4 border-blue-600 shadow-lg"
+              />
+            </div>
+            <h2 className="text-xl font-semibold">{user.name || user.username}</h2>
+            <p className="text-gray-400 text-sm">{user.email}</p>
+
+            <div className="flex gap-3 text-center text-gray-300">
+              <div>
+                <p className="text-sm">Focus</p>
+                <p className="text-lg font-bold text-blue-400">{user.focusScore}</p>
+              </div>
+              <div>
+                <p className="text-sm">Accuracy</p>
+                <p className="text-lg font-bold text-green-400">
+                  {user.accuracyScore}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm">Mastery</p>
+                <p className="text-lg font-bold text-yellow-400">
+                  {user.masteryScore}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── RIGHT: EDIT FORM ─────────────── */}
+          <div className="space-y-6">
+            <div>
+              <label className="text-sm text-gray-400 flex items-center gap-2 mb-1">
+                <User className="w-4 h-4 text-blue-400" /> Username
+              </label>
+              <Input
+                name="username"
+                value={editData.username || ""}
+                onChange={handleChange}
+                className="bg-gray-800 border-gray-700 text-gray-100"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-400 flex items-center gap-2 mb-1">
+                <Mail className="w-4 h-4 text-green-400" /> Email
+              </label>
+              <Input
+                name="email"
+                value={editData.email || ""}
+                onChange={handleChange}
+                className="bg-gray-800 border-gray-700 text-gray-100"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-400 flex items-center gap-2 mb-1">
+                <Image className="w-4 h-4 text-purple-400" /> Avatar URL
+              </label>
+              <Input
+                name="avatarUrl"
+                value={editData.avatarUrl || ""}
+                onChange={handleChange}
+                className="bg-gray-800 border-gray-700 text-gray-100"
+              />
+            </div>
+
+            {/* Preferences */}
+            <div className="border-t border-gray-800 pt-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-blue-400 mb-3">
+                <Settings className="w-4 h-4" /> Learning Preferences
+              </h3>
+
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" defaultValue={user?.name} />
+                <div>
+                  <label className="text-sm text-gray-400 mb-1 block">Pace</label>
+                  <select
+                    value={editData.learningPreferences?.pace || "moderate"}
+                    onChange={(e) =>
+                      handlePreferenceChange("pace", e.target.value)
+                    }
+                    className="w-full bg-gray-800 text-gray-100 border border-gray-700 rounded-lg px-3 py-2"
+                  >
+                    <option value="slow">Slow</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="fast">Fast</option>
+                  </select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" defaultValue={user?.email} />
-                </div>
-              </div>
-              <Button className="glow-primary">Save Changes</Button>
-            </CardContent>
-          </Card>
 
-          {/* Notifications */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5" />
-                Notifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Daily Study Reminders</p>
-                  <p className="text-sm text-muted-foreground">Get reminded to study every day</p>
+                  <label className="text-sm text-gray-400 mb-1 block">
+                    Preferred Topics
+                  </label>
+                  <Input
+                    value={(editData.learningPreferences?.preferredTopics || []).join(", ")}
+                    onChange={(e) =>
+                      handlePreferenceChange(
+                        "preferredTopics",
+                        e.target.value.split(",").map((v) => v.trim())
+                      )
+                    }
+                    className="bg-gray-800 border-gray-700 text-gray-100"
+                  />
                 </div>
-                <Switch defaultChecked />
               </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Quiz Notifications</p>
-                  <p className="text-sm text-muted-foreground">Alerts for new quizzes and results</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Achievement Alerts</p>
-                  <p className="text-sm text-muted-foreground">Celebrate your milestones</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Arena Battle Invites</p>
-                  <p className="text-sm text-muted-foreground">Get notified of battle challenges</p>
-                </div>
-                <Switch />
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Appearance */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="w-5 h-5" />
-                Appearance
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Dark Mode</p>
-                  <p className="text-sm text-muted-foreground">Currently using dark theme</p>
-                </div>
-                <Switch defaultChecked disabled />
+              <div className="mt-3">
+                <label className="text-sm text-gray-400 mb-1 block">
+                  Weak Areas
+                </label>
+                <Input
+                  value={(editData.learningPreferences?.weakAreas || []).join(", ")}
+                  onChange={(e) =>
+                    handlePreferenceChange(
+                      "weakAreas",
+                      e.target.value.split(",").map((v) => v.trim())
+                    )
+                  }
+                  className="bg-gray-800 border-gray-700 text-gray-100"
+                />
               </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Animations</p>
-                  <p className="text-sm text-muted-foreground">Enable smooth animations</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </CardContent>
 
-          {/* Privacy & Security */}
-          <Card className="border-warning/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-warning" />
-                Privacy & Security
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="current-password">Current Password</Label>
-                <Input id="current-password" type="password" placeholder="Enter current password" />
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="new-password">New Password</Label>
-                  <Input id="new-password" type="password" placeholder="New password" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input id="confirm-password" type="password" placeholder="Confirm password" />
-                </div>
-              </div>
-              <Button className="bg-warning hover:bg-warning/90 text-warning-foreground">
-                Update Password
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="flex justify-center pb-6">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className={`px-6 py-3 mt-4 flex items-center gap-2 ${
+              saving
+                ? "bg-gray-700 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+            }`}
+          >
+            <Save className="w-4 h-4" />
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
 
-          {/* Data Management */}
-          <Card className="border-destructive/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="w-5 h-5 text-destructive" />
-                Data Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  Download My Data
-                </Button>
-                <Button variant="outline" className="w-full justify-start text-destructive hover:text-destructive">
-                  Delete Account
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+        {message && (
+          <p className="text-center text-green-400 pb-4">{message}</p>
+        )}
+      </Card>
     </div>
   );
 };
 
-export default Settings;
+export default UserProfile;
