@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
-import { Home, BookOpen, Users, FileText, BarChart3, Settings, Sparkles, Bell } from 'lucide-react';
+import { Home, BookOpen, Users, FileText, Settings, Sparkles, Bell } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
@@ -18,7 +18,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { name: 'Courses', href: '/admin/courses', icon: BookOpen },
     { name: 'Students', href: '/admin/students', icon: Users },
     { name: 'Assessments', href: '/admin/assessments', icon: FileText },
-    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 

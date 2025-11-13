@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { User, Bell, Shield, BookOpen } from 'lucide-react';
+import { User, Bell } from 'lucide-react';
 
 const AdminSettings = () => {
   return (
@@ -81,74 +81,6 @@ const AdminSettings = () => {
                 </div>
                 <Switch />
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Course Defaults */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
-                Course Defaults
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">AI Auto-Grading</p>
-                  <p className="text-sm text-muted-foreground">Enable AI-assisted grading by default</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Adaptive Quizzes</p>
-                  <p className="text-sm text-muted-foreground">Use AI to adjust quiz difficulty</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Student Analytics</p>
-                  <p className="text-sm text-muted-foreground">Share performance analytics with students</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Security */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-        >
-          <Card className="border-warning/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-warning" />
-                Security
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="current-pwd">Current Password</Label>
-                <Input id="current-pwd" type="password" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="new-pwd">New Password</Label>
-                <Input id="new-pwd" type="password" />
-              </div>
-              <Button className="w-full bg-warning hover:bg-warning/90 text-warning-foreground">
-                Update Password
-              </Button>
             </CardContent>
           </Card>
         </motion.div>

@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
-import { Home, Calendar, BookOpen, FileQuestion, Trophy, BarChart3, Settings, Sparkles, LucideBatteryWarning, Icon, History, Bot } from 'lucide-react';
+import { Home, Calendar, BookOpen, FileQuestion, Trophy, Settings, Sparkles, LucideBatteryWarning, Icon, History, Bot } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 
@@ -19,9 +19,9 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
     { name: 'Dashboard', href: '/student', icon: Home },
     { name: 'Calendar', href: '/student/calendar', icon: Calendar },
     { name: 'Courses', href: '/student/courses', icon: BookOpen },
+    { name: 'Assignments', href: '/student/assignments', icon: FileQuestion },
     { name: 'Quizzes', href: '/student/quizzes', icon: FileQuestion },
     { name: 'Arena', href: '/student/arena', icon: Trophy },
-    { name: 'Reports', href: '/student/reports', icon: BarChart3 },
     { name: 'Settings', href: '/student/settings', icon: Settings },
     {name :'History' ,href: "/student/hist",icon:History},
     { name: "My Learning", href: '/student/learning', icon: LucideBatteryWarning },
@@ -34,8 +34,6 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
     }
     return location.pathname.startsWith(path);
   };
-
-  const levelProgress = user ? ((user.xp % 1000) / 1000) * 100 : 0;
 
   return (
     <div className="flex h-screen bg-background">
@@ -69,41 +67,6 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
             </NavLink>
           ))}
         </nav>
-
-        {/* User Profile */}
-        <div className="p-4 border-t border-border">
-          {user && (
-            <div className="bg-muted/30 rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-3">
-                <Avatar className="w-10 h-10 border-2 border-primary">
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {user.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">Level {user.level}</p>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">XP</span>
-                  <span className="font-medium text-primary">{user.xp}</span>
-                </div>
-                <Progress value={levelProgress} className="h-2" />
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-warning/10 text-warning">
-                  <span>🔥</span>
-                  <span className="font-medium">{user.streak} day streak</span>
-                </div>
-                <div className="px-2 py-1 rounded-lg bg-success/10 text-success font-medium">
-                  {user.rank}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
       </aside>
 
       {/* Main Content */}

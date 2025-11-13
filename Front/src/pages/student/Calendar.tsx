@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
-  Plus,
   Flame,
   Clock,
   CheckCircle2,
   Target,
-  ListTodo,
+  BookOpen,
+  FileText,
+  HelpCircle,
+  Zap,
+  TrendingUp,
+  Lock,
+  RefreshCw,
+  Settings
 } from "lucide-react";
 import {
   Card,
@@ -17,126 +24,579 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
-// ─── Custom Shape Wrapper ───────────────────────────────
-const ShapeCell = ({ day, shape, color, onAddTask, isPast }) => {
-  const shapeClass = {
-    circle: "rounded-full",
-    square: "rounded-md",
-    diamond: "clip-diamond",
-    triangle: "clip-triangle",
-    hexagon: "clip-hexagon",
-  }[shape];
+// Types
+interface Task {
+  taskId: string;
+  _id?: string;
+  title: string;
+  description: string;
+  date: string;
+  status: "pending" | "completed" | "in-progress";
+  category: string;
+  priority: "low" | "medium" | "high";
+  type: "study" | "quiz" | "reading" | "practice" | "assignment";
+  estimatedDuration: number;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  aiGenerated: boolean;
+  completedAt?: string;
+  content?: any;
+}
 
+interface StudyPreferences {
+  subjects: string[];
+  difficultyLevel: string;
+  dailyStudyTime: number;
+  learningGoals: string[];
+  preferredLearningStyles: string[];
+}
+
+interface CalendarData {
+  tasks: Task[];
+  todayTasks: Task[];
+  upcomingTasks: Task[];
+  streak: {
+    currentStreak: number;
+    longestStreak: number;
+  };
+  statistics: {
+    totalTasksCompleted: number;
+    completionRate: number;
+    totalStudyTime: number;
+    averageDailyTasks: number;
+  };
+  studyPreferences: StudyPreferences;
+}
+// Update these in your TaskItem component
+const typeIcons = {
+  study: BookOpen,
+  quiz: HelpCircle,
+  reading: FileText,
+  practice: TrendingUp,
+  assignment: Zap,
+  review: RefreshCw  // Add this line
+};
+
+const typeColors = {
+  study: "text-blue-400",
+  quiz: "text-purple-400", 
+  reading: "text-green-400",
+  practice: "text-yellow-400",
+  assignment: "text-orange-400",
+  review: "text-pink-400"  // Add this line
+};
+
+// Shape Cell Component
+const ShapeCell = ({ 
+  day, 
+  color, 
+  isToday,
+  isCompleted,
+  isFuture,
+  hasTask,
+  onClick
+}: { 
+  day: number;
+  color: string;
+  isToday: boolean;
+  isCompleted: boolean;
+  isFuture: boolean;
+  hasTask: boolean;
+  onClick?: () => void;
+}) => {
   return (
     <motion.div
-      whileHover={{ scale: 1.08 }}
-      className={`relative group w-12 h-12 flex items-center justify-center ${color} ${shapeClass} text-sm text-gray-200 font-semibold transition-all`}
+      whileHover={{ scale: hasTask && !isFuture ? 1.1 : 1 }}
+      onClick={hasTask && !isFuture ? onClick : undefined}
+      className={`relative w-12 h-12 flex items-center justify-center ${color} rounded-lg text-sm font-semibold transition-all border-2 ${
+        isToday ? "border-indigo-400 shadow-lg shadow-indigo-500/20" :
+        isCompleted ? "border-green-500 shadow-lg shadow-green-500/20" :
+        "border-transparent"
+      } ${isFuture ? "cursor-not-allowed opacity-60" : hasTask ? "cursor-pointer hover:scale-110 hover:shadow-lg" : "cursor-default"}`}
     >
-      <span className="z-10">{day}</span>
+      <span className={`${isToday ? "text-indigo-200" : "text-gray-200"}`}>
+        {day}
+      </span>
+      
+      {/* Completion checkmark */}
+      {isCompleted && (
+        <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-[#121214]">
+          <CheckCircle2 className="w-3 h-3 text-white" />
+        </div>
+      )}
 
-      {!isPast && (
-        <button
-          onClick={onAddTask}
-          className="absolute bottom-0 right-0 p-[3px] bg-indigo-600 hover:bg-indigo-700 rounded-full opacity-0 group-hover:opacity-100 transition-all"
-        >
-          <Plus className="w-3 h-3 text-white" />
-        </button>
+      {/* Today's indicator */}
+      {isToday && !isCompleted && (
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-400 rounded-full border-2 border-[#121214] animate-pulse" />
+      )}
+
+      {/* Task indicator dot */}
+      {hasTask && !isCompleted && !isToday && (
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-indigo-400 rounded-full" />
       )}
     </motion.div>
   );
 };
 
-// ─── Main Calendar Component ───────────────────────────────
+// Task Item Component
+const TaskItem = ({ 
+  task, 
+  onComplete,
+  onRegenerate
+}: { 
+  task: Task; 
+  onComplete?: (taskId: string) => void;
+  onRegenerate?: () => void;
+}) => {
+  const navigate = useNavigate();
+  
+  const typeIcons = {
+    study: BookOpen,
+    quiz: HelpCircle,
+    reading: FileText,
+    practice: TrendingUp,
+    assignment: Zap
+  };
+
+  const typeColors = {
+    study: "text-blue-400",
+    quiz: "text-purple-400", 
+    reading: "text-green-400",
+    practice: "text-yellow-400",
+    assignment: "text-orange-400"
+  };
+
+  const TypeIcon = typeIcons[task.type] || BookOpen;
+
+  const isTaskAvailable = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const taskDate = new Date(task.date);
+    taskDate.setHours(0, 0, 0, 0);
+    return taskDate.getTime() === today.getTime();
+  };
+
+  const handleTaskClick = () => {
+    if (isTaskAvailable() && task.status !== "completed") {
+      navigate(`/task/${task.taskId}`);
+    }
+  };
+
+  const handleComplete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isTaskAvailable() && task.status !== "completed" && onComplete) {
+      onComplete(task.taskId);
+    }
+  };
+
+  const handleRegenerate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onRegenerate) {
+      onRegenerate();
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex items-start gap-3 p-4 rounded-lg border transition-all ${
+        !isTaskAvailable() 
+          ? "bg-gray-800/30 border-gray-700/30 opacity-60 cursor-not-allowed"
+          : task.status === "completed"
+          ? "bg-green-500/10 border-green-500/20 cursor-default"
+          : "bg-gray-800/50 border-gray-700/50 hover:border-gray-600/50 hover:bg-gray-800/70 cursor-pointer"
+      }`}
+      onClick={handleTaskClick}
+    >
+      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all mt-0.5 ${
+        task.status === "completed" 
+          ? "bg-green-500 border-green-500" 
+          : !isTaskAvailable()
+          ? "border-gray-500"
+          : "border-gray-500"
+      }`}>
+        {task.status === "completed" && <CheckCircle2 className="w-3 h-3 text-white" />}
+        {!isTaskAvailable() && <Lock className="w-3 h-3 text-gray-500" />}
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-2">
+          <TypeIcon className={`w-4 h-4 ${typeColors[task.type]}`} />
+          <h4 className={`text-sm font-medium ${
+            task.status === "completed" ? "text-green-300" : 
+            !isTaskAvailable() ? "text-gray-500" : "text-gray-200"
+          }`}>
+            {task.title}
+          </h4>
+          {task.aiGenerated && (
+            <Badge variant="outline" className="text-xs bg-purple-500/20 text-purple-400 border-purple-500/20">
+              AI
+            </Badge>
+          )}
+          {task.status === "completed" && (
+            <Badge variant="outline" className="text-xs bg-green-500/20 text-green-400 border-green-500/20">
+              Done
+            </Badge>
+          )}
+          {isTaskAvailable() && task.status !== "completed" && (
+            <Badge variant="outline" className="text-xs bg-indigo-500/20 text-indigo-400 border-indigo-500/20">
+              Available
+            </Badge>
+          )}
+        </div>
+        <p className={`text-xs mb-2 ${
+          !isTaskAvailable() ? "text-gray-500" : "text-gray-400"
+        }`}>
+          {task.description}
+        </p>
+        
+        {/* Learning Objectives */}
+        {task.content?.learningObjectives && (
+          <div className="mb-2">
+            <p className="text-xs text-gray-500 mb-1">Learning Objectives:</p>
+            <ul className="text-xs text-gray-400 list-disc list-inside">
+              {task.content.learningObjectives.slice(0, 2).map((obj, index) => (
+                <li key={index}>{obj}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        <div className={`flex items-center gap-4 text-xs ${
+          !isTaskAvailable() ? "text-gray-500" : "text-gray-500"
+        }`}>
+          <span>{task.estimatedDuration}min</span>
+          <span>•</span>
+          <span className="capitalize">{task.difficulty}</span>
+          <span>•</span>
+          <span>{task.category}</span>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex gap-2 mt-3">
+          {isTaskAvailable() && task.status !== "completed" && (
+            <>
+              <Button
+                size="sm"
+                onClick={handleComplete}
+                className="bg-indigo-600 hover:bg-indigo-700 text-xs"
+              >
+                Mark Complete
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRegenerate}
+                className="text-xs border-gray-600 hover:bg-gray-700"
+              >
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Regenerate
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Study Preferences Component
+const StudyPreferencesCard = ({ preferences }: { preferences: StudyPreferences }) => {
+  const getDifficultyColor = (level: string) => {
+    switch (level) {
+      case "beginner": return "text-green-400";
+      case "intermediate": return "text-yellow-400";
+      case "advanced": return "text-red-400";
+      default: return "text-gray-400";
+    }
+  };
+
+  return (
+    <Card className="bg-[#121214] border-gray-800">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-blue-400 text-sm">
+          <Settings className="w-4 h-4" /> Study Profile
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-gray-400 text-sm">Difficulty Level</span>
+          <Badge variant="outline" className={`capitalize ${getDifficultyColor(preferences.difficultyLevel)}`}>
+            {preferences.difficultyLevel}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-gray-400 text-sm">Daily Study Time</span>
+          <span className="text-gray-200 text-sm">
+            {preferences.dailyStudyTime} min
+          </span>
+        </div>
+        
+        <div>
+          <span className="text-gray-400 text-sm">Subjects</span>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {preferences.subjects.slice(0, 4).map((subject, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {subject}
+              </Badge>
+            ))}
+            {preferences.subjects.length > 4 && (
+              <Badge variant="secondary" className="text-xs">
+                +{preferences.subjects.length - 4} more
+              </Badge>
+            )}
+          </div>
+        </div>
+        
+        <div>
+          <span className="text-gray-400 text-sm">Learning Goals</span>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {preferences.learningGoals.slice(0, 2).map((goal, index) => (
+              <Badge key={index} variant="outline" className="text-xs bg-blue-500/20 text-blue-400 border-blue-500/20">
+                {goal}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Main Calendar Component
 const Calendar = () => {
-  const [tasks, setTasks] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [showDialog, setShowDialog] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    priority: "medium",
+  const navigate = useNavigate();
+  const [calendarData, setCalendarData] = useState<CalendarData>({
+    tasks: [],
+    todayTasks: [],
+    upcomingTasks: [],
+    streak: { currentStreak: 0, longestStreak: 0 },
+    statistics: { 
+      totalTasksCompleted: 0, 
+      completionRate: 0, 
+      totalStudyTime: 0, 
+      averageDailyTasks: 0 
+    },
+    studyPreferences: {
+      subjects: [],
+      difficultyLevel: "beginner",
+      dailyStudyTime: 60,
+      learningGoals: [],
+      preferredLearningStyles: []
+    }
   });
-  const [streak, setStreak] = useState(0);
-  const [personalBest, setPersonalBest] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [completing, setCompleting] = useState<string | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
 
   const today = new Date();
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/calendar", {
-          withCredentials: true,
-        });
-        setTasks(res.data.calendarData || []);
-      } catch (err) {
-        console.error("Calendar fetch error:", err);
-      }
-    };
-    fetchTasks();
+    fetchCalendarData();
   }, []);
 
-  const handleAddTask = async () => {
-    if (!newTask.title) return alert("Enter task title");
+  // Refresh when navigating back to calendar
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchCalendarData();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  const normalizeTask = (task: any): Task => {
+    if (!task) return task;
+    const identifier =
+      task.taskId ||
+      (task._id ? task._id.toString() : undefined) ||
+      new Date().getTime().toString();
+
+    const questions = Array.isArray(task.content?.questions)
+      ? task.content.questions.map((question: any, index: number) => ({
+          ...question,
+          questionNumber:
+            question?.questionNumber !== undefined
+              ? question.questionNumber
+              : index + 1,
+        }))
+      : undefined;
+
+    return {
+      ...task,
+      taskId: identifier,
+      content: {
+        ...task.content,
+        questions,
+      },
+    };
+  };
+
+  const fetchCalendarData = async () => {
     try {
-      setAdding(true);
-      await axios.post(
-        "http://localhost:5000/api/calendar/add",
-        { ...newTask, date: selectedDate },
-        { withCredentials: true }
-      );
-      setShowDialog(false);
-    } catch (err) {
-      console.error("Add task error:", err);
+      setLoading(true);
+      const res = await axios.get("http://localhost:5000/api/calendar", {
+        withCredentials: true,
+      });
+      console.log("📅 Calendar data received:", res.data);
+      console.log("📅 Today's tasks:", res.data.todayTasks);
+      console.log("📅 All tasks:", res.data.tasks);
+      
+      // Ensure todayTasks is always an array
+      const todayTasks = Array.isArray(res.data.todayTasks) ? res.data.todayTasks : [];
+      
+      // If no todayTasks but tasks exist, try to find today's task manually
+      if (todayTasks.length === 0 && res.data.tasks && res.data.tasks.length > 0) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTask = res.data.tasks.find((t: Task) => {
+          const taskDate = new Date(t.date);
+          taskDate.setHours(0, 0, 0, 0);
+          return taskDate.getTime() === today.getTime();
+        });
+        if (todayTask) {
+          console.log("✅ Found today's task in tasks array:", todayTask.title);
+          res.data.todayTasks = [todayTask];
+        }
+      }
+      
+      setCalendarData({
+        ...res.data,
+        tasks: Array.isArray(res.data.tasks) ? res.data.tasks.map(normalizeTask) : [],
+        todayTasks: Array.isArray(res.data.todayTasks)
+          ? res.data.todayTasks.map(normalizeTask)
+          : [],
+      });
+      
+      // Show message if no task for today
+      if (!res.data.todayTasks || res.data.todayTasks.length === 0) {
+        console.warn("⚠️ No task found for today");
+        // Auto-generate if no task
+        setTimeout(async () => {
+          try {
+            await axios.post(
+              "http://localhost:5000/api/calendar/regenerate-today",
+              {},
+              { withCredentials: true }
+            );
+            await fetchCalendarData();
+          } catch (err) {
+            console.error("Auto-generate failed:", err);
+          }
+        }, 1000);
+      }
+    } catch (err: any) {
+      console.error("❌ Calendar fetch error:", err);
+      console.error("Error details:", err.response?.data);
+      toast.error(err.response?.data?.message || "Failed to load calendar data");
     } finally {
-      setAdding(false);
+      setLoading(false);
     }
   };
 
-  const isPastDate = (date) => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return date < now;
+  const handleCompleteTask = async (taskId: string) => {
+    try {
+      setCompleting(taskId);
+      const res = await axios.patch(
+        `http://localhost:5000/api/calendar/complete/${taskId}`,
+        {},
+        { withCredentials: true }
+      );
+      
+      await fetchCalendarData();
+      toast.success(res.data.message);
+    } catch (err: any) {
+      console.error("Complete task error:", err);
+      toast.error(err.response?.data?.message || "Failed to complete task");
+    } finally {
+      setCompleting(null);
+    }
   };
 
-  // ─── Shape & Color Logic ───────────────────────────────
-  const shapes = ["circle", "triangle", "square", "diamond", "hexagon"];
-  const colors = [
-    "bg-[#1f1f22]",
-    "bg-indigo-900/70",
-    "bg-indigo-700/70",
-    "bg-indigo-600/70",
-    "bg-indigo-500/70",
-  ];
+  const handleRegenerateTask = async () => {
+    try {
+      setRegenerating(true);
+      const res = await axios.post(
+        "http://localhost:5000/api/calendar/regenerate-today",
+        {},
+        { withCredentials: true }
+      );
+      
+      await fetchCalendarData();
+      toast.success("Task regenerated with AI!");
+    } catch (err: any) {
+      console.error("Regenerate task error:", err);
+      toast.error(err.response?.data?.message || "Failed to regenerate task");
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
-  const getShapeForWeek = (weekIndex) => shapes[weekIndex % shapes.length];
+  const getColorForDay = (date: Date) => {
+    const tasks = calendarData.tasks || [];
+    const dayTasks = tasks.filter((t: Task) => {
+      const taskDate = new Date(t.date);
+      taskDate.setHours(0, 0, 0, 0);
+      return taskDate.getTime() === date.getTime();
+    });
 
-  const getColorForDay = (date) => {
-    const completedCount = tasks.filter(
-      (t) =>
-        new Date(t.date).toDateString() === date.toDateString() &&
-        t.status === "completed"
-    ).length;
-    if (completedCount >= 3) return "bg-indigo-500/80";
-    if (completedCount === 2) return "bg-indigo-700/70";
-    if (completedCount === 1) return "bg-indigo-900/70";
+    const completed = dayTasks.some((t: Task) => t.status === "completed");
+    const hasTask = dayTasks.length > 0;
+
+    if (completed) return "bg-green-500/80";
+    if (hasTask) return "bg-indigo-600/70";
     return "bg-[#1f1f22]";
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime() === today.getTime();
+  };
+
+  const isCompleted = (date: Date) => {
+    const tasks = calendarData.tasks || [];
+    return tasks.some((t: Task) => {
+      const taskDate = new Date(t.date);
+      taskDate.setHours(0, 0, 0, 0);
+      return taskDate.getTime() === date.getTime() && t.status === "completed";
+    });
+  };
+
+  const isFuture = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return date > today;
+  };
+
+  const getTaskForDate = (date: Date): Task | null => {
+    const tasks = calendarData.tasks || [];
+    const task = tasks.find((t: Task) => {
+      const taskDate = new Date(t.date);
+      taskDate.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
+      return taskDate.getTime() === date.getTime();
+    });
+    return task || null;
+  };
+
+  const hasTaskForDate = (date: Date): boolean => {
+    return getTaskForDate(date) !== null;
+  };
+
+  const handleDayClick = (date: Date) => {
+    const task = getTaskForDate(date);
+    if (task && task.status !== "completed") {
+      navigate(`/task/${task.taskId}`);
+    }
   };
 
   const totalDays = new Date(
@@ -145,179 +605,247 @@ const Calendar = () => {
     0
   ).getDate();
 
-  // ─── UI Rendering ───────────────────────────────
+  if (loading) {
+    return (
+      <div className="p-8 bg-[#0b0b0d] min-h-screen text-gray-200 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">AI is generating your daily task...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8 bg-[#0b0b0d] min-h-screen text-gray-200 space-y-10">
+    <div className="p-8 bg-[#0b0b0d] min-h-screen text-gray-200 space-y-8">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <h1 className="text-4xl font-bold flex items-center gap-2 text-indigo-300">
-            <CalendarDays className="w-7 h-7" /> Study Calendar
+            <CalendarDays className="w-7 h-7" /> Daily Learning
           </h1>
           <p className="text-gray-400">
-            Visualize your progress with weekly shape tracking
+            Complete your AI-generated daily task to maintain your streak!
           </p>
         </div>
 
-        {/* Streak Tracker */}
-        <Card className="bg-gradient-to-r from-indigo-900/50 to-indigo-600/40 border-indigo-700 shadow-md w-full md:w-1/3">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-indigo-200">
-              <Flame className="w-5 h-5 text-orange-400" /> Study Streak
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full bg-gray-800 rounded-full h-2 mb-2 overflow-hidden">
-              <motion.div
-                className="bg-gradient-to-r from-orange-400 to-indigo-400 h-2"
-                initial={{ width: 0 }}
-                animate={{
-                  width: `${Math.min((streak / Math.max(personalBest, 1)) * 100, 100)}%`,
-                }}
-                transition={{ duration: 1 }}
-              />
-            </div>
-            <div className="flex justify-between text-sm text-gray-300">
-              <span>{streak} Days</span>
-              <span>Best: {personalBest}</span>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Streak & Stats */}
+        <div className="flex gap-4">
+          <Card className="bg-gradient-to-r from-indigo-900/50 to-indigo-600/40 border-indigo-700">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-indigo-200 text-sm">
+                <Flame className="w-4 h-4 text-orange-400" /> Current Streak
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold text-white">
+                {calendarData.streak.currentStreak} days
+              </div>
+              <div className="text-xs text-gray-300">
+                Best: {calendarData.streak.longestStreak} days
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-green-900/50 to-green-600/40 border-green-700">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-green-200 text-sm">
+                <CheckCircle2 className="w-4 h-4" /> Completed
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold text-white">
+                {calendarData.statistics.totalTasksCompleted}
+              </div>
+              <div className="text-xs text-gray-300">
+                Total tasks
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* Calendar Section */}
-      <Card className="bg-[#121214] border-gray-800 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-indigo-300 text-lg flex items-center gap-2">
-            <CalendarDays className="w-5 h-5" />{" "}
-            {new Date().toLocaleString("default", {
-              month: "long",
-              year: "numeric",
-            })}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Week Headers */}
-          <div className="grid grid-cols-7 text-center mb-3 text-gray-400 text-sm">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-              <div key={d}>{d}</div>
-            ))}
-          </div>
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Calendar Section */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="bg-[#121214] border-gray-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-indigo-300 text-lg flex items-center gap-2">
+                <CalendarDays className="w-5 h-5" />{" "}
+                {new Date().toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Week Headers */}
+              <div className="grid grid-cols-7 text-center mb-4 text-gray-400 text-sm">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                  <div key={d}>{d}</div>
+                ))}
+              </div>
 
-          {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-4 justify-items-center">
-            {Array.from({ length: totalDays }, (_, i) => {
-              const day = i + 1;
-              const date = new Date(today.getFullYear(), today.getMonth(), day);
-              const weekIndex = Math.floor(i / 7);
-              const shape = getShapeForWeek(weekIndex);
-              const color = getColorForDay(date);
-              return (
-                <ShapeCell
-                  key={day}
-                  day={day}
-                  shape={shape}
-                  color={color}
-                  isPast={isPastDate(date)}
-                  onAddTask={() => {
-                    setSelectedDate(date);
-                    setShowDialog(true);
-                  }}
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-3 justify-items-center">
+                {Array.from({ length: totalDays }, (_, i) => {
+                  const day = i + 1;
+                  const date = new Date(today.getFullYear(), today.getMonth(), day);
+                  const color = getColorForDay(date);
+                  const hasTask = hasTaskForDate(date);
+                  
+                  return (
+                    <ShapeCell
+                      key={day}
+                      day={day}
+                      color={color}
+                      isToday={isToday(date)}
+                      isCompleted={isCompleted(date)}
+                      isFuture={isFuture(date)}
+                      hasTask={hasTask}
+                      onClick={() => handleDayClick(date)}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="flex justify-center gap-6 mt-6 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500/80 rounded"></div>
+                  <span className="text-gray-400">Completed</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-indigo-600/70 rounded"></div>
+                  <span className="text-gray-400">Pending</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-[#1f1f22] rounded"></div>
+                  <span className="text-gray-400">No Task</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tasks Sidebar */}
+        <div className="space-y-6">
+          {/* Today's Task */}
+          <Card className="bg-[#121214] border-gray-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-indigo-400 text-sm">
+                <Target className="w-4 h-4" /> Today's AI Task
+                <Badge variant="secondary" className="ml-2">
+                  {calendarData.todayTasks?.length || 0}/1
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {calendarData.todayTasks?.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CalendarDays className="w-6 h-6 text-indigo-400" />
+                  </div>
+                  <p className="text-gray-400 text-sm mb-4">
+                    No task for today. Generating one now...
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        setRegenerating(true);
+                        await axios.post(
+                          "http://localhost:5000/api/calendar/regenerate-today",
+                          {},
+                          { withCredentials: true }
+                        );
+                        await fetchCalendarData();
+                        toast.success("Task generated successfully!");
+                      } catch (err: any) {
+                        console.error("Error generating task:", err);
+                        toast.error(err.response?.data?.message || "Failed to generate task");
+                      } finally {
+                        setRegenerating(false);
+                      }
+                    }}
+                    disabled={regenerating}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    {regenerating ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Generate Task
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                calendarData.todayTasks.map((task) => (
+                  <TaskItem
+                    key={task.taskId}
+                    task={task}
+                    onComplete={handleCompleteTask}
+                    onRegenerate={handleRegenerateTask}
+                  />
+                ))
+              )}
+
+              {/* Daily Progress */}
+              <div className="pt-4 border-t border-gray-700/50">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-gray-400">Daily Progress</span>
+                  <span className="text-indigo-300">
+                    {calendarData.todayTasks?.some(t => t.status === "completed") ? "100%" : "0%"}
+                  </span>
+                </div>
+                <Progress 
+                  value={calendarData.todayTasks?.some(t => t.status === "completed") ? 100 : 0} 
+                  className="h-2"
                 />
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Task Summary Section */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card className="bg-[#121214] border-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-indigo-400">
-              <Target className="w-5 h-5" /> Today's Tasks
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-400 text-sm">
-              Track and complete your daily goals.
-            </p>
-          </CardContent>
-        </Card>
+          {/* Study Preferences */}
+          <StudyPreferencesCard preferences={calendarData.studyPreferences} />
 
-        <Card className="bg-[#121214] border-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-400">
-              <Clock className="w-5 h-5" /> Upcoming Tasks
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-gray-400 text-sm">
-            Your scheduled study sessions will appear here.
-          </CardContent>
-        </Card>
+          {/* Statistics */}
+          <Card className="bg-[#121214] border-gray-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-400 text-sm">
+                <TrendingUp className="w-4 h-4" /> Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-sm">Completion Rate</span>
+                <span className="text-green-300 font-semibold">
+                  {calendarData.statistics.completionRate}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-sm">Total Study Time</span>
+                <span className="text-gray-200">
+                  {Math.round(calendarData.statistics.totalStudyTime / 60)}h
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-sm">Tasks Completed</span>
+                <span className="text-gray-200">
+                  {calendarData.statistics.totalTasksCompleted}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Add Task Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-[#1a1a1d] text-gray-200 border-gray-700 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              Add Task for {selectedDate && selectedDate.toDateString()}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 py-4">
-            <Input
-              placeholder="Task title"
-              value={newTask.title}
-              onChange={(e) =>
-                setNewTask({ ...newTask, title: e.target.value })
-              }
-              className="bg-[#101014] border-gray-700"
-            />
-            <Textarea
-              placeholder="Task description"
-              value={newTask.description}
-              onChange={(e) =>
-                setNewTask({ ...newTask, description: e.target.value })
-              }
-              className="bg-[#101014] border-gray-700"
-            />
-            <Select
-              value={newTask.priority}
-              onValueChange={(val) =>
-                setNewTask({ ...newTask, priority: val })
-              }
-            >
-              <SelectTrigger className="bg-[#101014] border-gray-700">
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#1a1a1d] border-gray-700">
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
-              onClick={handleAddTask}
-              disabled={adding}
-            >
-              {adding ? "Adding..." : "Add Task"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
-
-// 🟢 Custom CSS Shapes
-const style = document.createElement("style");
-style.innerHTML = `
-.clip-triangle { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
-.clip-hexagon { clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
-.clip-diamond { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
-`;
-document.head.appendChild(style);
 
 export default Calendar;

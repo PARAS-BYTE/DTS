@@ -1,18 +1,22 @@
 import express from "express";
 import {
   getCalendar,
-  addCalendarTask,
   completeTask,
   getCalendarSummary,
-  updateDailyStreak,
-} from "../controllers/calendarController.js";
+  updateStudyPreferences,
+  regenerateTodaysTask,
+  updateTaskStatus,
+  getTaskById,
+} from "../Controllers/CalendarController.js";
 
 const router = express.Router();
 
 router.get("/", getCalendar);
-router.get("/summary", getCalendarSummary);
-router.post("/add", addCalendarTask);
 router.patch("/complete/:taskId", completeTask);
-router.patch("/streak", updateDailyStreak);
+router.get("/task/:taskId", getTaskById);
+router.get("/summary", getCalendarSummary);
+router.patch("/preferences", updateStudyPreferences);
+router.post("/regenerate-today", regenerateTodaysTask);
+router.patch("/task/:taskId", updateTaskStatus);
 
 export default router;

@@ -1,35 +1,116 @@
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, BookOpen, FileCheck, TrendingUp, Plus, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+
+interface DashboardStats {
+  educatorName: string;
+  activeCourses: number;
+  enrolledStudents: number;
+  pendingAssignments: number;
+  avgPerformance: number;
+  performanceImprovement: number;
+  coursePerformanceData: Array<{ course: string; avg: number }>;
+  engagementData: Array<{ week: string; students: number }>;
+  admin: {
+    _id: string;
+    username: string;
+    email: string;
+    fullName: string;
+    department: string;
+  };
+}
+
+interface Activity {
+  student: string;
+  action: string;
+  item: string;
+  time: string;
+}
 
 const AdminDashboard = () => {
-  const performanceData = [
-    { course: 'ML', avg: 78 },
-    { course: 'Web Dev', avg: 85 },
-    { course: 'DSA', avg: 72 },
-    { course: 'Mobile', avg: 80 },
-  ];
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activityLoading, setActivityLoading] = useState(true);
 
-  const engagementData = [
-    { week: 'W1', students: 120 },
-    { week: 'W2', students: 145 },
-    { week: 'W3', students: 168 },
-    { week: 'W4', students: 185 },
-  ];
+  // ─── Get Admin Token ────────────────────────────────
+  const getAdminToken = () => {
+    return localStorage.getItem('adminToken');
+  };
+
+  // ─── Fetch Dashboard Stats ────────────────────────────────
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      const token = getAdminToken();
+      const { data } = await axios.get('http://localhost:5000/api/admin/auth/dashboard/stats', {
+        withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (data.success) {
+        setStats(data.stats);
+      }
+    } catch (err: any) {
+      console.error('Fetch Dashboard Stats Error:', err);
+      toast.error('Failed to load dashboard statistics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── Fetch Recent Activity ────────────────────────────────
+  const fetchRecentActivity = async () => {
+    try {
+      setActivityLoading(true);
+      const token = getAdminToken();
+      const { data } = await axios.get('http://localhost:5000/api/admin/auth/dashboard/activity', {
+        withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (data.success) {
+        setActivities(data.activities);
+      }
+    } catch (err: any) {
+      console.error('Fetch Activity Error:', err);
+      // Don't show error toast for activity, just log it
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardStats();
+    fetchRecentActivity();
+    
+    // Refresh stats every 30 seconds for real-time updates
+    const interval = setInterval(() => {
+      fetchDashboardStats();
+      fetchRecentActivity();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold mb-2 text-gradient">Instructor Dashboard</h1>
+          <h1 className="text-4xl font-bold mb-2 text-gradient">
+            {stats?.educatorName ? `${stats.educatorName}'s Dashboard` : 'Instructor Dashboard'}
+          </h1>
           <p className="text-muted-foreground text-lg">
             Manage your courses and track student progress
           </p>
         </div>
-        <Link to="/admin/courses/new">
+        <Link to="/admin/courses">
           <Button size="lg" className="glow-primary">
             <Plus className="w-5 h-5 mr-2" />
             Create Course
@@ -50,11 +131,18 @@ const AdminDashboard = () => {
               <Users className="w-4 h-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">185</div>
-              <p className="text-xs text-success mt-1 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +12% from last month
-              </p>
+              {loading ? (
+                <div className="text-3xl font-bold text-primary">...</div>
+              ) : (
+                <>
+                  <div className="text-3xl font-bold text-primary">
+                    {stats?.enrolledStudents ?? 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Students enrolled in your courses
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -70,8 +158,18 @@ const AdminDashboard = () => {
               <BookOpen className="w-4 h-4 text-secondary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-secondary">12</div>
-              <p className="text-xs text-muted-foreground mt-1">4 new this semester</p>
+              {loading ? (
+                <div className="text-3xl font-bold text-secondary">...</div>
+              ) : (
+                <>
+                  <div className="text-3xl font-bold text-secondary">
+                    {stats?.activeCourses ?? 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Published courses available to students
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -87,8 +185,16 @@ const AdminDashboard = () => {
               <FileCheck className="w-4 h-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-warning">28</div>
-              <p className="text-xs text-muted-foreground mt-1">Needs grading</p>
+              {loading ? (
+                <div className="text-3xl font-bold text-warning">...</div>
+              ) : (
+                <>
+                  <div className="text-3xl font-bold text-warning">
+                    {stats?.pendingAssignments ?? 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Needs grading</p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -104,11 +210,19 @@ const AdminDashboard = () => {
               <TrendingUp className="w-4 h-4 text-success" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-success">79%</div>
-              <p className="text-xs text-success mt-1 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +3% improvement
-              </p>
+              {loading ? (
+                <div className="text-3xl font-bold text-success">...</div>
+              ) : (
+                <>
+                  <div className="text-3xl font-bold text-success">
+                    {stats?.avgPerformance ?? 0}%
+                  </div>
+                  <p className="text-xs text-success mt-1 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    +{stats?.performanceImprovement ?? 0}% improvement
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -129,21 +243,37 @@ const AdminDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="course" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Bar dataKey="avg" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {loading ? (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                  Loading chart data...
+                </div>
+              ) : stats?.coursePerformanceData && stats.coursePerformanceData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={stats.coursePerformanceData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="course" 
+                      stroke="hsl(var(--muted-foreground))"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Bar dataKey="avg" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                  No performance data available yet
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -161,27 +291,37 @@ const AdminDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={engagementData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="students"
-                    stroke="hsl(var(--secondary))"
-                    strokeWidth={3}
-                    dot={{ fill: 'hsl(var(--secondary))', r: 5 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {loading ? (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                  Loading chart data...
+                </div>
+              ) : stats?.engagementData && stats.engagementData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={stats.engagementData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="students"
+                      stroke="hsl(var(--secondary))"
+                      strokeWidth={3}
+                      dot={{ fill: 'hsl(var(--secondary))', r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                  No engagement data available yet
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -205,26 +345,31 @@ const AdminDashboard = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {[
-              { student: 'Emma Watson', action: 'completed', item: 'ML Assignment 4', time: '5 min ago' },
-              { student: 'John Smith', action: 'started', item: 'Web Dev Module 3', time: '12 min ago' },
-              { student: 'Sarah Lee', action: 'scored 95% on', item: 'DSA Quiz', time: '1 hour ago' },
-              { student: 'Mike Chen', action: 'submitted', item: 'Final Project', time: '2 hours ago' },
-            ].map((activity, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
-              >
-                <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                <div className="flex-1">
-                  <p className="text-sm">
-                    <span className="font-medium">{activity.student}</span> {activity.action}{' '}
-                    <span className="font-medium">{activity.item}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">{activity.time}</p>
-                </div>
+            {activityLoading ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">Loading activity...</p>
               </div>
-            ))}
+            ) : activities.length > 0 ? (
+              activities.map((activity, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
+                  <div className="flex-1">
+                    <p className="text-sm">
+                      <span className="font-medium">{activity.student}</span> {activity.action}{' '}
+                      <span className="font-medium">{activity.item}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">No recent activity</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>

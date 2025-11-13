@@ -12,10 +12,32 @@ import {
   Search,
   Play,
   CheckCircle2,
+  DollarSign,
+  Link as LinkIcon,
 } from 'lucide-react';
 
+interface Course {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  level: string;
+  duration: number;
+  thumbnail: string;
+  price: number;
+  link: string;
+  instructorName?: string;
+  instructor?: {
+    username: string;
+    email: string;
+  };
+  progress?: number;
+  isEnrolled?: boolean;
+}
+
 const Courses = () => {
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,10 +47,27 @@ const Courses = () => {
   const fetchCourses = async () => {
     try {
       setLoading(true);
+      
+      // Fetch enrolled courses first to check enrollment status
+      const enrolledResponse = await axios.get('http://localhost:5000/api/courses/my', {
+        withCredentials: true,
+      }).catch(() => ({ data: [] }));
+      
+      const enrolledIds = new Set(enrolledResponse.data.map((course: Course) => course._id));
+      setEnrolledCourseIds(enrolledIds);
+      
+      // Fetch all courses
       const { data } = await axios.get('http://localhost:5000/api/courses', {
         withCredentials: true,
       });
-      setCourses(data);
+      
+      // Mark courses as enrolled
+      const coursesWithEnrollment = data.map((course: Course) => ({
+        ...course,
+        isEnrolled: enrolledIds.has(course._id),
+      }));
+      
+      setCourses(coursesWithEnrollment);
     } catch (err: any) {
       console.error('Fetch Courses Error:', err);
       setError('Failed to load courses.');
@@ -43,6 +82,11 @@ const Courses = () => {
 
   // ─── Enroll in a Course ────────────────────────────────
   const handleEnroll = async (courseId: string) => {
+    // Check if already enrolled
+    if (enrolledCourseIds.has(courseId)) {
+      return;
+    }
+
     try {
       setEnrolling(courseId);
 
@@ -54,15 +98,37 @@ const Courses = () => {
 
       console.log('Enrollment Success:', data);
 
-      // Optional: update course list or progress immediately
+      // Add to enrolled courses set
+      setEnrolledCourseIds(prev => new Set([...prev, courseId]));
+      
+      // Update course enrollment status
+      setCourses(prevCourses => 
+        prevCourses.map(course => 
+          course._id === courseId 
+            ? { ...course, isEnrolled: true }
+            : course
+        )
+      );
+
+      // Show success message
       alert(`✅ ${data.message}`);
-      fetchCourses();
     } catch (err: any) {
       console.error('Enrollment Error:', err);
-      alert(
-        err.response?.data?.message ||
-          '❌ Enrollment failed. Please try again.'
-      );
+      const errorMessage = err.response?.data?.message || '❌ Enrollment failed. Please try again.';
+      
+      // Check if already enrolled error
+      if (errorMessage.includes('Already enrolled')) {
+        setEnrolledCourseIds(prev => new Set([...prev, courseId]));
+        setCourses(prevCourses => 
+          prevCourses.map(course => 
+            course._id === courseId 
+              ? { ...course, isEnrolled: true }
+              : course
+          )
+        );
+      }
+      
+      alert(errorMessage);
     } finally {
       setEnrolling(null);
     }
@@ -130,17 +196,37 @@ const Courses = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                     <div className="flex items-center gap-1">
                       <User className="w-4 h-4" />
                       <span>
-                        {course.instructor?.username || 'Instructor'}
+                        {course.instructorName || course.instructor?.username || 'Instructor'}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
                       <span>{course.duration || 0}h</span>
                     </div>
+                    {course.price !== undefined && course.price > 0 && (
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="w-4 h-4" />
+                        <span className="font-semibold text-primary">${course.price}</span>
+                      </div>
+                    )}
+                    {course.link && (
+                      <div className="flex items-center gap-1">
+                        <LinkIcon className="w-4 h-4" />
+                        <a
+                          href={course.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Course Link
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   {/* Progress Bar */}
@@ -156,7 +242,12 @@ const Courses = () => {
 
                   {/* Buttons */}
                   <div className="flex gap-2">
-                    {course.progress === 100 ? (
+                    {course.isEnrolled ? (
+                      <Button className="flex-1" disabled variant="outline">
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        You have already enrolled
+                      </Button>
+                    ) : course.progress === 100 ? (
                       <Button className="flex-1" disabled>
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         Completed

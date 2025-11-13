@@ -18,16 +18,20 @@ import authRoutes from './routes/authRoutes.js';
 import courseRouter from './routes/CourseRouter.js';
 import calendarRouter from './routes/CalendarRoutes.js';
 import QuizRouter from './routes/QuizRouter.js';
+import adminAuthRoutes from './routes/adminAuthRoutes.js';
+import assignmentRouter from './routes/AssignmentRouter.js';
 // import aiRoutes from './routes/AiRoutes.js';
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({ origin: true,
+     credentials: true,
+    withCredentials: true}));
 app.use(express.json());
 app.use(cookieParser());
 
 // MongoDB Connection
-mongoose.connect('mongodb://127.0.0.1:27017/nova_learn', {
+mongoose.connect('mongodb://127.0.0.1:27017/learn_novar', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 });
@@ -35,8 +39,9 @@ mongoose.connect('mongodb://127.0.0.1:27017/nova_learn', {
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRouter);
 app.use('/api/calendar', calendarRouter);
-
 app.use('/api/quiz', QuizRouter);
+app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/assignments', assignmentRouter);
 
 app.post("/trans", async (req, res) => {
     try {

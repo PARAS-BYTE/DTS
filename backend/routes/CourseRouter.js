@@ -1,27 +1,22 @@
 import express from "express";
-// import {
-//     getAllCourses,
-//     getCourseById,
-//     createCourse,
-//     updateCourse,
-//     deleteCourse,
-//     enrollInCourse,
-//     getMyCourses,
-// } from "../Controllers/CourseController.js";
-import { getAllCourses, createCourse, updateCourse, deleteCourse, enrollInCourse, getMyCourses, getCourseDetails } from "../Controllers/CourseController.js";
-// import { isAdmin } from "../middleware/roleCheck.js";
+import { getAllCourses, createCourse, updateCourse, deleteCourse, enrollInCourse, getMyCourses, getCourseDetails, trackCourseAccess, completeLesson } from "../Controllers/CourseController.js";
+import { protectAdmin } from "../MiddleWare/adminAuthMiddleware.js";
 
 const router = express.Router();
 
+// Public routes
 router.get("/", getAllCourses);
-// router.get("/:id", getCourseById);
-
 router.get("/my", getMyCourses);
-router.post("/getsingle",getCourseDetails)
+router.post("/getsingle", getCourseDetails);
 router.post("/enroll", enrollInCourse);
 
-router.post("/",  createCourse);
-router.put("/:id", updateCourse);
-router.delete("/:id", deleteCourse);
+// Student routes (require authentication via JWT in controller)
+router.post("/:id/access", trackCourseAccess);
+router.post("/:id/complete-lesson", completeLesson);
+
+// Admin protected routes
+router.post("/", protectAdmin, createCourse);
+router.put("/:id", protectAdmin, updateCourse);
+router.delete("/:id", protectAdmin, deleteCourse);
 
 export default router;

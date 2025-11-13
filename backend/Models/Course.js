@@ -47,6 +47,31 @@ const courseSchema = new Schema(
       type: Number, // total duration (hours)
       default: 0,
     },
+    price: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    link: {
+      type: String,
+      default: "",
+    },
+    instructorName: {
+      type: String,
+      default: "",
+    },
+    language: {
+      type: String,
+      default: "English",
+    },
+    requirements: {
+      type: [String],
+      default: [],
+    },
+    whatYouWillLearn: {
+      type: [String],
+      default: [],
+    },
 
     // ─── Instructor ─────────────────────────────
     instructor: {
