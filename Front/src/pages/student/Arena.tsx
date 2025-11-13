@@ -1,213 +1,457 @@
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Trophy, Swords, Users, Zap, Crown, Medal, Award } from 'lucide-react';
-import { useStore } from '@/store/useStore';
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import gsap from "gsap";
 
-const Arena = () => {
-  const user = useStore((state) => state.user);
+const API_URL = "http://localhost:5000/api/battle";
 
-  const leaderboard = [
-    { position: 1, name: 'Emma Watson', xp: 5420, level: 24, rank: 'Platinum', avatar: 'EW' },
-    { position: 2, name: 'John Smith', xp: 4890, level: 22, rank: 'Gold', avatar: 'JS' },
-    { position: 3, name: 'Sarah Lee', xp: 4320, level: 21, rank: 'Gold', avatar: 'SL' },
-    { position: 4, name: 'Mike Chen', xp: 3850, level: 19, rank: 'Silver', avatar: 'MC' },
-    { position: 5, name: 'Alex Johnson', xp: user?.xp || 2450, level: user?.level || 12, rank: user?.rank || 'Gold', avatar: 'AJ', isCurrentUser: true },
-    { position: 6, name: 'Lisa Park', xp: 2120, level: 11, rank: 'Silver', avatar: 'LP' },
-    { position: 7, name: 'Tom Wilson', xp: 1890, level: 10, rank: 'Bronze', avatar: 'TW' },
-  ];
+const BattleSetup = () => {
+  // Form states
+  const [battleName, setBattleName] = useState("");
+  const [tags, setTags] = useState("");
+  const [battleCode, setBattleCode] = useState("");
+  const [createdBattle, setCreatedBattle] = useState(null);
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const getRankColor = (rank: string) => {
-    switch (rank) {
-      case 'Platinum': return 'text-secondary';
-      case 'Gold': return 'text-warning';
-      case 'Silver': return 'text-muted-foreground';
-      case 'Bronze': return 'text-orange-500';
-      default: return 'text-foreground';
+  // Recent battles
+  const [recentBattles, setRecentBattles] = useState([]);
+  const [recentLoading, setRecentLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  // Animation refs
+  const leftSword = useRef(null);
+  const rightSword = useRef(null);
+  const introContainer = useRef(null);
+  const novaTextRef = useRef(null);
+
+  // axios instance for reuse
+  const axiosInstance = axios.create({
+    baseURL: API_URL,
+    withCredentials: true,
+    headers: { "Content-Type": "application/json" },
+  });
+
+  // —————— NOVA + SWORDS Animation (per-letter) ——————
+  useEffect(() => {
+    if (!introContainer.current) return;
+
+    // safety: ensure novaTextRef exists
+    if (novaTextRef.current) {
+      const text = "N O V A   B A T T L E   A R E N A";
+      novaTextRef.current.innerHTML = text
+        .split("")
+        .map((char) =>
+          char === " "
+            ? `<span class="inline-block w-2"></span>`
+            : `<span class="inline-block opacity-0 translate-y-4">${char}</span>`
+        )
+        .join("");
+    }
+
+    const letters =
+      novaTextRef.current?.querySelectorAll("span") ?? [];
+
+    gsap.set(introContainer.current, { opacity: 1 });
+
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+    tl.fromTo(
+      leftSword.current,
+      { x: "-180%", rotate: -70, opacity: 0 },
+      { x: "-10%", rotate: -30, opacity: 1, duration: 0.8 }
+    )
+      .fromTo(
+        rightSword.current,
+        { x: "180%", rotate: 70, opacity: 0 },
+        { x: "10%", rotate: 30, opacity: 1, duration: 0.8 },
+        "-=0.6"
+      )
+      // letters reveal synced slightly before collision
+      .to(
+        letters,
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.05,
+          duration: 0.4,
+          ease: "power2.out",
+        },
+        "-=0.3"
+      )
+      // collision — 2s duration
+      .to(
+        [leftSword.current, rightSword.current],
+        {
+          x: (i) => (i === 0 ? 80 : -80),
+          rotate: 0,
+          scale: 2,
+          duration: 2,
+        },
+        "+=0.2"
+      )
+      // small pulse on letters during collision
+      .to(
+        letters,
+        {
+          scale: 1.12,
+          yoyo: true,
+          repeat: 1,
+          duration: 0.35,
+          stagger: 0.02,
+        },
+        "<"
+      )
+      // fade out swords & letters
+      .to([leftSword.current, rightSword.current], { opacity: 0, scale: 0.7, duration: 0.4 })
+      .to(letters, { opacity: 0, duration: 0.25, stagger: 0.01 }, "-=0.3")
+      .to(introContainer.current, { opacity: 0, duration: 0.6 }, "-=0.3");
+
+    // cleanup on unmount
+    return () => {
+      tl.kill();
+      gsap.killTweensOf([leftSword.current, rightSword.current, letters]);
+    };
+  }, []);
+
+  // —————— Fetch recent battles ——————
+  useEffect(() => {
+    let mounted = true;
+    const fetchRecent = async () => {
+      try {
+        setRecentLoading(true);
+        const res = await axiosInstance.get("/all");
+        if (!mounted) return;
+        setRecentBattles(res.data.battles || []);
+      } catch (err) {
+        console.error("Failed to fetch recent battles:", err);
+      } finally {
+        if (mounted) setRecentLoading(false);
+      }
+    };
+    fetchRecent();
+    return () => (mounted = false);
+  }, []);
+
+  // CREATE BATTLE
+  const handleCreateBattle = async () => {
+    if (!battleName || !tags) {
+      toast({ description: "⚠️ Please fill all fields" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { data } = await axiosInstance.post("/create", {
+        battleName,
+        tags: tags.split(",").map((t) => t.trim()),
+      });
+
+      setCreatedBattle(data);
+      setBattleCode(data.battleCode);
+      toast({ description: "🔥 Battle created successfully!" });
+
+      // refresh recent battles quickly
+      try {
+        const res = await axiosInstance.get("/all");
+        setRecentBattles(res.data.battles || []);
+      } catch (e) {
+        // ignore refresh error
+      }
+    } catch (err) {
+      toast({
+        description: err.response?.data?.message || "❌ Failed to create battle",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getRankIcon = (position: number) => {
-    if (position === 1) return <Crown className="w-6 h-6 text-warning" />;
-    if (position === 2) return <Medal className="w-6 h-6 text-muted-foreground" />;
-    if (position === 3) return <Award className="w-6 h-6 text-orange-500" />;
-    return null;
+  // JOIN BATTLE
+  const handleJoinBattle = async () => {
+    if (!battleCode || !username) {
+      toast({ description: "⚠️ Enter username and battle code" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const { data } = await axiosInstance.post("/join", { battleCode });
+
+      toast({ description: `⚔️ Joined battle: ${data.battleName}` });
+
+      navigate("/student/battleground", {
+        state: { battleData: data, username },
+      });
+    } catch (err) {
+      toast({
+        description: err.response?.data?.message || "❌ Failed to join battle",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // navigate to analysis page for a particular battle
+  const openBattleAnalysis = (battleId) => {
+    if (!battleId) {
+      toast({ description: "Invalid battle selected" });
+      return;
+    }
+    navigate("/student/battleanalysis", { state: { battleId } });
+  };
+
+  // small helper
+  const safe = (v, d = "") => (v === undefined || v === null ? d : v);
+
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold mb-2 text-gradient">Battle Arena</h1>
-        <p className="text-muted-foreground text-lg">
-          Compete with peers and rise through the ranks
-        </p>
-      </div>
-
-      {/* Battle Modes */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30 hover:scale-105 transition-transform cursor-pointer glow-primary h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Swords className="w-7 h-7 text-primary" />
-                1v1 Quiz Battle
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                Challenge a friend to a head-to-head quiz showdown. First to answer correctly wins!
-              </p>
-              <div className="flex items-center gap-2 text-sm">
-                <Zap className="w-4 h-4 text-warning" />
-                <span className="text-warning font-medium">+200 XP for winner</span>
-              </div>
-              <Button size="lg" className="w-full glow-primary">
-                Find Opponent
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="bg-gradient-to-br from-secondary/20 to-secondary/5 border-secondary/30 hover:scale-105 transition-transform cursor-pointer glow-accent h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Users className="w-7 h-7 text-secondary" />
-                2v2 Team Battle
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                Team up with a partner and compete against another duo. Teamwork makes the dream work!
-              </p>
-              <div className="flex items-center gap-2 text-sm">
-                <Zap className="w-4 h-4 text-warning" />
-                <span className="text-warning font-medium">+150 XP per team member</span>
-              </div>
-              <Button size="lg" variant="outline" className="w-full hover:bg-secondary/10">
-                Create Team
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Leaderboard */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+    <div className="min-h-screen bg-white flex items-center justify-center p-6 relative overflow-hidden">
+      {/* INTRO OVERLAY */}
+      <div
+        ref={introContainer}
+        className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white pointer-events-none"
       >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              <Trophy className="w-7 h-7 text-warning" />
-              Global Leaderboard
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {leaderboard.map((player, index) => (
-              <motion.div
-                key={player.position}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className={`flex items-center gap-4 p-4 rounded-xl transition-all ${
-                  player.isCurrentUser
-                    ? 'bg-primary/10 border-2 border-primary glow-primary'
-                    : 'bg-muted/30 hover:bg-muted/50'
-                }`}
-              >
-                <div className="w-12 flex items-center justify-center">
-                  {getRankIcon(player.position) || (
-                    <div className="text-2xl font-bold text-muted-foreground">
-                      #{player.position}
+        <div className="flex items-center gap-8">
+          <img
+            ref={leftSword}
+            src="/leftsword.png"
+            alt="left sword"
+            className="w-[200px] h-[200px] opacity-0 object-contain"
+          />
+          <img
+            ref={rightSword}
+            src="/rightsword.png"
+            alt="right sword"
+            className="w-[200px] h-[200px] opacity-0 object-contain"
+          />
+        </div>
+
+        {/* Nova per-letter */}
+        <div
+          ref={novaTextRef}
+          className="mt-[100px] text-black text-4xl md:text-5xl font-extrabold text-center"
+          aria-hidden
+        />
+      </div>
+
+      {/* MAIN UI */}
+      <div className="w-full max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="text-center mb-10"
+        >
+          <h1 className="text-5xl font-extrabold text-black tracking-wide">
+            ⚔️ Battle Arena
+          </h1>
+          <p className="mt-3 text-gray-700 text-lg">
+            Create or Join a Battle — Let the clash begin.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+          {/* CREATE BATTLE */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="rounded-2xl border border-gray-200 shadow-lg bg-white p-6"
+          >
+            <Card className="bg-transparent shadow-none">
+              <CardHeader>
+                <CardTitle className="text-2xl text-black font-semibold">
+                  Create Battle
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-5">
+                {!createdBattle ? (
+                  <>
+                    <div>
+                      <Label className="text-gray-700">Battle Name</Label>
+                      <Input
+                        placeholder="Ex: JS Master Clash"
+                        value={battleName}
+                        onChange={(e) => setBattleName(e.target.value)}
+                        className="mt-2 bg-white text-black border-gray-300"
+                      />
                     </div>
-                  )}
-                </div>
 
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-                  {player.avatar}
-                </div>
+                    <div>
+                      <Label className="text-gray-700">Tags (comma separated)</Label>
+                      <Input
+                        placeholder="JavaScript, Arrays, Logic"
+                        value={tags}
+                        onChange={(e) => setTags(e.target.value)}
+                        className="mt-2 bg-white text-black border-gray-300"
+                      />
+                    </div>
 
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold">{player.name}</p>
-                    {player.isCurrentUser && (
-                      <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-medium">
-                        You
+                    <Button
+                      onClick={handleCreateBattle}
+                      disabled={loading}
+                      className="w-full py-3 mt-2 bg-black hover:bg-gray-800 text-white rounded-lg shadow-lg shadow-black/10"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        "Create Battle"
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <div className="text-center py-6">
+                    <h3 className="text-2xl font-bold text-green-600">Battle Created!</h3>
+                    <p className="mt-3 text-gray-700">
+                      <span className="font-medium">Name:</span> {safe(createdBattle.battleName)}
+                    </p>
+                    <p className="mt-1 text-black text-lg">
+                      <span className="font-medium">Code:</span>{" "}
+                      <span className="text-black font-bold tracking-wide">
+                        {safe(createdBattle.battleCode)}
                       </span>
-                    )}
+                    </p>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setCreatedBattle(null);
+                        setBattleCode("");
+                        setBattleName("");
+                        setTags("");
+                      }}
+                      className="mt-5 border-gray-300 text-black hover:bg-gray-50"
+                    >
+                      Create Another
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                    <span>Level {player.level}</span>
-                    <span className={`font-medium ${getRankColor(player.rank)}`}>
-                      {player.rank}
-                    </span>
-                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* JOIN BATTLE */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="rounded-2xl border border-gray-200 shadow-lg bg-white p-6"
+          >
+            <Card className="bg-transparent shadow-none">
+              <CardHeader>
+                <CardTitle className="text-2xl text-black font-semibold">
+                  Join Battle
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-5">
+                <div>
+                  <Label className="text-gray-700">Your Name</Label>
+                  <Input
+                    placeholder="Enter your name"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="mt-2 bg-white text-black border-gray-300"
+                  />
                 </div>
 
-                <div className="text-right">
-                  <div className="flex items-center gap-1 text-primary font-bold text-lg">
-                    <Zap className="w-5 h-5" />
-                    {player.xp.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-muted-foreground">XP</p>
+                <div>
+                  <Label className="text-gray-700">Battle Code</Label>
+                  <Input
+                    placeholder="Enter battle code"
+                    value={battleCode}
+                    onChange={(e) => setBattleCode(e.target.value)}
+                    className="mt-2 bg-white text-black border-gray-300"
+                  />
                 </div>
-              </motion.div>
-            ))}
-          </CardContent>
-        </Card>
-      </motion.div>
 
-      {/* Rank Progress */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <Card className="border-warning/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-warning" />
-              Your Rank Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold text-warning">{user?.rank}</p>
-                <p className="text-sm text-muted-foreground">Current Rank</p>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-secondary">Platinum</p>
-                <p className="text-sm text-muted-foreground">Next Rank</p>
-              </div>
+                <Button
+                  onClick={handleJoinBattle}
+                  disabled={loading}
+                  className="w-full py-3 mt-2 bg-black hover:bg-gray-800 text-white rounded-lg shadow-lg shadow-black/10"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Joining...
+                    </>
+                  ) : (
+                    "Join Battle"
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* RECENT BATTLES */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mt-12 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+        >
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-2xl font-bold text-black">🔥 Recent Battles</h2>
+            <p className="text-sm text-gray-600">{recentLoading ? "Loading..." : `${recentBattles.length} available`}</p>
+          </div>
+
+          {recentBattles.length === 0 && !recentLoading ? (
+            <p className="text-gray-600 italic">No battles available.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {recentBattles.map((battle) => (
+                <div
+                  key={battle._id}
+                  className="bg-white border border-gray-200 p-5 rounded-xl hover:bg-gray-50 transition shadow-sm"
+                >
+                  <h3 className="text-black text-xl font-semibold">{safe(battle.battleName, "Untitled")}</h3>
+                  <p className="text-gray-600 text-sm mt-1">Code: <span className="text-black font-semibold">{safe(battle.battleCode)}</span></p>
+                  <p className="text-gray-600 text-sm">Players: {Array.isArray(battle.players) ? battle.players.length : safe(battle.players, 0)}</p>
+                  <p className="text-gray-600 text-sm">Tags: <span className="text-black">{Array.isArray(battle.tags) ? battle.tags.join(", ") : safe(battle.tags)}</span></p>
+
+                  <div className="mt-4 flex gap-3">
+                    <Button
+                      className="flex-1 bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
+                      onClick={() => openBattleAnalysis(battle._id)}
+                    >
+                      View Analysis
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        // prefill code for quick join
+                        setBattleCode(battle.battleCode || "");
+                        toast({ description: "Battle code filled" });
+                      }}
+                      className="border-gray-300 text-black hover:bg-gray-50"
+                    >
+                      Use Code
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Progress to Platinum</span>
-                <span className="font-medium">{user?.xp || 0} / 5000 XP</span>
-              </div>
-              <Progress value={((user?.xp || 0) / 5000) * 100} className="h-3" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              You need <span className="text-primary font-medium">{5000 - (user?.xp || 0)} XP</span> more to reach Platinum rank!
-            </p>
-          </CardContent>
-        </Card>
-      </motion.div>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 };
 
-export default Arena;
+export default BattleSetup;

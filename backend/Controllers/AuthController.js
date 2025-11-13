@@ -13,18 +13,45 @@ export const registerUser = asyncHandler(async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+    // Validate required fields
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "Please provide username, email, and password" });
     }
 
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    }
+
+    // Check if user exists by email
+    const userExistsByEmail = await User.findOne({ email });
+    if (userExistsByEmail) {
+      return res.status(400).json({ message: "User with this email already exists" });
+    }
+
+    // Check if user exists by username
+    const userExistsByUsername = await User.findOne({ username });
+    if (userExistsByUsername) {
+      return res.status(400).json({ message: "Username already taken" });
+    }
+
+    // Create user
     const user = await User.create({ username, email, password });
     if (!user) {
       return res.status(400).json({ message: "Invalid user data" });
     }
 
     // ✅ Create token
-    generateToken(res, user._id);
+    try {
+      generateToken(res, user._id);
+    } catch (tokenError) {
+      console.error("Token generation error:", tokenError.message);
+      // If token generation fails, still return success but log the error
+      // User is created, they just won't be automatically logged in
+      if (tokenError.message.includes("JWT_SECRET")) {
+        console.error("WARNING: JWT_SECRET is not set in environment variables!");
+      }
+    }
 
     res.status(201).json({
       _id: user._id,
@@ -34,7 +61,21 @@ export const registerUser = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Register Error:", error.message);
-    res.status(500).json({ message: "Server error while registering user" });
+    console.error("Full Error:", error);
+    
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message).join(', ');
+      return res.status(400).json({ message: messages });
+    }
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ message: `${field} already exists` });
+    }
+    
+    res.status(500).json({ message: error.message || "Server error while registering user" });
   }
 });
 
@@ -201,6 +242,11 @@ export const getStudentDashboard = asyncHandler(async (req, res) => {
       return res.status(401).json({ message: "Not authorized, no token" });
     }
 
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not defined in environment variables");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
 
@@ -275,14 +321,123 @@ export const getStudentDashboard = asyncHandler(async (req, res) => {
     summary.weeklyXP = weeklyXP;
     summary.streak = calendar.streak?.currentStreak || 0;
     summary.personalBestStreak = calendar.streak?.longestStreak || 0;
+    
+    // Ensure all required fields exist for new users
+    summary.courses = summary.courses || [];
+    summary.upcomingTasks = summary.upcomingTasks || [];
+    summary.last7DaysStudy = summary.last7DaysStudy || [];
+    summary.xpHistory = summary.xpHistory || [];
+    summary.weakTopics = summary.weakTopics || [];
 
     res.status(200).json({
       ...summary,
-      statistics: calendarStats,
+      statistics: calendarStats || {},
       streakStats: calendar.streak || { currentStreak: 0, longestStreak: 0 },
     });
   } catch (error) {
     console.error("Dashboard Fetch Error:", error.message);
-    res.status(500).json({ message: "Failed to load dashboard" });
+    console.error("Full Error:", error);
+    
+    // Handle JWT errors
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    
+    res.status(500).json({ message: error.message || "Failed to load dashboard" });
+  }
+});
+
+const authenticateUser = async (req) => {
+  let token;
+
+  // 1️⃣ Extract token
+  if (req.cookies?.jwt) token = req.cookies.jwt;
+  else if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer ")
+  )
+    token = req.headers.authorization.split(" ")[1];
+
+  if (!token) throw new Error("Not authorized, no token");
+
+  // 2️⃣ Verify token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  // 3️⃣ Get user
+  const user = await User.findById(decoded.userId);
+  if (!user) throw new Error("User not found");
+
+  return user;
+};
+
+//
+// ─── GET USER PROFILE (AUTH REQUIRED) ───────────────────────────────
+//
+export const getUserProfilesetting = asyncHandler(async (req, res) => {
+  try {
+    const user = await authenticateUser(req);
+    res.status(200).json({
+      _id: user._id,
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      xp: user.xp,
+      level: user.level,
+      streakDays: user.streakDays,
+      masteryScore: user.masteryScore,
+      focusScore: user.focusScore,
+      accuracyScore: user.accuracyScore,
+      coins: user.coins,
+      badges: user.badges.length,
+      learningPreferences: user.learningPreferences,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+  } catch (error) {
+    console.error("❌ Get Profile Error:", error.message);
+    res.status(401).json({ message: error.message || "Unauthorized request" });
+  }
+});
+
+//
+// ─── UPDATE USER PROFILE (AUTH REQUIRED) ───────────────────────────────
+//
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  try {
+    const user = await authenticateUser(req);
+
+    // Only allow safe fields to update
+    const allowedFields = [
+      "username",
+      "name",
+      "avatarUrl",
+      "learningPreferences",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        user[field] = req.body[field];
+      }
+    });
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      message: "✅ Profile updated successfully",
+      user: {
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        avatarUrl: updatedUser.avatarUrl,
+        learningPreferences: updatedUser.learningPreferences,
+        xp: updatedUser.xp,
+        level: updatedUser.level,
+        coins: updatedUser.coins,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Update Profile Error:", error.message);
+    res.status(401).json({ message: error.message || "Unauthorized request"     });
   }
 });

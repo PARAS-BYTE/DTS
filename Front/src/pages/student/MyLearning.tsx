@@ -113,9 +113,8 @@ const MyLearning = () => {
 
     // ─── Filter Search ────────────────────────────────────────
     const filteredCourses = courses.filter((course) =>
-        course.title.toLowerCase().includes(searchQuery.toLowerCase())
+        (course?.title || "").toLowerCase().includes((searchQuery || "").toLowerCase())
     );
-
     return (
         <div className="p-8 space-y-8">
             {/* Header */}
@@ -138,7 +137,7 @@ const MyLearning = () => {
                     className="pl-10"
                 />
             </div>
-
+            
             {/* Loading & Error States */}
             {loading && (
                 <p className="text-center text-muted-foreground">

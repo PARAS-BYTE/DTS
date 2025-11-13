@@ -136,19 +136,19 @@ const ChatBot = () => {
     date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-gray-950 text-gray-100">
+    <div className="flex flex-col h-screen bg-white text-black">
 
       {/* ✅ Enhanced Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900/95 backdrop-blur-sm">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center shadow-lg shadow-black/10">
             <Bot className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
               NovaAI
             </h1>
-            <p className="text-xs text-gray-400 flex items-center gap-1">
+            <p className="text-xs text-gray-600 flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               Advanced AI Assistant
             </p>
@@ -160,7 +160,7 @@ const ChatBot = () => {
             onClick={clearChat}
             variant="ghost"
             size="sm"
-            className="h-9 w-9 p-0 text-gray-400 hover:text-white hover:bg-gray-800 border border-gray-700 rounded-lg transition-all duration-200"
+            className="h-9 w-9 p-0 text-gray-600 hover:text-black hover:bg-gray-100 border border-gray-300 rounded-lg transition-all duration-200"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -168,7 +168,7 @@ const ChatBot = () => {
       </div>
 
       {/* ✅ Enhanced Messages Container */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 bg-gradient-to-b from-gray-900 to-gray-900/80">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 bg-white">
         <AnimatePresence>
           {messages.map((msg) => (
             <motion.div
@@ -179,8 +179,8 @@ const ChatBot = () => {
               className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "model" && (
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 border border-purple-400/30 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-5 h-5 text-purple-300" />
+                <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-300 flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-5 h-5 text-black" />
                 </div>
               )}
 
@@ -191,8 +191,8 @@ const ChatBot = () => {
                 <div
                   className={`px-4 py-3 rounded-2xl ${
                     msg.role === "user"
-                      ? "bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg"
-                      : "bg-gray-800/80 border border-gray-700/50 backdrop-blur-sm shadow-lg"
+                      ? "bg-black text-white shadow-lg shadow-black/10"
+                      : "bg-gray-50 border border-gray-200 shadow-sm"
                   }`}
                 >
                   {/* ✅ Render Sanitized HTML with Tailwind Prose */}
@@ -200,25 +200,25 @@ const ChatBot = () => {
                     className={`
                       max-w-none 
                       ${msg.role === "model" ? `
-                        [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-gray-200 [&_h1]:mt-4 [&_h1]:mb-2
-                        [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-gray-200 [&_h2]:mt-4 [&_h2]:mb-2
-                        [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-gray-200 [&_h3]:mt-3 [&_h3]:mb-2
-                        [&_p]:text-gray-300 [&_p]:my-2
+                        [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-black [&_h1]:mt-4 [&_h1]:mb-2
+                        [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-black [&_h2]:mt-4 [&_h2]:mb-2
+                        [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-black [&_h3]:mt-3 [&_h3]:mb-2
+                        [&_p]:text-gray-700 [&_p]:my-2
                         [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-2
                         [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-2
-                        [&_li]:text-gray-300 [&_li]:my-1
-                        [&_pre]:bg-gray-900 [&_pre]:border [&_pre]:border-gray-700 [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:my-2 [&_pre]:overflow-x-auto
-                        [&_code]:text-purple-300 [&_code]:text-sm
+                        [&_li]:text-gray-700 [&_li]:my-1
+                        [&_pre]:bg-gray-100 [&_pre]:border [&_pre]:border-gray-300 [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:my-2 [&_pre]:overflow-x-auto
+                        [&_code]:text-black [&_code]:text-sm
                         [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none
-                        [&_blockquote]:border-l-4 [&_blockquote]:border-purple-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-400
-                        [&_a]:text-blue-400 [&_a]:hover:text-blue-300 [&_a]:underline
+                        [&_blockquote]:border-l-4 [&_blockquote]:border-black [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600
+                        [&_a]:text-black [&_a]:hover:text-gray-700 [&_a]:underline
                       ` : ""}
                     `}
                     dangerouslySetInnerHTML={{ __html: msg.html }}
                   />
                   
                   {/* Timestamp */}
-                  <div className={`text-xs mt-2 ${msg.role === "user" ? "text-blue-100/70" : "text-gray-500"}`}>
+                  <div className={`text-xs mt-2 ${msg.role === "user" ? "text-gray-300" : "text-gray-500"}`}>
                     {formatTime(msg.timestamp)}
                   </div>
                 </div>
@@ -229,10 +229,10 @@ const ChatBot = () => {
                     onClick={() => handleCopy(msg.id, extractTextContent(msg.html))}
                     variant="ghost"
                     size="sm"
-                    className={`absolute -top-2 -right-2 h-8 w-8 p-0 bg-gray-900 border border-gray-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg ${
+                    className={`absolute -top-2 -right-2 h-8 w-8 p-0 bg-white border border-gray-300 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg ${
                       copiedMessageId === msg.id 
-                        ? "text-green-400 opacity-100 bg-green-900/20 border-green-500/50" 
-                        : "text-gray-400 hover:text-white hover:bg-gray-800 hover:border-gray-500"
+                        ? "text-green-600 opacity-100 bg-green-50 border-green-500" 
+                        : "text-gray-600 hover:text-black hover:bg-gray-100 hover:border-gray-400"
                     }`}
                     title="Copy response"
                   >
@@ -246,7 +246,7 @@ const ChatBot = () => {
               </div>
 
               {msg.role === "user" && (
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center flex-shrink-0 shadow-lg shadow-black/10">
                   <User className="w-5 h-5 text-white" />
                 </div>
               )}
@@ -259,18 +259,18 @@ const ChatBot = () => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex gap-3 text-gray-300 items-center"
+            className="flex gap-3 text-gray-700 items-center"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 border border-purple-400/30 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-purple-300" />
+            <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-300 flex items-center justify-center">
+              <Bot className="w-5 h-5 text-black" />
             </div>
-            <div className="flex items-center gap-3 bg-gray-800/80 border border-gray-700/50 rounded-2xl px-4 py-3">
+            <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
               <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div className="w-2 h-2 bg-black rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-black rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
-              <span className="text-sm text-gray-300">NovaAI is thinking...</span>
+              <span className="text-sm text-gray-700">NovaAI is thinking...</span>
             </div>
           </motion.div>
         )}
@@ -279,7 +279,7 @@ const ChatBot = () => {
       </div>
 
       {/* ✅ Enhanced Input Area */}
-      <div className="border-t border-gray-800/50 p-4 bg-gray-900/95 backdrop-blur-sm">
+      <div className="border-t border-gray-200 p-4 bg-white">
         <form
           onSubmit={handleSend}
           className="flex gap-3 max-w-4xl mx-auto"
@@ -288,7 +288,7 @@ const ChatBot = () => {
             placeholder="Message NovaAI... (Ask for code, explanations, or help)"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="bg-gray-800/80 border-gray-700 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all duration-200 backdrop-blur-sm placeholder-gray-400"
+            className="bg-white border-gray-300 text-black rounded-xl px-4 py-3 focus:ring-2 focus:ring-black/20 focus:border-black transition-all duration-200 placeholder-gray-400"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -300,7 +300,7 @@ const ChatBot = () => {
           <Button
             type="submit"
             disabled={loading || !input.trim()}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-6 py-3 rounded-xl shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-purple-500/25"
+            className="bg-black hover:bg-gray-800 px-6 py-3 rounded-xl shadow-lg shadow-black/10 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-white"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -311,7 +311,7 @@ const ChatBot = () => {
         </form>
         
         {/* Quick Tips */}
-        <div className="text-xs text-gray-500 text-center mt-3">
+        <div className="text-xs text-gray-600 text-center mt-3">
           Try: "Show me a React component" or "Explain JavaScript closures"
         </div>
       </div>

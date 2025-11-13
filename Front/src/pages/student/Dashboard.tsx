@@ -41,12 +41,21 @@ const Dashboard = () => {
     const fetchDashboard = async () => {
       try {
         const token = localStorage.getItem("token");
+        const headers: any = {};
+        
+        // Only add Authorization header if token exists in localStorage
+        // Otherwise, rely on httpOnly cookie (which is set during signup/login)
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        
         const res = await axios.get("http://localhost:5000/api/auth/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
+          headers,
+          withCredentials: true, // This ensures cookies are sent
         });
         setUser(res.data);
       } catch (err: any) {
+        console.error("Dashboard fetch error:", err);
         setError(err.response?.data?.message || "Failed to load dashboard");
       } finally {
         setLoading(false);
@@ -81,13 +90,13 @@ const masteryScore = Math.round(
   user?.weakTopics ?? ["Neural Networks", "Dynamic Programming", "React Context"];
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8 bg-white">
       {/* ✅ Welcome Section */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-4xl font-bold mb-2">
-          Welcome back, <span className="text-gradient">{user?.name}</span>! 👋
+        <h1 className="text-4xl font-bold mb-2 text-black">
+          Welcome back, <span className="bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">{user?.name}</span>! 👋
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-gray-700 text-lg">
           You are learning with <b>Nova Learn</b>. Keep up the momentum 🔥
         </p>
       </motion.div>
@@ -123,16 +132,16 @@ const masteryScore = Math.round(
 
         {/* ✅ Stopwatch Card - Now using global stopwatch */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-          <Card className="bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-blue-500/30">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">App Usage Time</CardTitle>
-              <Clock className="w-4 h-4 text-blue-500" />
+              <CardTitle className="text-sm font-medium text-black">App Usage Time</CardTitle>
+              <Clock className="w-4 h-4 text-black" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-500 font-mono">
+              <div className="text-3xl font-bold text-black font-mono">
                 {formatTime(elapsedTime)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-gray-600 mt-1">
                 Time spent in Nova Learn today
               </p>
             </CardContent>
@@ -202,14 +211,14 @@ const StatCard = ({ title, icon: Icon, value, sub, progress, streak, color }: an
 
   return (
     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-      <Card className={`bg-gradient-to-br ${colorClasses[color]}`}>
+      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
-          <Icon className={`w-4 h-4`} />
+          <CardTitle className="text-sm font-medium text-black">{title}</CardTitle>
+          <Icon className={`w-4 h-4 text-black`} />
         </CardHeader>
         <CardContent>
-          <div className={`text-3xl font-bold`}>{value}</div>
-          <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+          <div className={`text-3xl font-bold text-black`}>{value}</div>
+          <p className="text-xs text-gray-600 mt-1">{sub}</p>
 
           {progress && <Progress value={progress} className="mt-3 h-2" />}
 
@@ -219,7 +228,7 @@ const StatCard = ({ title, icon: Icon, value, sub, progress, streak, color }: an
                 <div
                   key={i}
                   className={`flex-1 h-2 rounded-full ${
-                    i < streak ? `${bgClasses[color]}` : "bg-muted"
+                    i < streak ? "bg-black" : "bg-gray-200"
                   }`}
                 />
               ))}
@@ -241,10 +250,10 @@ const ChartCard = ({ title, icon: Icon, color, type, data, xKey, yKey, fillId }:
   };
 
   return (
-    <Card>
+    <Card className="bg-white border border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon className={`w-5 h-5 ${colorClasses[color]}`} />
+        <CardTitle className="flex items-center gap-2 text-black">
+          <Icon className={`w-5 h-5 text-black`} />
           {title}
         </CardTitle>
       </CardHeader>

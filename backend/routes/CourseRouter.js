@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllCourses, createCourse, updateCourse, deleteCourse, enrollInCourse, getMyCourses, getCourseDetails, trackCourseAccess, completeLesson } from "../Controllers/CourseController.js";
+import { getAllCourses, createCourse, updateCourse, deleteCourse, enrollInCourse, getMyCourses, getCourseDetails, trackCourseAccess, completeLesson, autoCreateCourse, getPlaylistVideos } from "../Controllers/CourseController.js";
 import { protectAdmin } from "../MiddleWare/adminAuthMiddleware.js";
 
 const router = express.Router();
@@ -18,5 +18,9 @@ router.post("/:id/complete-lesson", completeLesson);
 router.post("/", protectAdmin, createCourse);
 router.put("/:id", protectAdmin, updateCourse);
 router.delete("/:id", protectAdmin, deleteCourse);
+
+// AI and playlist routes
+router.post("/aigen", autoCreateCourse);
+router.post("/ytcr", getPlaylistVideos);
 
 export default router;

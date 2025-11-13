@@ -120,6 +120,7 @@ const StudyGround = () => {
     setActiveVideo(lesson);
   };
 
+
   // ─── Mark Lesson as Completed ────────────────────────────────
   const markLessonComplete = async (lesson: any) => {
     if (!courseId || !lesson) return;
@@ -233,9 +234,9 @@ const StudyGround = () => {
     );
 
   return (
-    <div className="p-6 lg:p-10 bg-background">
+    <div className="min-h-screen bg-white text-black p-6 lg:p-10">
       {/* ─── Top Section ───────────────────────────── */}
-      <div className="flex flex-col gap-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6 border-b border-gray-200 pb-4">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -246,35 +247,36 @@ const StudyGround = () => {
             Back to Courses
           </Button>
         </div>
-        <h1 className="text-3xl font-bold">{course.title}</h1>
-        <p className="text-muted-foreground">{course.description}</p>
+        <h1 className="text-3xl font-bold text-black">{course.title}</h1>
+        <p className="text-gray-700">{course.description}</p>
 
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
           <span className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4" /> {course.category}
+            <BookOpen className="w-4 h-4 text-black" /> {course.category}
           </span>
           <span className="flex items-center gap-2">
-            <Clock className="w-4 h-4" /> {course.duration} hrs
+            <Clock className="w-4 h-4 text-black" /> {course.duration} hrs
           </span>
-          <span className="font-medium">{course.level}</span>
+          <span className="text-black font-medium">{course.level}</span>
         </div>
 
         <div className="mt-3">
           <Progress value={course.userProgress?.progress || 0} className="h-2" />
-          <div className="flex justify-between text-xs mt-1">
+          <div className="flex justify-between text-xs mt-1 text-gray-600">
             <span>Your Progress</span>
-            <span className="font-medium text-primary">
+            <span className="font-medium text-black">
               {course.userProgress?.progress || 0}%
             </span>
           </div>
         </div>
       </div>
 
-      {/* ─── Video + Sidebar Layout ───────────────────── */}
+      {/* ─── Course Layout: Video + Sidebar ───────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
-        {/* Video Player + Transcript */}
+        {/* Video + Transcript Section */}
         <div className="space-y-6">
-          <Card className="border-none shadow-lg">
+          {/* Video Player */}
+          <Card className="border border-gray-200 shadow-lg bg-white">
             <CardContent className="p-0">
               {activeVideo ? (
                 <div className="space-y-4">
@@ -296,13 +298,13 @@ const StudyGround = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className="text-sm text-gray-600 mt-2">
                       Duration: {activeVideo.duration || 0} minutes
                     </p>
                     {!isLessonCompleted(activeVideo) && (
                       <Button
                         onClick={() => markLessonComplete(activeVideo)}
-                        className="mt-4 glow-primary"
+                        className="mt-4 bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         Mark as Completed
@@ -311,7 +313,7 @@ const StudyGround = () => {
                   </div>
                 </div>
               ) : (
-                <div className="h-[450px] flex justify-center items-center text-muted-foreground">
+                <div className="h-[450px] flex justify-center items-center text-gray-600">
                   Select a lesson to begin
                 </div>
               )}
@@ -320,51 +322,51 @@ const StudyGround = () => {
 
           {/* Transcript Section */}
           {activeVideo && (
-            <Card className="border border-primary/20">
+            <Card className="border border-gray-200 bg-white shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-primary">
+                <CardTitle className="text-lg font-semibold text-black">
                   Transcript
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm leading-relaxed text-muted-foreground max-h-[300px] overflow-y-auto whitespace-pre-line">
+                <div className="text-sm leading-relaxed text-gray-700 max-h-[300px] overflow-y-auto whitespace-pre-line scrollbar-thin">
                   {transcript}
-                </p>
+                </div>
               </CardContent>
             </Card>
           )}
         </div>
 
-        {/* Sidebar - Modules and Lessons */}
-        <div className="space-y-4">
+        {/* ─── Sidebar (Scrollable Modules List) ───────────────────────────── */}
+        <div className="lg:h-[calc(100vh-180px)] overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
           {course.modules?.map((mod: any, modIndex: number) => (
             <motion.div
               key={modIndex}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: modIndex * 0.1 }}
+              transition={{ duration: 0.3, delay: modIndex * 0.05 }}
             >
-              <Card className="border border-primary/10 hover:border-primary/30 transition-all shadow-sm">
+              <Card className="border border-gray-200 bg-white hover:border-black/30 transition-all duration-200 shadow-sm">
                 <CardHeader
-                  className="cursor-pointer flex flex-row justify-between items-center"
+                  className="cursor-pointer flex flex-row justify-between items-center p-4"
                   onClick={() =>
                     setExpandedModule(
                       expandedModule === modIndex ? null : modIndex
                     )
                   }
                 >
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2 text-black">
                     {expandedModule === modIndex ? (
-                      <ChevronDown className="w-4 h-4" />
+                      <ChevronDown className="w-4 h-4 text-black" />
                     ) : (
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-4 h-4 text-gray-600" />
                     )}
                     {mod.title}
                   </CardTitle>
                 </CardHeader>
 
                 {expandedModule === modIndex && (
-                  <CardContent className="space-y-2">
+                  <CardContent className="space-y-2 pt-2">
                     {mod.lessons?.map((lesson: any, index: number) => {
                       const isCompleted = isLessonCompleted(lesson);
                       const isActive = activeVideo?.videoUrl === lesson.videoUrl;
@@ -373,20 +375,22 @@ const StudyGround = () => {
                         <Button
                           key={index}
                           variant={isActive ? 'default' : 'outline'}
-                          className={`w-full justify-between ${
-                            isCompleted ? 'border-success/50' : ''
-                          }`}
+                          className={`w-full justify-between text-left text-sm ${
+                            isActive
+                              ? "bg-black hover:bg-gray-800 text-white"
+                              : "bg-white hover:bg-gray-50 text-black border border-gray-200"
+                          } ${isCompleted ? 'border-green-500' : ''}`}
                           onClick={() => handleLessonSelect(lesson)}
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 truncate">
                             {isCompleted ? (
                               <CheckCircle2 className="w-4 h-4 text-success" />
                             ) : (
                               <Play className="w-4 h-4" />
                             )}
-                            <span>{lesson.title}</span>
+                            <span className="truncate">{lesson.title}</span>
                           </div>
-                          <span className="text-muted-foreground text-xs">
+                          <span className="text-gray-600 text-xs">
                             {lesson.duration || 0} mins
                           </span>
                         </Button>
@@ -412,9 +416,9 @@ const StudyGround = () => {
 
       {/* ─── Completion Banner ───────────────────────────── */}
       {course.userProgress?.completed && (
-        <div className="text-center mt-8 p-6 rounded-xl bg-success/10 border border-success/20">
-          <CheckCircle2 className="w-10 h-10 text-success mx-auto mb-2" />
-          <p className="text-primary font-semibold text-lg">
+        <div className="text-center mt-10 p-6 bg-green-50 rounded-xl border border-green-200">
+          <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto mb-2" />
+          <p className="text-green-700 font-semibold text-lg">
             🎉 Congratulations! You've completed this course!
           </p>
         </div>

@@ -33,7 +33,12 @@ const Signup = () => {
         navigate('/student');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Email already in use');
+      console.error('Signup error:', err);
+      // Extract error message from response
+      const errorMessage = err.response?.data?.message || 
+                          err.message || 
+                          'Failed to create account. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

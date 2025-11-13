@@ -3,6 +3,7 @@
 // const mongoose = require('mongoose');
 // const cookieParser = require('cookie-parser');
 import dotenv from 'dotenv';
+dotenv.config();
 import fetch from 'node-fetch'
 import express from 'express';
 import cors from 'cors';
@@ -11,7 +12,6 @@ import cookieParser from 'cookie-parser';
 import { YoutubeTranscript } from "youtube-transcript";
 import axios from 'axios'
 // require('dotenv').config();
-dotenv.config();
 
 // const authRoutes = require('./routes/authRoutes.js').default || require('./routes/authRoutes.js');
 import authRoutes from './routes/authRoutes.js';
@@ -20,9 +20,18 @@ import calendarRouter from './routes/CalendarRoutes.js';
 import QuizRouter from './routes/QuizRouter.js';
 import adminAuthRoutes from './routes/adminAuthRoutes.js';
 import assignmentRouter from './routes/AssignmentRouter.js';
+import BattleRouter from './routes/BattleRoutes.js';
+import StoreRouter from './routes/storeRoutes.js';
+import RoadMapRouter from './routes/RoadMapRoutes.js';
 // import aiRoutes from './routes/AiRoutes.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const DEFAULT_JWT_SECRET = 'novalearn_dev_secret_key';
+if (!process.env.JWT_SECRET) {
+  console.warn('⚠️  JWT_SECRET not set. Using fallback development secret. Please set JWT_SECRET in your environment for production.');
+  process.env.JWT_SECRET = DEFAULT_JWT_SECRET;
+}
 
 app.use(cors({ origin: true,
      credentials: true,
@@ -36,53 +45,18 @@ mongoose.connect('mongodb://127.0.0.1:27017/learn_novar', {
     useUnifiedTopology: true,
 });
 
+app.use("/api/battle",BattleRouter)
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/quiz', QuizRouter);
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/assignments', assignmentRouter);
+app.use("/api/store",StoreRouter)
+app.use("/api/roadmap",RoadMapRouter)
 
 app.post("/trans", async (req, res) => {
-    try {
-        const { videoUrl } = req.body;
-        if (!videoUrl)
-            return res.status(400).json({ message: "Video URL is required" });
-
-        // Extract Video ID
-        const match = videoUrl.match(
-            /(?:youtube\.com\/.*v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-        );
-        const videoId = match ? match[1] : null;
-        if (!videoId)
-            return res.status(400).json({ message: "Invalid YouTube URL" });
-
-        console.log(`🎥 Fetching transcript for video: ${videoId}`);
-
-        // Fetch transcript using youtube-transcript
-        const transcriptArray = await YoutubeTranscript.fetchTranscript(videoId);
-
-        if (!transcriptArray || transcriptArray.length === 0)
-            return res.status(404).json({ message: "No transcript found." });
-
-        // Combine transcript into one paragraph
-        const transcriptText = transcriptArray
-            .map((t) => t.text)
-            .join(" ")
-            .replace(/\s+/g, " ")
-            .trim();
-
-        res.json({
-            source: "youtube-transcript",
-            transcript: transcriptText,
-        });
-    } catch (error) {
-        console.error("❌ Transcript Fetch Error:", error.message);
-        res.status(500).json({
-            message: "Failed to fetch transcript",
-            error: error.message,
-        });
-    }
+  res.send({})
 });
 
 const db = mongoose.connection;

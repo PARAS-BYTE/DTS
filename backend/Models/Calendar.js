@@ -7,7 +7,6 @@ const taskSchema = new Schema({
   taskId: {
     type: String,
     required: true,
-    unique: true,
     default: () => new mongoose.Types.ObjectId().toString()
   },
   title: {
@@ -601,7 +600,36 @@ class CalendarClass {
   }
 }
 
+// Pre-save hook to ensure all tasks have taskId
+calendarSchema.pre('save', function(next) {
+  if (this.tasks && Array.isArray(this.tasks)) {
+    this.tasks.forEach((task) => {
+      if (!task.taskId) {
+        task.taskId = new mongoose.Types.ObjectId().toString();
+      }
+    });
+  }
+  next();
+});
+
 calendarSchema.loadClass(CalendarClass);
 
 const Calendar = mongoose.model("Calendar", calendarSchema);
+
+// Drop the problematic unique index if it exists (run once on connection)
+// This is done asynchronously to avoid blocking
+if (mongoose.connection.readyState === 1) {
+  // Already connected, drop index now
+  Calendar.collection.dropIndex('tasks.taskId_1').catch(() => {
+    // Index doesn't exist, that's fine
+  });
+} else {
+  // Wait for connection
+  mongoose.connection.once('open', () => {
+    Calendar.collection.dropIndex('tasks.taskId_1').catch(() => {
+      // Index doesn't exist, that's fine
+    });
+  });
+}
+
 export default Calendar;

@@ -39,6 +39,16 @@ import ChatBot from "./pages/student/ChatBot";
 import AdminSignup from "./pages/admin/AdminSignup";
 import DailyTask from "./pages/student/DailyTask";
 import Assignments from "./pages/student/Assignments";
+import BattleLive from "./pages/student/BattleLive";
+import Summary from "./pages/student/Summary";
+import CreateCourse from "./pages/student/CreateCourse";
+import AutoGenerateCourse from "./pages/student/AutoCourseGeneration";
+import PlaylistExtractor from "./pages/student/PlaylistExtracter";
+import Store from "./pages/student/Store";
+import BattleShow from "./pages/student/BattleShow";
+import CreateRoadmap from "./pages/student/RoadMap";
+import RoadMapDisplay from "./pages/student/RoadMapDisplay";
+import RoadMapInt from "./pages/student/RoadMapInt";
 
 // ✅ Create a context for the stopwatch
 interface StopwatchContextType {
@@ -249,7 +259,89 @@ const App = () => (
             <Route
               path="/student/ground"
               element={
-                <StudyGroud />
+                <StudentLayout>
+                  <StudyGroud />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/generatecourse"
+              element={
+                <StudentLayout>
+                  <AutoGenerateCourse />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/store"
+              element={
+                <StudentLayout>
+                  <Store />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/viaplaylist"
+              element={
+                <StudentLayout>
+                  <PlaylistExtractor />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/createroadmap"
+              element={
+                <StudentLayout>
+                  <CreateRoadmap />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/viewroadmap"
+              element={
+                <StudentLayout>
+                  <RoadMapDisplay />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/roadmap"
+              element={
+                <StudentLayout>
+                  <RoadMapInt />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/battleanalysis"
+              element={
+                <StudentLayout>
+                  <BattleShow />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/battleground"
+              element={
+                <StudentLayout>
+                  <BattleLive />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/summary"
+              element={
+                <StudentLayout>
+                  <Summary />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/createcourse"
+              element={
+                <StudentLayout>
+                  <CreateCourse/>
+                </StudentLayout>
               }
             />
             <Route

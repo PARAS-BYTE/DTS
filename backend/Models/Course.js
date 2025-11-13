@@ -11,7 +11,7 @@ const lessonSchema = new Schema({
 });
 
 const moduleSchema = new Schema({
-  title: { type: String, required: true },
+  title: { type: String, },
   description: String,
   lessons: [lessonSchema],
   order: { type: Number, default: 0 },
@@ -22,16 +22,15 @@ const courseSchema = new Schema(
     // ─── Basic Info ─────────────────────────────
     title: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     description: {
       type: String,
-      required: true,
+      // required: true,
     },
     category: {
       type: String,
-      enum: ["Programming", "AI/ML", "Web Development", "Data Science", "Design", "Other"],
       default: "Other",
     },
     thumbnail: {
@@ -77,7 +76,7 @@ const courseSchema = new Schema(
     instructor: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      // required: true,
     },
 
     // ─── Course Structure ───────────────────────
