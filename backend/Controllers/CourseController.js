@@ -33,7 +33,7 @@ const resolveVideoUrl = (videoUrl) =>
 export const getAllCourses = asyncHandler(async (req, res) => {
     try {
         const { category, level, search } = req.query;
-        const query = {};
+        const query = { published: { $ne: false } }; // Only get published courses
 
         if (category) query.category = category;
         if (level) query.level = level;
@@ -45,27 +45,25 @@ export const getAllCourses = asyncHandler(async (req, res) => {
             .select("title description category level thumbnail averageRating duration instructor price link instructorName language requirements whatYouWillLearn published")
             .populate("instructor", "username email");
 
-        // Only return published courses for public access
-        const publishedCourses = courses
-            .filter(course => course.published !== false)
-            .map(course => ({
-                _id: course._id,
-                title: course.title,
-                description: course.description,
-                category: course.category,
-                level: course.level,
-                thumbnail: resolveThumbnail(course.thumbnail),
-                averageRating: course.averageRating,
-                duration: course.duration,
-                instructor: course.instructor,
-                instructorName: course.instructorName,
-                language: course.language,
-                price: course.price,
-                link: course.link,
-                requirements: course.requirements,
-                whatYouWillLearn: course.whatYouWillLearn,
-                published: course.published !== false,
-            }));
+        // Format courses for response
+        const publishedCourses = courses.map(course => ({
+            _id: course._id,
+            title: course.title,
+            description: course.description,
+            category: course.category,
+            level: course.level,
+            thumbnail: resolveThumbnail(course.thumbnail),
+            averageRating: course.averageRating,
+            duration: course.duration,
+            instructor: course.instructor,
+            instructorName: course.instructorName,
+            language: course.language,
+            price: course.price,
+            link: course.link,
+            requirements: course.requirements,
+            whatYouWillLearn: course.whatYouWillLearn,
+            published: course.published !== false,
+        }));
         
         res.status(200).json(publishedCourses);
     } catch (error) {
@@ -410,7 +408,7 @@ export const enrollInCourse = asyncHandler(async (req, res) => {
 
 
 //
-// ─── GET ENROLLED COURSES OF A STUDENT ─────────────────────────────
+// ─── GET ENROLLED COURSES AND CREATED COURSES OF A STUDENT ─────────────────────────────
 // @route   GET /api/courses/my
 // @access  Private (Student)
 //
@@ -443,23 +441,213 @@ export const getMyCourses = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // ─── 3. Build Course Response ───────────────────────────────────────────
-        const courses = user.enrolledCourses.map((ec) => ({
+        // ─── 3. Get Enrolled Courses ───────────────────────────────────────────
+        const enrolledCourses = user.enrolledCourses.map((ec) => ({
             _id: ec.courseId?._id,
             title: ec.courseId?.title,
             description: ec.courseId?.description,
             progress: ec.progress || 0,
             completed: ec.completed || false,
             thumbnail: resolveThumbnail(ec.courseId?.thumbnail),
+            isCreatedByMe: false, // Mark as enrolled course
         }));
-        // console.log(`Sending Data`, courses)
-        // ─── 4. Respond ────────────────────────────────────────────────────────
-        res.status(200).json(courses);
+
+        // ─── 4. Get Courses Created by User ─────────────────────────────────────
+        const createdCourses = await Course.find({ instructor: user._id })
+            .select("title description thumbnail duration modules")
+            .lean();
+
+        const formattedCreatedCourses = createdCourses.map((course) => ({
+            _id: course._id,
+            title: course.title,
+            description: course.description,
+            progress: 0, // User-created courses start at 0% progress
+            completed: false,
+            thumbnail: resolveThumbnail(course.thumbnail),
+            isCreatedByMe: true, // Mark as created by user
+        }));
+
+        // ─── 5. Combine and Remove Duplicates ───────────────────────────────────
+        // Use a Map to avoid duplicates (in case user enrolled in their own course)
+        const coursesMap = new Map();
+        
+        // Add enrolled courses first
+        enrolledCourses.forEach(course => {
+            if (course._id) {
+                coursesMap.set(course._id.toString(), course);
+            }
+        });
+
+        // Add created courses (will override if user also enrolled in their own course)
+        formattedCreatedCourses.forEach(course => {
+            if (course._id) {
+                coursesMap.set(course._id.toString(), course);
+            }
+        });
+
+        // ─── 6. Convert Map to Array and Respond ────────────────────────────────
+        const allCourses = Array.from(coursesMap.values());
+        res.status(200).json(allCourses);
     } catch (error) {
         console.error("My Courses Error:", error.message);
         res
             .status(500)
             .json({ message: "Server error while fetching enrolled courses" });
+    }
+});
+
+//
+// ─── GET MY CREATED COURSES (ADMIN OR USER) ─────────────────────────────
+// @route   GET /api/courses/my-created (Admin) or /api/courses/my-created-user (User)
+// @access  Private (Admin or User)
+//
+export const getMyCreatedCourses = asyncHandler(async (req, res) => {
+    try {
+        let instructorId = null;
+
+        // Check if admin is making the request (req.admin is set by protectAdmin middleware)
+        if (req.admin) {
+            instructorId = req.admin._id;
+        } 
+        // Check if user is making the request
+        else {
+            let token;
+            if (req.cookies && req.cookies.jwt) {
+                token = req.cookies.jwt;
+            } else if (
+                req.headers.authorization &&
+                req.headers.authorization.startsWith("Bearer ")
+            ) {
+                token = req.headers.authorization.split(" ")[1];
+            }
+
+            if (!token) {
+                return res.status(401).json({ message: "Not authorized, no token" });
+            }
+
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = await User.findById(decoded.userId);
+            
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            
+            instructorId = user._id;
+        }
+
+        if (!instructorId) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+
+        // Fetch courses created by this instructor
+        const courses = await Course.find({ instructor: instructorId })
+            .select("title description category level thumbnail averageRating duration instructor price link instructorName language requirements whatYouWillLearn published enrolledStudents")
+            .populate("instructor", "username email fullName");
+
+        const formattedCourses = courses.map(course => ({
+            _id: course._id,
+            title: course.title,
+            description: course.description,
+            category: course.category,
+            level: course.level,
+            thumbnail: resolveThumbnail(course.thumbnail),
+            averageRating: course.averageRating,
+            duration: course.duration,
+            instructor: course.instructor,
+            instructorName: course.instructorName,
+            language: course.language,
+            price: course.price,
+            link: course.link,
+            requirements: course.requirements,
+            whatYouWillLearn: course.whatYouWillLearn,
+            published: course.published !== false,
+            enrolledStudents: course.enrolledStudents || [],
+        }));
+
+        res.status(200).json(formattedCourses);
+    } catch (error) {
+        console.error("Get My Created Courses Error:", error.message);
+        res.status(500).json({ message: "Server error while fetching created courses" });
+    }
+});
+
+//
+// ─── CREATE COURSE (USER) ─────────────────────────────────────────
+// @route   POST /api/courses/user
+// @access  Private (User)
+//
+export const createUserCourse = asyncHandler(async (req, res) => {
+    try {
+        // Extract JWT
+        let token;
+        if (req.cookies && req.cookies.jwt) {
+            token = req.cookies.jwt;
+        } else if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith("Bearer ")
+        ) {
+            token = req.headers.authorization.split(" ")[1];
+        }
+
+        if (!token) {
+            return res.status(401).json({ message: "Not authorized, no token" });
+        }
+
+        // Verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const { 
+            title, 
+            description, 
+            category, 
+            level, 
+            duration, 
+            thumbnail,
+            price,
+            link,
+            instructorName,
+            language,
+            requirements,
+            whatYouWillLearn,
+            modules
+        } = req.body;
+
+        if (!title || !description) {
+            return res.status(400).json({ message: "Title and description are required" });
+        }
+
+        // Create course with user as instructor
+        const course = await Course.create({
+            title,
+            description,
+            category: category || "Other",
+            level: level || "Beginner",
+            duration: duration || 0,
+            thumbnail: thumbnail || "",
+            price: price || 0,
+            link: link || "",
+            instructorName: instructorName || user.name || user.username,
+            language: language || "English",
+            requirements: requirements || [],
+            whatYouWillLearn: whatYouWillLearn || [],
+            modules: modules || [],
+            instructor: user._id, // Store user ID as instructor
+            published: false, // User-created courses are private by default
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Course created successfully",
+            course
+        });
+    } catch (error) {
+        console.error("Create User Course Error:", error.message);
+        res.status(500).json({ message: "Server error while creating course", error: error.message });
     }
 });
 

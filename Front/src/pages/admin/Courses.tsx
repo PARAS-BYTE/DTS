@@ -74,7 +74,8 @@ const AdminCourses = () => {
     try {
       setLoading(true);
       const token = getAdminToken();
-      const { data } = await axios.get('http://localhost:5000/api/courses', {
+      // Fetch only courses created by this admin
+      const { data } = await axios.get('http://localhost:5000/api/courses/my-created', {
         withCredentials: true,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });

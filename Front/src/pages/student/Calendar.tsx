@@ -15,7 +15,8 @@ import {
   TrendingUp,
   Lock,
   RefreshCw,
-  Settings
+  Settings,
+  Plus
 } from "lucide-react";
 import {
   Card,
@@ -26,6 +27,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 
 // Types
@@ -232,9 +252,13 @@ const TaskItem = ({
           }`}>
             {task.title}
           </h4>
-          {task.aiGenerated && (
+          {task.aiGenerated ? (
             <Badge variant="outline" className="text-xs bg-purple-500/20 text-purple-400 border-purple-500/20">
               AI
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-400 border-blue-500/20">
+              Custom
             </Badge>
           )}
           {task.status === "completed" && (
@@ -393,6 +417,18 @@ const Calendar = () => {
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [taskForm, setTaskForm] = useState({
+    title: "",
+    description: "",
+    date: new Date(),
+    type: "study",
+    category: "General",
+    priority: "medium",
+    estimatedDuration: 30,
+    difficulty: "beginner",
+  });
 
   const today = new Date();
 
@@ -510,7 +546,8 @@ const Calendar = () => {
       );
       
       await fetchCalendarData();
-      toast.success(res.data.message);
+      const xpGained = res.data.xpGained || 0;
+      toast.success(`${res.data.message} +${xpGained} XP earned! 🎉`);
     } catch (err: any) {
       console.error("Complete task error:", err);
       toast.error(err.response?.data?.message || "Failed to complete task");
@@ -535,6 +572,44 @@ const Calendar = () => {
       toast.error(err.response?.data?.message || "Failed to regenerate task");
     } finally {
       setRegenerating(false);
+    }
+  };
+
+  const handleCreateTask = async () => {
+    if (!taskForm.title.trim() || !taskForm.description.trim()) {
+      toast.error("Please fill in title and description");
+      return;
+    }
+
+    try {
+      setCreating(true);
+      const res = await axios.post(
+        "http://localhost:5000/api/calendar/create-task",
+        {
+          ...taskForm,
+          date: taskForm.date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        },
+        { withCredentials: true }
+      );
+      
+      await fetchCalendarData();
+      toast.success(res.data.message || "Custom task created successfully! 🎉");
+      setIsCreateDialogOpen(false);
+      setTaskForm({
+        title: "",
+        description: "",
+        date: new Date(),
+        type: "study",
+        category: "General",
+        priority: "medium",
+        estimatedDuration: 30,
+        difficulty: "beginner",
+      });
+    } catch (err: any) {
+      console.error("Create task error:", err);
+      toast.error(err.response?.data?.message || "Failed to create task");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -625,9 +700,18 @@ const Calendar = () => {
             <CalendarDays className="w-7 h-7" /> Daily Learning
           </h1>
           <p className="text-gray-400">
-            Complete your AI-generated daily task to maintain your streak!
+            Complete your AI-generated daily task or create your own to maintain your streak!
           </p>
         </div>
+
+        {/* Create Task Button */}
+        <Button
+          onClick={() => setIsCreateDialogOpen(true)}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create Custom Task
+        </Button>
 
         {/* Streak & Stats */}
         <div className="flex gap-4">
@@ -844,6 +928,155 @@ const Calendar = () => {
           </Card>
         </div>
       </div>
+
+      {/* Create Task Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[#121214] border-gray-800 text-gray-200">
+          <DialogHeader>
+            <DialogTitle className="text-indigo-300">Create Custom Task</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Create your own task and earn XP when you complete it!
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-gray-300">Task Title *</Label>
+              <Input
+                id="title"
+                value={taskForm.title}
+                onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
+                placeholder="e.g., Review JavaScript fundamentals"
+                className="bg-[#1f1f22] border-gray-700 text-white"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-gray-300">Description *</Label>
+              <Textarea
+                id="description"
+                value={taskForm.description}
+                onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
+                placeholder="Describe what you want to accomplish..."
+                rows={4}
+                className="bg-[#1f1f22] border-gray-700 text-white"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date" className="text-gray-300">Date *</Label>
+                <Calendar
+                  mode="single"
+                  selected={taskForm.date}
+                  onSelect={(date) => date && setTaskForm({ ...taskForm, date })}
+                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  className="bg-[#1f1f22] border-gray-700 rounded-md"
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="type" className="text-gray-300">Task Type</Label>
+                  <Select
+                    value={taskForm.type}
+                    onValueChange={(value) => setTaskForm({ ...taskForm, type: value })}
+                  >
+                    <SelectTrigger className="bg-[#1f1f22] border-gray-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1f1f22] border-gray-700">
+                      <SelectItem value="study">Study</SelectItem>
+                      <SelectItem value="quiz">Quiz</SelectItem>
+                      <SelectItem value="reading">Reading</SelectItem>
+                      <SelectItem value="practice">Practice</SelectItem>
+                      <SelectItem value="assignment">Assignment</SelectItem>
+                      <SelectItem value="review">Review</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="difficulty" className="text-gray-300">Difficulty</Label>
+                  <Select
+                    value={taskForm.difficulty}
+                    onValueChange={(value) => setTaskForm({ ...taskForm, difficulty: value })}
+                  >
+                    <SelectTrigger className="bg-[#1f1f22] border-gray-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1f1f22] border-gray-700">
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="priority" className="text-gray-300">Priority</Label>
+                  <Select
+                    value={taskForm.priority}
+                    onValueChange={(value) => setTaskForm({ ...taskForm, priority: value })}
+                  >
+                    <SelectTrigger className="bg-[#1f1f22] border-gray-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1f1f22] border-gray-700">
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="duration" className="text-gray-300">Duration (minutes)</Label>
+                  <Input
+                    id="duration"
+                    type="number"
+                    min="1"
+                    value={taskForm.estimatedDuration}
+                    onChange={(e) => setTaskForm({ ...taskForm, estimatedDuration: parseInt(e.target.value) || 30 })}
+                    className="bg-[#1f1f22] border-gray-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-gray-300">Category</Label>
+                  <Input
+                    id="category"
+                    value={taskForm.category}
+                    onChange={(e) => setTaskForm({ ...taskForm, category: e.target.value })}
+                    placeholder="e.g., Programming, Math"
+                    className="bg-[#1f1f22] border-gray-700 text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateDialogOpen(false)}
+              disabled={creating}
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateTask}
+              disabled={creating}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+              {creating ? "Creating..." : "Create Task"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

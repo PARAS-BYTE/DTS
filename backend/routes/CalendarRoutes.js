@@ -7,6 +7,7 @@ import {
   regenerateTodaysTask,
   updateTaskStatus,
   getTaskById,
+  createCustomTask,
 } from "../Controllers/CalendarController.js";
 
 const router = express.Router();
@@ -18,5 +19,6 @@ router.get("/summary", getCalendarSummary);
 router.patch("/preferences", updateStudyPreferences);
 router.post("/regenerate-today", regenerateTodaysTask);
 router.patch("/task/:taskId", updateTaskStatus);
+router.post("/create-task", createCustomTask);
 
 export default router;

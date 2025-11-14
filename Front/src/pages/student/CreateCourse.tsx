@@ -81,12 +81,13 @@ const CreateCourse = () => {
     console.log("🎓 Course Created:", course);
     // Api Calling and Navigating Twoards My Learning to the User
       try{
-        const some=  await axios.post("http://localhost:5000/api/courses",course,{withCredentials:true})
+        const some=  await axios.post("http://localhost:5000/api/courses/user",course,{withCredentials:true})
         console.log("The Data i am getting",some)
         navigate(-1)
-        toast({ description: "✅ Course logged in console!" });
+        toast({ description: "✅ Course created successfully!" });
       }catch(err){
-
+        console.error("Course creation error:", err);
+        toast({ description: "❌ Failed to create course. Please try again." });
       }
   };
 

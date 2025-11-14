@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import Calendar from "../Models/Calendar.js";
 import User from "../Models/User.js";
 
@@ -458,6 +459,100 @@ export const updateTaskStatus = asyncHandler(async (req, res) => {
       status: task.status,
       completedAt: task.completedAt
     }
+  });
+});
+
+// POST /api/calendar/create-task - Create a custom task
+export const createCustomTask = asyncHandler(async (req, res) => {
+  const user = await authenticateUser(req);
+  const { title, description, date, type, category, priority, estimatedDuration, difficulty } = req.body;
+  
+  // Validate required fields
+  if (!title || !description || !date) {
+    return res.status(400).json({ 
+      message: "Title, description, and date are required" 
+    });
+  }
+  
+  let calendar = await Calendar.findOne({ userId: user._id });
+  if (!calendar) {
+    // Create calendar if it doesn't exist
+    calendar = new Calendar({
+      userId: user._id,
+      studyPreferences: {
+        subjects: user.enrolledCourses?.map(course => course.title) || ["General Learning"],
+        difficultyLevel: user.level > 2 ? "advanced" : user.level > 1 ? "intermediate" : "beginner",
+        dailyStudyTime: 60,
+        learningGoals: ["Improve knowledge", "Build consistent study habits"],
+        preferredLearningStyles: ["visual", "practical"]
+      }
+    });
+    await calendar.save();
+  }
+  
+  // Validate task date (should not be in the past, except today)
+  const taskDate = new Date(date);
+  taskDate.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  if (taskDate < today) {
+    return res.status(400).json({ 
+      message: "Cannot create tasks for past dates" 
+    });
+  }
+  
+  // Check if task already exists for this date
+  const existingTask = calendar.tasks.find(t => {
+    const tDate = new Date(t.date);
+    tDate.setHours(0, 0, 0, 0);
+    return tDate.getTime() === taskDate.getTime();
+  });
+  
+  if (existingTask && !existingTask.aiGenerated) {
+    return res.status(400).json({ 
+      message: "A custom task already exists for this date" 
+    });
+  }
+  
+  // Create new custom task
+  const newTask = {
+    taskId: new mongoose.Types.ObjectId().toString(),
+    title: title.trim(),
+    description: description.trim(),
+    date: taskDate,
+    status: "pending",
+    type: calendar.validateTaskType(type || "study"),
+    category: category || "General",
+    priority: calendar.validatePriority(priority || "medium"),
+    estimatedDuration: estimatedDuration || 30,
+    difficulty: calendar.validateDifficulty(difficulty || "beginner"),
+    aiGenerated: false, // Mark as custom task
+    content: {
+      learningObjectives: [],
+      successCriteria: "Complete the task as described"
+    }
+  };
+  
+  // If there's an AI-generated task for this date, replace it
+  if (existingTask && existingTask.aiGenerated) {
+    const index = calendar.tasks.findIndex(t => {
+      const tDate = new Date(t.date);
+      tDate.setHours(0, 0, 0, 0);
+      return tDate.getTime() === taskDate.getTime();
+    });
+    if (index !== -1) {
+      calendar.tasks[index] = newTask;
+    }
+  } else {
+    calendar.tasks.push(newTask);
+  }
+  
+  await calendar.save();
+  
+  res.status(201).json({
+    message: "Custom task created successfully!",
+    task: newTask
   });
 });
 
