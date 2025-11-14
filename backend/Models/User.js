@@ -27,7 +27,11 @@ const userSchema = new Schema(
 
     // ─── Charts / History ────────────────────────
     last7DaysStudy: [{ day: String, hours: Number }],
-    xpHistory: [{ week: String, xp: Number }],
+    xpHistory: [{ 
+      date: { type: Date, default: Date.now },
+      reason: String,
+      amount: Number 
+    }],
 
     // ─── Calendar & Tasks ────────────────────────
     calendarData: [

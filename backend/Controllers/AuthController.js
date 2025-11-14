@@ -268,6 +268,7 @@ export const getStudentDashboard = asyncHandler(async (req, res) => {
       target.setHours(0, 0, 0, 0);
       target.setDate(today.getDate() - i);
 
+      // Calculate XP from calendar tasks
       const completedTasks = tasks.filter((task) => {
         if (task.status !== "completed") return false;
         const completionDate = task.completedAt || task.date;
@@ -278,7 +279,21 @@ export const getStudentDashboard = asyncHandler(async (req, res) => {
         (sum, task) => sum + (task.estimatedDuration || 30),
         0
       );
-      const xp = completedTasks.reduce((sum, task) => sum + taskXp(task), 0);
+      const taskXP = completedTasks.reduce((sum, task) => sum + taskXp(task), 0);
+
+      // Calculate XP from user.xpHistory (quizzes, lessons, assignments)
+      const historyXP = (user.xpHistory || []).reduce((sum, entry) => {
+        if (!entry.date) return sum;
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0, 0, 0, 0);
+        if (sameDay(entryDate, target)) {
+          return sum + (entry.amount || 0);
+        }
+        return sum;
+      }, 0);
+
+      // Total XP for the day (tasks + quizzes + lessons + assignments)
+      const totalXP = taskXP + historyXP;
 
       last7DaysStudy.push({
         day: dailyLabel(target),
@@ -287,7 +302,7 @@ export const getStudentDashboard = asyncHandler(async (req, res) => {
 
       xpHistory.push({
         day: dailyLabel(target),
-        xp,
+        xp: totalXP,
       });
     }
 

@@ -68,7 +68,7 @@ interface AppState {
 const mockUser: User = {
   id: '1',
   name: 'Alex Johnson',
-  email: 'alex@aimentor.com',
+  email: 'alex@learnnova.com',
   role: 'student',
   xp: 2450,
   level: 12,

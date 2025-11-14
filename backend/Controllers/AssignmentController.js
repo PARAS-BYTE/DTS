@@ -497,6 +497,24 @@ export const gradeAssignment = asyncHandler(async (req, res) => {
           feedback: feedback || "",
         });
       }
+      
+      // Award XP based on grade (percentage of max grade)
+      const maxGrade = assignment.totalMarks || 100;
+      const gradePercentage = (grade / maxGrade) * 100;
+      const xpGained = Math.round(gradePercentage * 0.5); // 0.5 XP per percentage point
+      
+      if (xpGained > 0) {
+        user.addXP(xpGained);
+        
+        // Add to XP history for dashboard charts
+        if (!user.xpHistory) user.xpHistory = [];
+        user.xpHistory.push({
+          date: new Date(),
+          reason: `Assignment: ${assignment.title}`,
+          amount: xpGained,
+        });
+      }
+      
       await user.save();
     }
 
@@ -686,6 +704,24 @@ Be fair but thorough. Award partial marks when appropriate. Provide constructive
             feedback: submission.feedback,
           });
         }
+        
+        // Award XP based on grade (percentage of max grade)
+        const maxGrade = assignment.totalMarks || 100;
+        const gradePercentage = (submission.grade / maxGrade) * 100;
+        const xpGained = Math.round(gradePercentage * 0.5); // 0.5 XP per percentage point
+        
+        if (xpGained > 0) {
+          user.addXP(xpGained);
+          
+          // Add to XP history for dashboard charts
+          if (!user.xpHistory) user.xpHistory = [];
+          user.xpHistory.push({
+            date: new Date(),
+            reason: `Assignment: ${assignment.title}`,
+            amount: xpGained,
+          });
+        }
+        
         await user.save();
       }
 

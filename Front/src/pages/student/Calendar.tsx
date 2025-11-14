@@ -80,14 +80,14 @@ const typeIcons = {
   review: RefreshCw  // Add this line
 };
 
-const typeColors = {
-  study: "text-blue-400",
-  quiz: "text-purple-400", 
-  reading: "text-green-400",
-  practice: "text-yellow-400",
-  assignment: "text-orange-400",
-  review: "text-pink-400"  // Add this line
-};
+  const typeColors = {
+    study: "text-blue-600",
+    quiz: "text-purple-600", 
+    reading: "text-green-600",
+    practice: "text-yellow-600",
+    assignment: "text-orange-600",
+    review: "text-pink-600"
+  };
 
 // Shape Cell Component
 const ShapeCell = ({ 
@@ -109,33 +109,33 @@ const ShapeCell = ({
 }) => {
   return (
     <motion.div
-      whileHover={{ scale: hasTask && !isFuture ? 1.1 : 1 }}
+      whileHover={{ scale: hasTask && !isFuture ? 1.05 : 1 }}
       onClick={hasTask && !isFuture ? onClick : undefined}
       className={`relative w-12 h-12 flex items-center justify-center ${color} rounded-lg text-sm font-semibold transition-all border-2 ${
-        isToday ? "border-indigo-400 shadow-lg shadow-indigo-500/20" :
+        isToday ? "border-black shadow-lg shadow-black/20" :
         isCompleted ? "border-green-500 shadow-lg shadow-green-500/20" :
-        "border-transparent"
-      } ${isFuture ? "cursor-not-allowed opacity-60" : hasTask ? "cursor-pointer hover:scale-110 hover:shadow-lg" : "cursor-default"}`}
+        "border-gray-200"
+      } ${isFuture ? "cursor-not-allowed opacity-60" : hasTask ? "cursor-pointer hover:scale-105 hover:shadow-md" : "cursor-default"}`}
     >
-      <span className={`${isToday ? "text-indigo-200" : "text-gray-200"}`}>
+      <span className={`${isToday ? "text-white" : isCompleted ? "text-white" : "text-black"}`}>
         {day}
       </span>
       
       {/* Completion checkmark */}
       {isCompleted && (
-        <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-[#121214]">
+        <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
           <CheckCircle2 className="w-3 h-3 text-white" />
         </div>
       )}
 
       {/* Today's indicator */}
       {isToday && !isCompleted && (
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-400 rounded-full border-2 border-[#121214] animate-pulse" />
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-black rounded-full border-2 border-white animate-pulse" />
       )}
 
       {/* Task indicator dot */}
       {hasTask && !isCompleted && !isToday && (
-        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-indigo-400 rounded-full" />
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black rounded-full" />
       )}
     </motion.div>
   );
@@ -205,10 +205,10 @@ const TaskItem = ({
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-start gap-3 p-4 rounded-lg border transition-all ${
         !isTaskAvailable() 
-          ? "bg-gray-800/30 border-gray-700/30 opacity-60 cursor-not-allowed"
+          ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
           : task.status === "completed"
-          ? "bg-green-500/10 border-green-500/20 cursor-default"
-          : "bg-gray-800/50 border-gray-700/50 hover:border-gray-600/50 hover:bg-gray-800/70 cursor-pointer"
+          ? "bg-green-50 border-green-200 cursor-default"
+          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-md cursor-pointer"
       }`}
       onClick={handleTaskClick}
     >
@@ -216,40 +216,40 @@ const TaskItem = ({
         task.status === "completed" 
           ? "bg-green-500 border-green-500" 
           : !isTaskAvailable()
-          ? "border-gray-500"
-          : "border-gray-500"
+          ? "border-gray-300"
+          : "border-gray-300"
       }`}>
         {task.status === "completed" && <CheckCircle2 className="w-3 h-3 text-white" />}
-        {!isTaskAvailable() && <Lock className="w-3 h-3 text-gray-500" />}
+        {!isTaskAvailable() && <Lock className="w-3 h-3 text-gray-400" />}
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-2">
           <TypeIcon className={`w-4 h-4 ${typeColors[task.type]}`} />
           <h4 className={`text-sm font-medium ${
-            task.status === "completed" ? "text-green-300" : 
-            !isTaskAvailable() ? "text-gray-500" : "text-gray-200"
+            task.status === "completed" ? "text-green-700" : 
+            !isTaskAvailable() ? "text-gray-500" : "text-black"
           }`}>
             {task.title}
           </h4>
           {task.aiGenerated && (
-            <Badge variant="outline" className="text-xs bg-purple-500/20 text-purple-400 border-purple-500/20">
+            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-600 border-purple-200">
               AI
             </Badge>
           )}
           {task.status === "completed" && (
-            <Badge variant="outline" className="text-xs bg-green-500/20 text-green-400 border-green-500/20">
+            <Badge variant="outline" className="text-xs bg-green-50 text-green-600 border-green-200">
               Done
             </Badge>
           )}
           {isTaskAvailable() && task.status !== "completed" && (
-            <Badge variant="outline" className="text-xs bg-indigo-500/20 text-indigo-400 border-indigo-500/20">
+            <Badge variant="outline" className="text-xs bg-black/5 text-black border-gray-200">
               Available
             </Badge>
           )}
         </div>
         <p className={`text-xs mb-2 ${
-          !isTaskAvailable() ? "text-gray-500" : "text-gray-400"
+          !isTaskAvailable() ? "text-gray-500" : "text-gray-600"
         }`}>
           {task.description}
         </p>
@@ -257,8 +257,8 @@ const TaskItem = ({
         {/* Learning Objectives */}
         {task.content?.learningObjectives && (
           <div className="mb-2">
-            <p className="text-xs text-gray-500 mb-1">Learning Objectives:</p>
-            <ul className="text-xs text-gray-400 list-disc list-inside">
+            <p className="text-xs text-gray-600 mb-1">Learning Objectives:</p>
+            <ul className="text-xs text-gray-600 list-disc list-inside">
               {task.content.learningObjectives.slice(0, 2).map((obj, index) => (
                 <li key={index}>{obj}</li>
               ))}
@@ -267,7 +267,7 @@ const TaskItem = ({
         )}
         
         <div className={`flex items-center gap-4 text-xs ${
-          !isTaskAvailable() ? "text-gray-500" : "text-gray-500"
+          !isTaskAvailable() ? "text-gray-500" : "text-gray-600"
         }`}>
           <span>{task.estimatedDuration}min</span>
           <span>•</span>
@@ -283,7 +283,7 @@ const TaskItem = ({
               <Button
                 size="sm"
                 onClick={handleComplete}
-                className="bg-indigo-600 hover:bg-indigo-700 text-xs"
+                className="bg-black hover:bg-gray-800 text-white text-xs shadow-lg shadow-black/20 hover:shadow-black/30"
               >
                 Mark Complete
               </Button>
@@ -291,7 +291,7 @@ const TaskItem = ({
                 size="sm"
                 variant="outline"
                 onClick={handleRegenerate}
-                className="text-xs border-gray-600 hover:bg-gray-700"
+                className="text-xs border-gray-300 hover:bg-gray-50 text-black"
               >
                 <RefreshCw className="w-3 h-3 mr-1" />
                 Regenerate
@@ -308,45 +308,45 @@ const TaskItem = ({
 const StudyPreferencesCard = ({ preferences }: { preferences: StudyPreferences }) => {
   const getDifficultyColor = (level: string) => {
     switch (level) {
-      case "beginner": return "text-green-400";
-      case "intermediate": return "text-yellow-400";
-      case "advanced": return "text-red-400";
-      default: return "text-gray-400";
+      case "beginner": return "text-green-600";
+      case "intermediate": return "text-yellow-600";
+      case "advanced": return "text-red-600";
+      default: return "text-gray-600";
     }
   };
 
   return (
-    <Card className="bg-[#121214] border-gray-800">
+    <Card className="bg-white border border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-400 text-sm">
+        <CardTitle className="flex items-center gap-2 text-black text-sm">
           <Settings className="w-4 h-4" /> Study Profile
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-sm">Difficulty Level</span>
-          <Badge variant="outline" className={`capitalize ${getDifficultyColor(preferences.difficultyLevel)}`}>
+          <span className="text-gray-700 text-sm">Difficulty Level</span>
+          <Badge variant="outline" className={`capitalize ${getDifficultyColor(preferences.difficultyLevel)} border-gray-200`}>
             {preferences.difficultyLevel}
           </Badge>
         </div>
         
         <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-sm">Daily Study Time</span>
-          <span className="text-gray-200 text-sm">
+          <span className="text-gray-700 text-sm">Daily Study Time</span>
+          <span className="text-black text-sm font-medium">
             {preferences.dailyStudyTime} min
           </span>
         </div>
         
         <div>
-          <span className="text-gray-400 text-sm">Subjects</span>
+          <span className="text-gray-700 text-sm">Subjects</span>
           <div className="flex flex-wrap gap-1 mt-1">
             {preferences.subjects.slice(0, 4).map((subject, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
+              <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-black border-gray-200">
                 {subject}
               </Badge>
             ))}
             {preferences.subjects.length > 4 && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-gray-100 text-black border-gray-200">
                 +{preferences.subjects.length - 4} more
               </Badge>
             )}
@@ -354,10 +354,10 @@ const StudyPreferencesCard = ({ preferences }: { preferences: StudyPreferences }
         </div>
         
         <div>
-          <span className="text-gray-400 text-sm">Learning Goals</span>
+          <span className="text-gray-700 text-sm">Learning Goals</span>
           <div className="flex flex-wrap gap-1 mt-1">
             {preferences.learningGoals.slice(0, 2).map((goal, index) => (
-              <Badge key={index} variant="outline" className="text-xs bg-blue-500/20 text-blue-400 border-blue-500/20">
+              <Badge key={index} variant="outline" className="text-xs bg-black/5 text-black border-gray-200">
                 {goal}
               </Badge>
             ))}
@@ -549,9 +549,9 @@ const Calendar = () => {
     const completed = dayTasks.some((t: Task) => t.status === "completed");
     const hasTask = dayTasks.length > 0;
 
-    if (completed) return "bg-green-500/80";
-    if (hasTask) return "bg-indigo-600/70";
-    return "bg-[#1f1f22]";
+    if (completed) return "bg-green-500";
+    if (hasTask) return "bg-black";
+    return "bg-gray-100";
   };
 
   const isToday = (date: Date) => {
@@ -607,57 +607,57 @@ const Calendar = () => {
 
   if (loading) {
     return (
-      <div className="p-8 bg-[#0b0b0d] min-h-screen text-gray-200 flex items-center justify-center">
+      <div className="p-8 bg-white min-h-screen text-black flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">AI is generating your daily task...</p>
+          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">AI is generating your daily task...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 bg-[#0b0b0d] min-h-screen text-gray-200 space-y-8">
+    <div className="p-8 bg-white min-h-screen text-black space-y-8">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
-          <h1 className="text-4xl font-bold flex items-center gap-2 text-indigo-300">
+          <h1 className="text-4xl font-bold flex items-center gap-2 text-black">
             <CalendarDays className="w-7 h-7" /> Daily Learning
           </h1>
-          <p className="text-gray-400">
+          <p className="text-gray-700">
             Complete your AI-generated daily task to maintain your streak!
           </p>
         </div>
 
         {/* Streak & Stats */}
         <div className="flex gap-4">
-          <Card className="bg-gradient-to-r from-indigo-900/50 to-indigo-600/40 border-indigo-700">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-indigo-200 text-sm">
-                <Flame className="w-4 h-4 text-orange-400" /> Current Streak
+              <CardTitle className="flex items-center gap-2 text-black text-sm">
+                <Flame className="w-4 h-4 text-orange-500" /> Current Streak
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-black">
                 {calendarData.streak.currentStreak} days
               </div>
-              <div className="text-xs text-gray-300">
+              <div className="text-xs text-gray-600">
                 Best: {calendarData.streak.longestStreak} days
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-900/50 to-green-600/40 border-green-700">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-green-200 text-sm">
-                <CheckCircle2 className="w-4 h-4" /> Completed
+              <CardTitle className="flex items-center gap-2 text-black text-sm">
+                <CheckCircle2 className="w-4 h-4 text-green-500" /> Completed
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-black">
                 {calendarData.statistics.totalTasksCompleted}
               </div>
-              <div className="text-xs text-gray-300">
+              <div className="text-xs text-gray-600">
                 Total tasks
               </div>
             </CardContent>
@@ -668,9 +668,9 @@ const Calendar = () => {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Calendar Section */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-[#121214] border-gray-800 shadow-lg">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-indigo-300 text-lg flex items-center gap-2">
+              <CardTitle className="text-black text-lg flex items-center gap-2">
                 <CalendarDays className="w-5 h-5" />{" "}
                 {new Date().toLocaleString("default", {
                   month: "long",
@@ -680,7 +680,7 @@ const Calendar = () => {
             </CardHeader>
             <CardContent>
               {/* Week Headers */}
-              <div className="grid grid-cols-7 text-center mb-4 text-gray-400 text-sm">
+              <div className="grid grid-cols-7 text-center mb-4 text-gray-700 text-sm font-medium">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                   <div key={d}>{d}</div>
                 ))}
@@ -712,16 +712,16 @@ const Calendar = () => {
               {/* Legend */}
               <div className="flex justify-center gap-6 mt-6 text-xs">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500/80 rounded"></div>
-                  <span className="text-gray-400">Completed</span>
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span className="text-gray-700">Completed</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-indigo-600/70 rounded"></div>
-                  <span className="text-gray-400">Pending</span>
+                  <div className="w-3 h-3 bg-black rounded"></div>
+                  <span className="text-gray-700">Pending</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-[#1f1f22] rounded"></div>
-                  <span className="text-gray-400">No Task</span>
+                  <div className="w-3 h-3 bg-gray-100 rounded border border-gray-200"></div>
+                  <span className="text-gray-700">No Task</span>
                 </div>
               </div>
             </CardContent>
@@ -731,11 +731,11 @@ const Calendar = () => {
         {/* Tasks Sidebar */}
         <div className="space-y-6">
           {/* Today's Task */}
-          <Card className="bg-[#121214] border-gray-800">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-indigo-400 text-sm">
+              <CardTitle className="flex items-center gap-2 text-black text-sm">
                 <Target className="w-4 h-4" /> Today's AI Task
-                <Badge variant="secondary" className="ml-2">
+                <Badge variant="secondary" className="ml-2 bg-gray-100 text-black border-gray-200">
                   {calendarData.todayTasks?.length || 0}/1
                 </Badge>
               </CardTitle>
@@ -743,10 +743,10 @@ const Calendar = () => {
             <CardContent className="space-y-4">
               {calendarData.todayTasks?.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CalendarDays className="w-6 h-6 text-indigo-400" />
+                  <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CalendarDays className="w-6 h-6 text-black" />
                   </div>
-                  <p className="text-gray-400 text-sm mb-4">
+                  <p className="text-gray-600 text-sm mb-4">
                     No task for today. Generating one now...
                   </p>
                   <Button
@@ -769,7 +769,7 @@ const Calendar = () => {
                       }
                     }}
                     disabled={regenerating}
-                    className="bg-indigo-600 hover:bg-indigo-700"
+                    className="bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30"
                   >
                     {regenerating ? (
                       <>
@@ -796,10 +796,10 @@ const Calendar = () => {
               )}
 
               {/* Daily Progress */}
-              <div className="pt-4 border-t border-gray-700/50">
+              <div className="pt-4 border-t border-gray-200">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-400">Daily Progress</span>
-                  <span className="text-indigo-300">
+                  <span className="text-gray-700">Daily Progress</span>
+                  <span className="text-black font-medium">
                     {calendarData.todayTasks?.some(t => t.status === "completed") ? "100%" : "0%"}
                   </span>
                 </div>
@@ -815,28 +815,28 @@ const Calendar = () => {
           <StudyPreferencesCard preferences={calendarData.studyPreferences} />
 
           {/* Statistics */}
-          <Card className="bg-[#121214] border-gray-800">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-green-400 text-sm">
+              <CardTitle className="flex items-center gap-2 text-black text-sm">
                 <TrendingUp className="w-4 h-4" /> Statistics
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400 text-sm">Completion Rate</span>
-                <span className="text-green-300 font-semibold">
+                <span className="text-gray-700 text-sm">Completion Rate</span>
+                <span className="text-green-600 font-semibold">
                   {calendarData.statistics.completionRate}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400 text-sm">Total Study Time</span>
-                <span className="text-gray-200">
+                <span className="text-gray-700 text-sm">Total Study Time</span>
+                <span className="text-black font-medium">
                   {Math.round(calendarData.statistics.totalStudyTime / 60)}h
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400 text-sm">Tasks Completed</span>
-                <span className="text-gray-200">
+                <span className="text-gray-700 text-sm">Tasks Completed</span>
+                <span className="text-black font-medium">
                   {calendarData.statistics.totalTasksCompleted}
                 </span>
               </div>

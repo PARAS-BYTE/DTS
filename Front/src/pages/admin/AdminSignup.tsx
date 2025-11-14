@@ -88,28 +88,43 @@ const AdminSignup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white overflow-hidden relative flex items-center justify-center p-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-black/5 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-black/3 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
-        <Card className="shadow-2xl border-white/20 bg-white/10 backdrop-blur-lg">
+        {/* Back Button */}
+        <Link to="/" className="absolute -top-16 left-0 flex items-center gap-2 text-gray-700 hover:text-black transition-colors">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Back to Home</span>
+        </Link>
+
+        <Card className="shadow-2xl border border-gray-200 bg-white">
           <CardHeader className="text-center space-y-4 pb-8">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg"
+              className="mx-auto w-16 h-16 bg-black/10 rounded-2xl flex items-center justify-center shadow-lg shadow-black/10"
             >
-              <Shield className="w-8 h-8 text-white" />
+              <Shield className="w-8 h-8 text-black" />
             </motion.div>
             <div>
-              <CardTitle className="text-2xl font-bold text-white mb-2">
+              <CardTitle className="text-2xl font-bold text-black mb-2">
                 Admin Registration
               </CardTitle>
-              <CardDescription className="text-blue-200 text-base">
+              <CardDescription className="text-gray-700 text-base">
                 Create administrator account
               </CardDescription>
             </div>
@@ -120,7 +135,7 @@ const AdminSignup = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full Name Field */}
               <div className="space-y-2">
-                <label className="text-blue-100 text-sm font-medium">Full Name</label>
+                <label className="text-gray-700 text-sm font-medium">Full Name</label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
                   <Input
@@ -130,14 +145,14 @@ const AdminSignup = () => {
                     value={formData.fullName}
                     onChange={handleChange}
                     required
-                    className="pl-10 h-12 text-white bg-white/5 border-white/20 placeholder:text-blue-200 focus:border-blue-400"
+                    className="pl-10 h-12 text-black bg-white border-gray-300 placeholder:text-gray-500 focus:border-black focus:ring-black/20"
                   />
                 </div>
               </div>
 
               {/* Username Field */}
               <div className="space-y-2">
-                <label className="text-blue-100 text-sm font-medium">Username</label>
+                <label className="text-gray-700 text-sm font-medium">Username</label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
                   <Input
@@ -147,14 +162,14 @@ const AdminSignup = () => {
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="pl-10 h-12 text-white bg-white/5 border-white/20 placeholder:text-blue-200 focus:border-blue-400"
+                    className="pl-10 h-12 text-black bg-white border-gray-300 placeholder:text-gray-500 focus:border-black focus:ring-black/20"
                   />
                 </div>
               </div>
 
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="text-blue-100 text-sm font-medium">Email Address</label>
+                <label className="text-gray-700 text-sm font-medium">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
                   <Input
@@ -164,14 +179,14 @@ const AdminSignup = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="pl-10 h-12 text-white bg-white/5 border-white/20 placeholder:text-blue-200 focus:border-blue-400"
+                    className="pl-10 h-12 text-black bg-white border-gray-300 placeholder:text-gray-500 focus:border-black focus:ring-black/20"
                   />
                 </div>
               </div>
 
               {/* Department Field */}
               <div className="space-y-2">
-                <label className="text-blue-100 text-sm font-medium">Department</label>
+                <label className="text-gray-700 text-sm font-medium">Department</label>
                 <div className="relative">
                   <Building className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
                   <Select 
@@ -194,7 +209,7 @@ const AdminSignup = () => {
 
               {/* Role Field */}
               <div className="space-y-2">
-                <label className="text-blue-100 text-sm font-medium">Role</label>
+                <label className="text-gray-700 text-sm font-medium">Role</label>
                 <Select 
                   value={formData.role} 
                   onValueChange={(value) => handleSelectChange('role', value)}
@@ -211,7 +226,7 @@ const AdminSignup = () => {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <label className="text-blue-100 text-sm font-medium">Password</label>
+                <label className="text-gray-700 text-sm font-medium">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
                   <Input
@@ -222,7 +237,7 @@ const AdminSignup = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="pl-10 pr-10 h-12 text-white bg-white/5 border-white/20 placeholder:text-blue-200 focus:border-blue-400"
+                    className="pl-10 pr-10 h-12 text-black bg-white border-gray-300 placeholder:text-gray-500 focus:border-black focus:ring-black/20"
                   />
                   <button
                     type="button"
@@ -232,7 +247,7 @@ const AdminSignup = () => {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="text-blue-300 text-xs">
+                <p className="text-gray-600 text-xs">
                   Must be at least 8 characters long
                 </p>
               </div>
@@ -242,7 +257,7 @@ const AdminSignup = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="p-3 text-sm text-green-300 bg-green-500/10 border border-green-500/30 rounded-lg"
+                  className="p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg"
                 >
                   {success}
                 </motion.div>
@@ -253,7 +268,7 @@ const AdminSignup = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="p-3 text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg"
+                  className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg"
                 >
                   {error}
                 </motion.div>
@@ -263,7 +278,7 @@ const AdminSignup = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-base shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-12 bg-black hover:bg-gray-800 text-white font-semibold text-base shadow-lg shadow-black/20 hover:shadow-black/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="flex items-center gap-2">
@@ -282,7 +297,7 @@ const AdminSignup = () => {
                 <div className="w-full border-t border-white/20" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-transparent text-blue-200">Already have an account?</span>
+                <span className="px-2 bg-white text-gray-600">Already have an account?</span>
               </div>
             </div>
 
@@ -290,7 +305,7 @@ const AdminSignup = () => {
             <div className="text-center">
               <Link
                 to="/admin/login"
-                className="text-blue-300 hover:text-white font-medium text-sm transition-colors inline-flex items-center gap-1"
+                className="text-gray-700 hover:text-black font-medium text-sm transition-colors inline-flex items-center gap-1"
               >
                 Sign in to admin portal
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,23 +323,23 @@ const AdminSignup = () => {
           transition={{ delay: 0.5 }}
           className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center"
         >
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-white/10">
-            <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Shield className="w-4 h-4 text-blue-300" />
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-8 h-8 bg-black/10 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <Shield className="w-4 h-4 text-black" />
             </div>
-            <p className="text-sm text-blue-200 font-medium">Role-Based Access</p>
+            <p className="text-sm text-gray-700 font-medium">Role-Based Access</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-white/10">
-            <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Lock className="w-4 h-4 text-green-300" />
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-8 h-8 bg-black/10 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <Lock className="w-4 h-4 text-black" />
             </div>
-            <p className="text-sm text-blue-200 font-medium">Secure Authentication</p>
+            <p className="text-sm text-gray-700 font-medium">Secure Authentication</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-white/10">
-            <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <BookOpen className="w-4 h-4 text-purple-300" />
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-8 h-8 bg-black/10 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <BookOpen className="w-4 h-4 text-black" />
             </div>
-            <p className="text-sm text-blue-200 font-medium">Course Management</p>
+            <p className="text-sm text-gray-700 font-medium">Course Management</p>
           </div>
         </motion.div>
 
@@ -337,7 +352,7 @@ const AdminSignup = () => {
         >
           <Link
             to="/"
-            className="text-blue-300 hover:text-white text-sm transition-colors inline-flex items-center gap-1"
+            className="text-gray-700 hover:text-black text-sm transition-colors inline-flex items-center gap-1"
           >
             ← Back to main site
           </Link>

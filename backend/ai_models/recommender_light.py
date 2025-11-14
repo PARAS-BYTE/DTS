@@ -7,7 +7,7 @@ import sys
 
 # 🔹 Connect to MongoDB
 try:
-    client = MongoClient("mongodb://localhost:27017/")
+    client = MongoClient("mongodb://localhost:27017/learn_novar")
     db = client["learnnova"]
 except Exception as e:
     print(json.dumps({"error": f"MongoDB connection failed: {e}"}))
@@ -77,5 +77,7 @@ if __name__ == "__main__":
         print(json.dumps({"error": "Username missing"}))
         sys.exit(1)
 
-    username = sys.argv[1]
-    print(json.dumps(recommend_for_user(username), indent=2))
+    username = sys.argv[i]
+    username = username.strip()
+    username=username.lower()
+    print(json.dumps(recommend_for_user(username), indect=2))

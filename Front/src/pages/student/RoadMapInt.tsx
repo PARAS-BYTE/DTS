@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+import BackButton from "@/components/BackButton";
 
 export default function RoadMapInt() {
   const [topic, setTopic] = useState("");
@@ -47,16 +48,19 @@ export default function RoadMapInt() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-10">
+    <div className="min-h-screen bg-white p-10">
       <div className="max-w-5xl mx-auto space-y-8">
+        <div className="mb-6">
+          <BackButton to="/student/courses" label="Back to Courses" />
+        </div>
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Roadmaps</h1>
+          <h1 className="text-3xl font-bold text-black">Roadmaps</h1>
 
           <div className="flex gap-4">
             {/* Create Roadmap Button */}
             <Link
               to="/student/createroadmap"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-md text-white"
+              className="px-4 py-2 bg-black hover:bg-gray-800 rounded-md text-white shadow-lg shadow-black/20 hover:shadow-black/30 transition-all"
             >
               Create Roadmap
             </Link>
@@ -64,22 +68,22 @@ export default function RoadMapInt() {
             {/* AI Create Button */}
             <Dialog>
               <DialogTrigger>
-                <Button className="bg-green-600 hover:bg-green-500 text-white">
+                <Button className="bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30">
                   Create With AI
                 </Button>
               </DialogTrigger>
 
-              <DialogContent className="bg-zinc-900 text-white border border-zinc-700">
+              <DialogContent className="bg-white text-black border border-gray-200">
                 <DialogHeader>
-                  <DialogTitle>Create Roadmap With AI</DialogTitle>
+                  <DialogTitle className="text-black">Create Roadmap With AI</DialogTitle>
                 </DialogHeader>
 
                 {/* AI form */}
                 <form onSubmit={handleAI} className="space-y-4 mt-4">
                   <div>
-                    <label className="text-sm">Topic *</label>
+                    <label className="text-sm text-gray-700">Topic *</label>
                     <Input
-                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                      className="bg-white border-gray-300 text-black mt-1 focus:border-black focus:ring-black/20"
                       placeholder="Enter topic e.g. MERN, DSA, ML..."
                       value={topic}
                       onChange={(e) => setTopic(e.target.value)}
@@ -88,9 +92,9 @@ export default function RoadMapInt() {
                   </div>
 
                   <div>
-                    <label className="text-sm">Level *</label>
+                    <label className="text-sm text-gray-700">Level *</label>
                     <Input
-                      className="bg-zinc-800 border-zinc-700 text-white mt-1"
+                      className="bg-white border-gray-300 text-black mt-1 focus:border-black focus:ring-black/20"
                       placeholder="Beginner / Intermediate / Advanced"
                       value={level}
                       onChange={(e) => setLevel(e.target.value)}
@@ -100,7 +104,7 @@ export default function RoadMapInt() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+                    className="w-full bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30"
                     disabled={loading}
                   >
                     {loading ? "Generating..." : "Generate Roadmap"}

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
+import BackButton from "@/components/BackButton";
 
 const NovaCourseGenerator = () => {
   const [form, setForm] = useState({
@@ -90,40 +91,45 @@ const NovaCourseGenerator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#05070F] via-[#0D1020] to-[#111827] text-white overflow-x-hidden pb-20">
+    <div className="min-h-screen bg-white overflow-x-hidden pb-20">
       {/* ─── Header ───────────────────────────── */}
       <motion.div
-        className="text-center py-16 space-y-4 nova-title"
+        className="py-16 space-y-4 nova-title"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <div className="flex justify-center items-center gap-3">
-          <motion.div
-            animate={{ rotate: [0, 15, -15, 0] }}
-            transition={{ repeat: Infinity, duration: 6 }}
-          >
-            <Brain className="w-12 h-12 text-indigo-400 drop-shadow-[0_0_20px_#6366f1]" />
-          </motion.div>
-          <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Nova Course Creator
-          </h1>
+        <div className="mb-6 px-8">
+          <BackButton to="/student/courses" label="Back to Courses" />
         </div>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-          Create immersive, structured courses on{" "}
-          <span className="text-indigo-400 font-semibold">any topic</span> —
-          art, finance, cooking, science, or anything else — powered by Gemini
-          AI.
-        </p>
+        <div className="text-center">
+          <div className="flex justify-center items-center gap-3">
+            <motion.div
+              animate={{ rotate: [0, 15, -15, 0] }}
+              transition={{ repeat: Infinity, duration: 6 }}
+            >
+              <Brain className="w-12 h-12 text-black" />
+            </motion.div>
+            <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
+              Nova Course Creator
+            </h1>
+          </div>
+          <p className="text-gray-700 text-lg max-w-2xl mx-auto leading-relaxed mt-4">
+            Create immersive, structured courses on{" "}
+            <span className="text-black font-semibold">any topic</span> —
+            art, finance, cooking, science, or anything else — powered by Gemini
+            AI.
+          </p>
+        </div>
       </motion.div>
 
       {/* ─── Input Section ───────────────────────────── */}
       <motion.div
-        className="max-w-4xl mx-auto bg-[#151826]/70 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl shadow-indigo-800/20 p-8"
+        className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-2xl shadow-xl p-8"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
       >
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-indigo-400 text-xl">
+          <CardTitle className="flex items-center gap-2 text-black text-xl">
             <Sparkles className="w-5 h-5" /> Generate a New Course
           </CardTitle>
         </CardHeader>
@@ -131,7 +137,7 @@ const NovaCourseGenerator = () => {
         <CardContent className="space-y-6">
           <Input
             placeholder="Enter your course topic (e.g., 'Astrophysics for Curious Minds', 'Vegan Cooking Basics')"
-            className="bg-[#0B0E17]/70 border-gray-700 text-white focus:ring-2 focus:ring-indigo-500"
+            className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20"
             value={form.topic}
             onChange={(e) => handleChange("topic", e.target.value)}
           />
@@ -140,9 +146,9 @@ const NovaCourseGenerator = () => {
           <div className="relative">
             <button
               onClick={() => setCategoryOpen((p) => !p)}
-              className="w-full bg-[#0B0E17]/70 border border-gray-700 rounded-lg px-4 py-2 text-left flex justify-between items-center hover:border-indigo-500 transition-all"
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-left flex justify-between items-center hover:border-black transition-all text-black"
             >
-              <span className="text-gray-200">{form.category}</span>
+              <span>{form.category}</span>
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${
                   categoryOpen ? "rotate-180" : ""
@@ -153,7 +159,7 @@ const NovaCourseGenerator = () => {
               <motion.ul
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute z-20 bg-[#0D0F1A] border border-gray-700 mt-1 rounded-lg shadow-lg w-full overflow-hidden max-h-60 overflow-y-auto"
+                className="absolute z-20 bg-white border border-gray-200 mt-1 rounded-lg shadow-lg w-full overflow-hidden max-h-60 overflow-y-auto"
               >
                 {categories.map((c, i) => (
                   <li
@@ -163,8 +169,8 @@ const NovaCourseGenerator = () => {
                       setCategoryOpen(false);
                       setShowCustom(c === "Other");
                     }}
-                    className={`px-4 py-2 cursor-pointer hover:bg-indigo-600/30 transition-all ${
-                      c === form.category ? "bg-indigo-600/20" : ""
+                    className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-all text-black ${
+                      c === form.category ? "bg-black/5" : ""
                     }`}
                   >
                     {c}
@@ -177,7 +183,7 @@ const NovaCourseGenerator = () => {
           {showCustom && (
             <Input
               placeholder="Enter custom category name"
-              className="bg-[#0B0E17]/70 border-gray-700 text-white focus:ring-2 focus:ring-indigo-500"
+              className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20"
               value={form.customCategory}
               onChange={(e) => handleChange("customCategory", e.target.value)}
             />
@@ -187,9 +193,9 @@ const NovaCourseGenerator = () => {
           <div className="relative">
             <button
               onClick={() => setLevelOpen((p) => !p)}
-              className="w-full bg-[#0B0E17]/70 border border-gray-700 rounded-lg px-4 py-2 text-left flex justify-between items-center hover:border-indigo-500 transition-all"
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-left flex justify-between items-center hover:border-black transition-all text-black"
             >
-              <span className="text-gray-200">{form.level}</span>
+              <span>{form.level}</span>
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${
                   levelOpen ? "rotate-180" : ""
@@ -200,7 +206,7 @@ const NovaCourseGenerator = () => {
               <motion.ul
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute z-20 bg-[#0D0F1A] border border-gray-700 mt-1 rounded-lg shadow-lg w-full"
+                className="absolute z-20 bg-white border border-gray-200 mt-1 rounded-lg shadow-lg w-full"
               >
                 {levels.map((l, i) => (
                   <li
@@ -209,8 +215,8 @@ const NovaCourseGenerator = () => {
                       handleChange("level", l);
                       setLevelOpen(false);
                     }}
-                    className={`px-4 py-2 cursor-pointer hover:bg-indigo-600/30 transition-all ${
-                      l === form.level ? "bg-indigo-600/20" : ""
+                    className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-all text-black ${
+                      l === form.level ? "bg-black/5" : ""
                     }`}
                   >
                     {l}
@@ -224,7 +230,7 @@ const NovaCourseGenerator = () => {
             <Button
               onClick={handleGenerate}
               disabled={loading}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg"
+              className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white font-semibold px-6 py-2 rounded-lg shadow-lg shadow-black/20 hover:shadow-black/30"
             >
               {loading ? (
                 <>
@@ -247,7 +253,7 @@ const NovaCourseGenerator = () => {
           animate={{ opacity: 1 }}
           className="flex justify-center mt-12"
         >
-          <Loader2 className="w-12 h-12 animate-spin text-indigo-400" />
+          <Loader2 className="w-12 h-12 animate-spin text-black" />
         </motion.div>
       )}
 
@@ -256,13 +262,13 @@ const NovaCourseGenerator = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="max-w-5xl mx-auto mt-14 bg-[#1A1E2D]/80 border border-gray-700 rounded-2xl p-8 shadow-xl backdrop-blur-lg"
+          className="max-w-5xl mx-auto mt-14 bg-white border border-gray-200 rounded-2xl p-8 shadow-xl"
         >
-          <h2 className="text-3xl font-bold text-indigo-400 mb-2">
+          <h2 className="text-3xl font-bold text-black mb-2">
             {course.title}
           </h2>
-          <p className="text-gray-300 mb-4">{course.description}</p>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-gray-700 mb-4">{course.description}</p>
+          <p className="text-sm text-gray-600 mb-6">
             Category: {course.category} • Level: {course.level} • Duration:{" "}
             {course.duration} hrs
           </p>
@@ -273,16 +279,16 @@ const NovaCourseGenerator = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-[#10121C]/70 border border-gray-700 rounded-xl p-5 mb-6"
+              className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6"
             >
-              <h3 className="text-xl font-semibold text-indigo-300 flex items-center gap-2 mb-2">
+              <h3 className="text-xl font-semibold text-black flex items-center gap-2 mb-2">
                 <Layers className="w-5 h-5" /> Module {i + 1}: {mod.title}
               </h3>
-              <p className="text-gray-400 mb-3">{mod.description}</p>
+              <p className="text-gray-600 mb-3">{mod.description}</p>
               <ul className="ml-5 space-y-1">
                 {mod.lessons?.map((lesson, j) => (
-                  <li key={j} className="text-gray-300 text-sm">
-                    <span className="text-indigo-400">•</span>{" "}
+                  <li key={j} className="text-gray-700 text-sm">
+                    <span className="text-black">•</span>{" "}
                     {lesson.title} — {lesson.duration} min
                   </li>
                 ))}
@@ -293,7 +299,7 @@ const NovaCourseGenerator = () => {
           <div className="flex justify-end mt-6">
             <Button
               onClick={() => toast({ description: "✨ Course saved successfully!" })}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white flex items-center gap-2 px-5 py-2"
+              className="bg-black hover:bg-gray-800 text-white flex items-center gap-2 px-5 py-2 shadow-lg shadow-black/20 hover:shadow-black/30"
             >
               <Lightbulb className="w-4 h-4" /> Save Course
             </Button>
