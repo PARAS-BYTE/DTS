@@ -100,18 +100,18 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8 bg-white">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold mb-2 text-gradient">
+          <h1 className="text-4xl font-bold mb-2 text-black">
             {stats?.educatorName ? `${stats.educatorName}'s Dashboard` : 'Instructor Dashboard'}
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-gray-700 text-lg">
             Manage your courses and track student progress
           </p>
         </div>
         <Link to="/admin/courses">
-          <Button size="lg" className="glow-primary">
+          <Button size="lg" className="bg-black text-white hover:bg-gray-800 shadow-lg shadow-black/20 hover:shadow-black/30">
             <Plus className="w-5 h-5 mr-2" />
             Create Course
           </Button>
@@ -125,20 +125,20 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30 hover:scale-105 transition-transform cursor-pointer">
+          <Card className="bg-white border border-gray-200 hover:scale-105 transition-transform cursor-pointer shadow-sm hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-              <Users className="w-4 h-4 text-primary" />
+              <CardTitle className="text-sm font-medium text-black">Total Students</CardTitle>
+              <Users className="w-4 h-4 text-black" />
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-3xl font-bold text-primary">...</div>
+                <div className="text-3xl font-bold text-black">...</div>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-primary">
+                  <div className="text-3xl font-bold text-black">
                     {stats?.enrolledStudents ?? 0}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-gray-600 mt-1">
                     Students enrolled in your courses
                   </p>
                 </>
@@ -152,20 +152,20 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          <Card className="bg-gradient-to-br from-secondary/20 to-secondary/5 border-secondary/30 hover:scale-105 transition-transform cursor-pointer">
+          <Card className="bg-white border border-gray-200 hover:scale-105 transition-transform cursor-pointer shadow-sm hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Active Courses</CardTitle>
-              <BookOpen className="w-4 h-4 text-secondary" />
+              <CardTitle className="text-sm font-medium text-black">Active Courses</CardTitle>
+              <BookOpen className="w-4 h-4 text-black" />
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-3xl font-bold text-secondary">...</div>
+                <div className="text-3xl font-bold text-black">...</div>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-secondary">
+                  <div className="text-3xl font-bold text-black">
                     {stats?.activeCourses ?? 0}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-gray-600 mt-1">
                     Published courses available to students
                   </p>
                 </>
@@ -179,20 +179,20 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.3 }}
         >
-          <Card className="bg-gradient-to-br from-warning/20 to-warning/5 border-warning/30 hover:scale-105 transition-transform cursor-pointer">
+          <Card className="bg-white border border-gray-200 hover:scale-105 transition-transform cursor-pointer shadow-sm hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Assignments Pending</CardTitle>
-              <FileCheck className="w-4 h-4 text-warning" />
+              <CardTitle className="text-sm font-medium text-black">Assignments Pending</CardTitle>
+              <FileCheck className="w-4 h-4 text-black" />
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-3xl font-bold text-warning">...</div>
+                <div className="text-3xl font-bold text-black">...</div>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-warning">
+                  <div className="text-3xl font-bold text-black">
                     {stats?.pendingAssignments ?? 0}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Needs grading</p>
+                  <p className="text-xs text-gray-600 mt-1">Needs grading</p>
                 </>
               )}
             </CardContent>
@@ -204,20 +204,20 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.4 }}
         >
-          <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/30 hover:scale-105 transition-transform cursor-pointer">
+          <Card className="bg-white border border-gray-200 hover:scale-105 transition-transform cursor-pointer shadow-sm hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Avg Performance</CardTitle>
-              <TrendingUp className="w-4 h-4 text-success" />
+              <CardTitle className="text-sm font-medium text-black">Avg Performance</CardTitle>
+              <TrendingUp className="w-4 h-4 text-black" />
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-3xl font-bold text-success">...</div>
+                <div className="text-3xl font-bold text-black">...</div>
               ) : (
                 <>
-                  <div className="text-3xl font-bold text-success">
+                  <div className="text-3xl font-bold text-black">
                     {stats?.avgPerformance ?? 0}%
                   </div>
-                  <p className="text-xs text-success mt-1 flex items-center gap-1">
+                  <p className="text-xs text-gray-700 mt-1 flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" />
                     +{stats?.performanceImprovement ?? 0}% improvement
                   </p>
@@ -235,10 +235,10 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <Card>
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart className="w-5 h-5 text-primary" />
+              <CardTitle className="flex items-center gap-2 text-black">
+                <BarChart className="w-5 h-5 text-black" />
                 Course Performance
               </CardTitle>
             </CardHeader>
@@ -283,10 +283,10 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <Card>
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-secondary" />
+              <CardTitle className="flex items-center gap-2 text-black">
+                <TrendingUp className="w-5 h-5 text-black" />
                 Student Engagement
               </CardTitle>
             </CardHeader>
@@ -333,12 +333,12 @@ const AdminDashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.7 }}
       >
-        <Card>
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle className="text-black">Recent Activity</CardTitle>
               <Link to="/admin/students">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-gray-700 hover:text-black">
                   View All <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
@@ -347,27 +347,27 @@ const AdminDashboard = () => {
           <CardContent className="space-y-3">
             {activityLoading ? (
               <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground">Loading activity...</p>
+                <p className="text-sm text-gray-600">Loading activity...</p>
               </div>
             ) : activities.length > 0 ? (
               activities.map((activity, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
+                  className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200"
                 >
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
+                  <div className="w-2 h-2 rounded-full bg-black mt-2" />
                   <div className="flex-1">
-                    <p className="text-sm">
+                    <p className="text-sm text-black">
                       <span className="font-medium">{activity.student}</span> {activity.action}{' '}
                       <span className="font-medium">{activity.item}</span>
                     </p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    <p className="text-xs text-gray-600">{activity.time}</p>
                   </div>
                 </div>
               ))
             ) : (
               <div className="text-center py-4">
-                <p className="text-sm text-muted-foreground">No recent activity</p>
+                <p className="text-sm text-gray-600">No recent activity</p>
               </div>
             )}
           </CardContent>

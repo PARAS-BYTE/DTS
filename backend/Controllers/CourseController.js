@@ -854,6 +854,15 @@ export const completeLesson = asyncHandler(async (req, res) => {
             }
 
             user.addXP(xpGained);
+            
+            // Add to XP history for dashboard charts
+            if (!user.xpHistory) user.xpHistory = [];
+            user.xpHistory.push({
+                date: new Date(),
+                reason: `Lesson: ${course.title}`,
+                amount: xpGained,
+            });
+            
             await user.save();
         }
 

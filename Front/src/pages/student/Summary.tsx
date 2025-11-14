@@ -109,10 +109,10 @@ const Summary = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="min-h-screen bg-background p-6 flex flex-col space-y-6"
+      className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8 flex flex-col space-y-6"
     >
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Trophy className="text-primary w-7 h-7" />
@@ -136,7 +136,7 @@ const Summary = () => {
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="grid md:grid-cols-3 gap-6"
+        className="grid gap-4 sm:gap-6 md:grid-cols-3"
       >
         {/* Score */}
         <Card className="bg-background/70 border-primary/30 shadow-lg">
@@ -195,7 +195,7 @@ const Summary = () => {
       </motion.div>
 
       {/* Charts Section */}
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid gap-6 lg:grid-cols-2">
         {/* Pie Chart */}
         <Card className="bg-background/60 shadow-md">
           <CardHeader>

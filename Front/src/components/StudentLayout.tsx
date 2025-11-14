@@ -38,9 +38,9 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
   };
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-white flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm">
+      <aside className="w-full md:w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm flex-shrink-0">
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
           <Link to="/" className="flex items-center gap-2">
@@ -77,7 +77,7 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-white">
+      <main className="flex-1 overflow-auto bg-white w-full">
         {children}
       </main>
     </div>

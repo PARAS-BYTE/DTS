@@ -69,28 +69,43 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white overflow-hidden relative flex items-center justify-center p-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-black/5 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-black/3 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-2xl">
+        {/* Back Button */}
+        <Link to="/" className="absolute -top-16 left-0 flex items-center gap-2 text-gray-700 hover:text-black transition-colors">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Back to Home</span>
+        </Link>
+
+        <Card className="bg-white border border-gray-200 shadow-2xl">
           <CardHeader className="text-center space-y-4">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg"
+              className="mx-auto w-16 h-16 bg-black/10 rounded-2xl flex items-center justify-center shadow-lg shadow-black/10"
             >
-              <Shield className="w-8 h-8 text-white" />
+              <Shield className="w-8 h-8 text-black" />
             </motion.div>
             <div>
-              <CardTitle className="text-2xl font-bold text-white">
+              <CardTitle className="text-2xl font-bold text-black">
                 Admin Portal
               </CardTitle>
-              <CardDescription className="text-blue-200 mt-2">
+              <CardDescription className="text-gray-700 mt-2">
                 Restricted Access - Authorized Personnel Only
               </CardDescription>
             </div>
@@ -98,18 +113,18 @@ const AdminLogin = () => {
 
           <CardContent className="space-y-6">
             {error && (
-              <Alert variant="destructive" className="border-red-400 bg-red-400/10">
-                <AlertDescription className="text-red-200">{error}</AlertDescription>
+              <Alert variant="destructive" className="border-red-200 bg-red-50">
+                <AlertDescription className="text-red-600">{error}</AlertDescription>
               </Alert>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-blue-100 font-medium">
+                <Label htmlFor="email" className="text-gray-700 font-medium">
                   Admin Email
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input
                     id="email"
                     type="email"
@@ -117,17 +132,17 @@ const AdminLogin = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-blue-200 focus:border-blue-400"
+                    className="pl-10 bg-white border-gray-300 text-black placeholder:text-gray-500 focus:border-black focus:ring-black/20"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-blue-100 font-medium">
+                <Label htmlFor="password" className="text-gray-700 font-medium">
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -135,19 +150,19 @@ const AdminLogin = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-blue-200 focus:border-blue-400"
+                    className="pl-10 pr-10 bg-white border-gray-300 text-black placeholder:text-gray-500 focus:border-black focus:ring-black/20"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-white/10"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-gray-50"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-blue-300" />
+                      <EyeOff className="h-4 w-4 text-gray-500" />
                     ) : (
-                      <Eye className="h-4 w-4 text-blue-300" />
+                      <Eye className="h-4 w-4 text-gray-500" />
                     )}
                   </Button>
                 </div>
@@ -156,7 +171,7 @@ const AdminLogin = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-black/20 hover:shadow-black/30"
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
@@ -169,16 +184,16 @@ const AdminLogin = () => {
               </Button>
             </form>
 
-            <div className="text-center pt-4 border-t border-white/20">
-              <p className="text-blue-200 text-sm">
-                <Link to="/login" className="text-white hover:underline">
+            <div className="text-center pt-4 border-t border-gray-200">
+              <p className="text-gray-700 text-sm">
+                <Link to="/login" className="text-gray-700 hover:text-black transition-colors">
                   ← Back to Student Portal
                 </Link>
               </p>
             </div>
 
             <div className="text-center">
-              <p className="text-blue-300 text-xs">
+              <p className="text-gray-600 text-xs">
                 Secure access • Activity monitored • Unauthorized access prohibited
               </p>
             </div>

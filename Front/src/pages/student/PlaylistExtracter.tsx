@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Youtube, Layers, FileText, Library, GraduationCap } from "lucide-react";
+import BackButton from "@/components/BackButton";
 
 const CreateCourseFromPlaylist = () => {
   const [formData, setFormData] = useState({
@@ -41,16 +42,19 @@ const CreateCourseFromPlaylist = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col items-center py-12 px-4">
+    <div className="min-h-screen bg-white flex flex-col items-center py-12 px-4">
       {/* Header */}
+      <div className="w-full max-w-lg mb-6">
+        <BackButton to="/student/courses" label="Back to Courses" />
+      </div>
       <div className="flex flex-col items-center text-center mb-10">
-        <div className="flex items-center gap-3 text-blue-500 mb-2">
+        <div className="flex items-center gap-3 text-black mb-2">
           <Youtube className="w-8 h-8" />
-          <h1 className="text-3xl md:text-4xl font-bold text-white">
+          <h1 className="text-3xl md:text-4xl font-bold text-black">
             Create Course from Playlist
           </h1>
         </div>
-        <p className="text-gray-400 max-w-xl">
+        <p className="text-gray-700 max-w-xl">
           Generate a structured course automatically from any public YouTube
           playlist.
         </p>
@@ -59,12 +63,12 @@ const CreateCourseFromPlaylist = () => {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-gray-900 p-8 rounded-2xl shadow-lg border border-gray-800 w-full max-w-lg space-y-6"
+        className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 w-full max-w-lg space-y-6"
       >
         {/* Playlist URL */}
         <div>
-          <label className="flex items-center gap-2 text-gray-300 mb-2 text-sm font-medium">
-            <Youtube className="w-4 h-4 text-blue-400" /> Playlist URL *
+          <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
+            <Youtube className="w-4 h-4 text-black" /> Playlist URL *
           </label>
           <input
             type="text"
@@ -73,14 +77,14 @@ const CreateCourseFromPlaylist = () => {
             value={formData.playlistUrl}
             onChange={handleChange}
             required
-            className="w-full bg-gray-800 text-gray-100 px-4 py-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
           />
         </div>
 
         {/* Title */}
         <div>
-          <label className="flex items-center gap-2 text-gray-300 mb-2 text-sm font-medium">
-            <Layers className="w-4 h-4 text-green-400" /> Course Title
+          <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
+            <Layers className="w-4 h-4 text-black" /> Course Title
           </label>
           <input
             type="text"
@@ -88,14 +92,14 @@ const CreateCourseFromPlaylist = () => {
             placeholder="e.g. Mastering React with YouTube"
             value={formData.title}
             onChange={handleChange}
-            className="w-full bg-gray-800 text-gray-100 px-4 py-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="flex items-center gap-2 text-gray-300 mb-2 text-sm font-medium">
-            <FileText className="w-4 h-4 text-yellow-400" /> Description
+          <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
+            <FileText className="w-4 h-4 text-black" /> Description
           </label>
           <textarea
             name="description"
@@ -103,34 +107,34 @@ const CreateCourseFromPlaylist = () => {
             placeholder="Briefly describe the course..."
             value={formData.description}
             onChange={handleChange}
-            className="w-full bg-gray-800 text-gray-100 px-4 py-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
           ></textarea>
         </div>
 
         {/* Category & Level */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
-            <label className="flex items-center gap-2 text-gray-300 mb-2 text-sm font-medium">
-              <Library className="w-4 h-4 text-purple-400" /> Category
+            <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
+              <Library className="w-4 h-4 text-black" /> Category
             </label>
             <input
               type="text"
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full bg-gray-800 text-gray-100 px-4 py-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
             />
           </div>
 
           <div className="flex-1">
-            <label className="flex items-center gap-2 text-gray-300 mb-2 text-sm font-medium">
-              <GraduationCap className="w-4 h-4 text-pink-400" /> Level
+            <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
+              <GraduationCap className="w-4 h-4 text-black" /> Level
             </label>
             <select
               name="level"
               value={formData.level}
               onChange={handleChange}
-              className="w-full bg-gray-800 text-gray-100 px-4 py-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
             >
               <option>Beginner</option>
               <option>Intermediate</option>
@@ -145,8 +149,8 @@ const CreateCourseFromPlaylist = () => {
           disabled={loading}
           className={`w-full py-3 mt-2 rounded-lg font-semibold transition ${
             loading
-              ? "bg-gray-700 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30"
+              ? "bg-gray-300 cursor-not-allowed text-gray-500"
+              : "bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30"
           }`}
         >
           {loading ? "Creating Course..." : "Generate Course"}
@@ -155,23 +159,23 @@ const CreateCourseFromPlaylist = () => {
 
       {/* Result */}
       {result && (
-        <div className="mt-10 w-full max-w-2xl bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-lg">
-          <h2 className="text-xl font-semibold text-blue-400 mb-4 flex items-center gap-2">
+        <div className="mt-10 w-full max-w-2xl bg-white border border-gray-200 p-6 rounded-2xl shadow-lg">
+          <h2 className="text-xl font-semibold text-black mb-4 flex items-center gap-2">
             <Layers className="w-5 h-5" /> Course Created Successfully
           </h2>
-          <div className="space-y-2 text-gray-300">
+          <div className="space-y-2 text-gray-700">
             <p>
-              <strong>Title:</strong> {result.course.title}
+              <strong className="text-black">Title:</strong> {result.course.title}
             </p>
             <p>
-              <strong>Modules:</strong> {result.totalModules}
+              <strong className="text-black">Modules:</strong> {result.totalModules}
             </p>
             <p>
-              <strong>Total Videos:</strong> {result.totalVideos}
+              <strong className="text-black">Total Videos:</strong> {result.totalVideos}
             </p>
-            <p className="text-gray-500 text-sm pt-2">
+            <p className="text-gray-600 text-sm pt-2">
               Course ID:{" "}
-              <span className="text-gray-400">{result.course._id}</span>
+              <span className="text-gray-700">{result.course._id}</span>
             </p>
           </div>
         </div>
@@ -179,7 +183,7 @@ const CreateCourseFromPlaylist = () => {
 
       {/* Error */}
       {error && (
-        <p className="text-red-400 mt-6 font-medium text-sm">{error}</p>
+        <p className="text-red-600 mt-6 font-medium text-sm">{error}</p>
       )}
     </div>
   );

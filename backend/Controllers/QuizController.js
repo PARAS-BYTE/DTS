@@ -139,9 +139,8 @@ export const evaluateQuiz = asyncHandler(async (req, res) => {
   const wrongCount = quiz.questions.length - correctCount;
   const accuracy = ((correctCount / quiz.questions.length) * 100).toFixed(2);
 
-  const xpGained = correctCount;
-  user.xp += xpGained;
-  user.weeklyXP += xpGained;
+  const xpGained = correctCount * 2; // 2 XP per correct answer (better than 1)
+  user.addXP(xpGained);
 
   // ─── Full analysis object (sent to frontend) ─────────────────────────────
   const analysis = {
@@ -174,6 +173,8 @@ export const evaluateQuiz = asyncHandler(async (req, res) => {
     attemptDate: new Date(),
   });
 
+  // Add to XP history for dashboard charts
+  if (!user.xpHistory) user.xpHistory = [];
   user.xpHistory.push({
     date: new Date(),
     reason: `Quiz: ${quiz.title}`,
