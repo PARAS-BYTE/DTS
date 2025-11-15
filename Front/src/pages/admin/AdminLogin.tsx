@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react';
+import { palette } from '@/theme/palette';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -69,12 +70,12 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white overflow-hidden relative flex items-center justify-center p-4">
+    <div className="min-h-screen overflow-hidden relative flex items-center justify-center p-4" style={{ background: palette.bg }}>
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-black/5 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-black/3 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+        <div className="absolute top-1/4 -left-48 w-96 h-96 rounded-full blur-3xl animate-float" style={{ background: palette.accentSoft, opacity: 0.5 }} />
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 rounded-full blur-3xl animate-float" style={{ background: palette.accentSoft, opacity: 0.3, animationDelay: '2s' }} />
+        <div className="absolute inset-0" style={{ background: `linear-gradient(${palette.border}1px,transparent 1px),linear-gradient(90deg,${palette.border}1px,transparent 1px)`, backgroundSize: '64px 64px' }} />
       </div>
 
       <motion.div
@@ -84,28 +85,29 @@ const AdminLogin = () => {
         className="w-full max-w-md relative z-10"
       >
         {/* Back Button */}
-        <Link to="/" className="absolute -top-16 left-0 flex items-center gap-2 text-gray-700 hover:text-black transition-colors">
+        <Link to="/" className="absolute -top-16 left-0 flex items-center gap-2 transition-colors" style={{ color: palette.text2 }} onMouseEnter={(e) => e.currentTarget.style.color = palette.text} onMouseLeave={(e) => e.currentTarget.style.color = palette.text2}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           <span>Back to Home</span>
         </Link>
 
-        <Card className="bg-white border border-gray-200 shadow-2xl">
+        <Card className="shadow-2xl" style={{ background: palette.card, borderColor: palette.border, borderWidth: '1px' }}>
           <CardHeader className="text-center space-y-4">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto w-16 h-16 bg-black/10 rounded-2xl flex items-center justify-center shadow-lg shadow-black/10"
+              className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
+              style={{ background: palette.accentSoft }}
             >
-              <Shield className="w-8 h-8 text-black" />
+              <Shield className="w-8 h-8" style={{ color: palette.accent }} />
             </motion.div>
             <div>
-              <CardTitle className="text-2xl font-bold text-black">
+              <CardTitle className="text-2xl font-bold" style={{ color: palette.text }}>
                 Admin Portal
               </CardTitle>
-              <CardDescription className="text-gray-700 mt-2">
+              <CardDescription className="mt-2" style={{ color: palette.text2 }}>
                 Restricted Access - Authorized Personnel Only
               </CardDescription>
             </div>
@@ -120,11 +122,11 @@ const AdminLogin = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 font-medium">
+                <Label htmlFor="email" className="font-medium" style={{ color: palette.text }}>
                   Admin Email
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4" style={{ color: palette.text2 }} />
                   <Input
                     id="email"
                     type="email"
@@ -132,17 +134,23 @@ const AdminLogin = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="pl-10 bg-white border-gray-300 text-black placeholder:text-gray-500 focus:border-black focus:ring-black/20"
+                    className="pl-10"
+                    style={{ 
+                      color: palette.text, 
+                      borderColor: palette.border, 
+                      backgroundColor: palette.card,
+                      '--tw-ring-color': palette.accent + '33'
+                    } as React.CSSProperties & { '--tw-ring-color': string }}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700 font-medium">
+                <Label htmlFor="password" className="font-medium" style={{ color: palette.text }}>
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4" style={{ color: palette.text2 }} />
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -150,19 +158,28 @@ const AdminLogin = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="pl-10 pr-10 bg-white border-gray-300 text-black placeholder:text-gray-500 focus:border-black focus:ring-black/20"
+                    className="pl-10 pr-10"
+                    style={{ 
+                      color: palette.text, 
+                      borderColor: palette.border, 
+                      backgroundColor: palette.card,
+                      '--tw-ring-color': palette.accent + '33'
+                    } as React.CSSProperties & { '--tw-ring-color': string }}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-gray-50"
+                    className="absolute right-0 top-0 h-full px-3 py-2"
+                    style={{ backgroundColor: 'transparent' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-500" />
+                      <EyeOff className="h-4 w-4" style={{ color: palette.text2 }} />
                     ) : (
-                      <Eye className="h-4 w-4 text-gray-500" />
+                      <Eye className="h-4 w-4" style={{ color: palette.text2 }} />
                     )}
                   </Button>
                 </div>
@@ -171,7 +188,14 @@ const AdminLogin = () => {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-black/20 hover:shadow-black/30"
+                className="w-full font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                style={{ 
+                  background: palette.accent, 
+                  color: palette.card,
+                  boxShadow: `0 10px 15px -3px ${palette.accent}33, 0 4px 6px -2px ${palette.accent}33`
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+                onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
@@ -185,7 +209,7 @@ const AdminLogin = () => {
             </form>
 
             <div className="text-center">
-              <p className="text-gray-600 text-xs">
+              <p className="text-xs" style={{ color: palette.text2 }}>
                 Secure access • Activity monitored • Unauthorized access prohibited
               </p>
             </div>

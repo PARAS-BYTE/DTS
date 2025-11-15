@@ -16,6 +16,7 @@ import {
   Award,
   Zap,
 } from "lucide-react";
+import { palette } from "@/theme/palette";
 
 const UserProfile = () => {
   const [user, setUser] = useState<any>(null);
@@ -83,23 +84,23 @@ const UserProfile = () => {
 
   if (loading)
     return (
-      <div className="h-[80vh] flex justify-center items-center text-gray-600">
+      <div className="h-[80vh] flex justify-center items-center" style={{ color: palette.text2 }}>
         Loading profile...
       </div>
     );
 
   if (!user)
     return (
-      <div className="h-[80vh] flex justify-center items-center text-red-600">
+      <div className="h-[80vh] flex justify-center items-center" style={{ color: "#EF4444" }}>
         Failed to load profile.
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col items-center py-12 px-6">
+    <div className="min-h-screen flex flex-col items-center py-8 sm:py-12 px-4 sm:px-6" style={{ background: palette.bg, color: palette.text }}>
       {/* ─── TOP XP SUMMARY ─────────────────────── */}
-      <div className="w-full max-w-5xl bg-white border border-gray-200 rounded-2xl shadow-sm mb-8">
-        <div className="grid md:grid-cols-3 text-center p-6 gap-4">
+      <div className="w-full max-w-5xl rounded-2xl shadow-sm mb-6 sm:mb-8" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 text-center p-4 sm:p-6 gap-4">
           {[
             { icon: Star, label: "Level", value: user.level },
             { icon: Zap, label: "XP", value: user.xp },
@@ -107,28 +108,28 @@ const UserProfile = () => {
           ].map((stat, i) => (
             <div key={i} className="flex flex-col items-center justify-center">
               <div className="flex items-center gap-2 mb-1">
-                <stat.icon className="w-5 h-5 text-black" />
-                <span className="font-semibold text-lg text-black">
+                <stat.icon className="w-5 h-5" style={{ color: palette.text }} />
+                <span className="font-semibold text-base sm:text-lg" style={{ color: palette.text }}>
                   {stat.value}
                 </span>
               </div>
-              <p className="text-gray-600 text-sm">{stat.label}</p>
+              <p className="text-sm" style={{ color: palette.text2 }}>{stat.label}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ─── MAIN PROFILE SECTION ─────────────────────── */}
-      <Card className="w-full max-w-5xl bg-white border border-gray-200 shadow-sm">
+      <Card className="w-full max-w-5xl shadow-sm" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold flex items-center gap-2 text-black">
-            <User className="w-6 h-6 text-black" /> Profile Overview
+          <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2" style={{ color: palette.text }}>
+            <User className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: palette.text }} /> Profile Overview
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="grid lg:grid-cols-[1fr_2fr] gap-10 p-8">
+        <CardContent className="grid lg:grid-cols-[1fr_2fr] gap-6 sm:gap-10 p-4 sm:p-8">
           {/* ─── LEFT: AVATAR + INFO ─────────────── */}
-          <div className="flex flex-col items-center text-center space-y-5">
+          <div className="flex flex-col items-center text-center space-y-4 sm:space-y-5">
             <div className="relative">
               <img
                 src={
@@ -136,26 +137,27 @@ const UserProfile = () => {
                   "https://cdn-icons-png.flaticon.com/512/149/149071.png"
                 }
                 alt="Avatar"
-                className="w-40 h-40 rounded-full object-cover border-4 border-black shadow-lg"
+                className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 shadow-lg"
+                style={{ borderColor: palette.accent }}
               />
             </div>
-            <h2 className="text-xl font-semibold text-black">{user.name || user.username}</h2>
-            <p className="text-gray-600 text-sm">{user.email}</p>
+            <h2 className="text-lg sm:text-xl font-semibold" style={{ color: palette.text }}>{user.name || user.username}</h2>
+            <p className="text-sm" style={{ color: palette.text2 }}>{user.email}</p>
 
-            <div className="flex gap-3 text-center text-gray-700">
+            <div className="flex gap-3 text-center">
               <div>
-                <p className="text-sm">Focus</p>
-                <p className="text-lg font-bold text-black">{user.focusScore}</p>
+                <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>Focus</p>
+                <p className="text-base sm:text-lg font-bold" style={{ color: palette.text }}>{user.focusScore}</p>
               </div>
               <div>
-                <p className="text-sm">Accuracy</p>
-                <p className="text-lg font-bold text-black">
+                <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>Accuracy</p>
+                <p className="text-base sm:text-lg font-bold" style={{ color: palette.text }}>
                   {user.accuracyScore}
                 </p>
               </div>
               <div>
-                <p className="text-sm">Mastery</p>
-                <p className="text-lg font-bold text-black">
+                <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>Mastery</p>
+                <p className="text-base sm:text-lg font-bold" style={{ color: palette.text }}>
                   {user.masteryScore}
                 </p>
               </div>
@@ -163,58 +165,59 @@ const UserProfile = () => {
           </div>
 
           {/* ─── RIGHT: EDIT FORM ─────────────── */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <label className="text-sm text-gray-700 flex items-center gap-2 mb-1">
-                <User className="w-4 h-4 text-black" /> Username
+              <label className="text-sm flex items-center gap-2 mb-1" style={{ color: palette.text2 }}>
+                <User className="w-4 h-4" style={{ color: palette.text }} /> Username
               </label>
               <Input
                 name="username"
                 value={editData.username || ""}
                 onChange={handleChange}
-                className="bg-white border-gray-300 text-black"
+                style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
               />
             </div>
 
             <div>
-              <label className="text-sm text-gray-700 flex items-center gap-2 mb-1">
-                <Mail className="w-4 h-4 text-black" /> Email
+              <label className="text-sm flex items-center gap-2 mb-1" style={{ color: palette.text2 }}>
+                <Mail className="w-4 h-4" style={{ color: palette.text }} /> Email
               </label>
               <Input
                 name="email"
                 value={editData.email || ""}
                 onChange={handleChange}
-                className="bg-white border-gray-300 text-black"
+                style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
               />
             </div>
 
             <div>
-              <label className="text-sm text-gray-700 flex items-center gap-2 mb-1">
-                <Image className="w-4 h-4 text-black" /> Avatar URL
+              <label className="text-sm flex items-center gap-2 mb-1" style={{ color: palette.text2 }}>
+                <Image className="w-4 h-4" style={{ color: palette.text }} /> Avatar URL
               </label>
               <Input
                 name="avatarUrl"
                 value={editData.avatarUrl || ""}
                 onChange={handleChange}
-                className="bg-white border-gray-300 text-black"
+                style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
               />
             </div>
 
             {/* Preferences */}
-            <div className="border-t border-gray-200 pt-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2 text-black mb-3">
+            <div className="pt-4" style={{ borderTop: `1px solid ${palette.border}` }}>
+              <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2 mb-3" style={{ color: palette.text }}>
                 <Settings className="w-4 h-4" /> Learning Preferences
               </h3>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-gray-700 mb-1 block">Pace</label>
+                  <label className="text-sm mb-1 block" style={{ color: palette.text2 }}>Pace</label>
                   <select
                     value={editData.learningPreferences?.pace || "moderate"}
                     onChange={(e) =>
                       handlePreferenceChange("pace", e.target.value)
                     }
-                    className="w-full bg-white text-black border border-gray-300 rounded-lg px-3 py-2"
+                    className="w-full rounded-lg px-3 py-2"
+                    style={{ background: palette.card, color: palette.text, border: `1px solid ${palette.border}` }}
                   >
                     <option value="slow">Slow</option>
                     <option value="moderate">Moderate</option>
@@ -223,7 +226,7 @@ const UserProfile = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm text-gray-700 mb-1 block">
+                  <label className="text-sm mb-1 block" style={{ color: palette.text2 }}>
                     Preferred Topics
                   </label>
                   <Input
@@ -234,13 +237,13 @@ const UserProfile = () => {
                         e.target.value.split(",").map((v) => v.trim())
                       )
                     }
-                    className="bg-white border-gray-300 text-black"
+                    style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
                   />
                 </div>
               </div>
 
               <div className="mt-3">
-                <label className="text-sm text-gray-700 mb-1 block">
+                <label className="text-sm mb-1 block" style={{ color: palette.text2 }}>
                   Weak Areas
                 </label>
                 <Input
@@ -251,22 +254,29 @@ const UserProfile = () => {
                       e.target.value.split(",").map((v) => v.trim())
                     )
                   }
-                  className="bg-white border-gray-300 text-black"
+                  style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
                 />
               </div>
             </div>
           </div>
         </CardContent>
 
-        <div className="flex justify-center pb-6">
+        <div className="flex justify-center pb-4 sm:pb-6">
           <Button
             onClick={handleSave}
             disabled={saving}
-            className={`px-6 py-3 mt-4 flex items-center gap-2 ${
+            className="px-6 py-3 mt-4 flex items-center gap-2"
+            style={
               saving
-                ? "bg-gray-300 cursor-not-allowed text-gray-600"
-                : "bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
-            }`}
+                ? { background: palette.border, color: palette.text2, cursor: 'not-allowed' }
+                : { background: palette.accentDeep, color: palette.card }
+            }
+            onMouseEnter={(e) => {
+              if (!saving) e.currentTarget.style.background = palette.accent;
+            }}
+            onMouseLeave={(e) => {
+              if (!saving) e.currentTarget.style.background = palette.accentDeep;
+            }}
           >
             <Save className="w-4 h-4" />
             {saving ? "Saving..." : "Save Changes"}
@@ -274,7 +284,7 @@ const UserProfile = () => {
         </div>
 
         {message && (
-          <p className="text-center text-green-600 pb-4">{message}</p>
+          <p className="text-center pb-4" style={{ color: "#10B981" }}>{message}</p>
         )}
       </Card>
     </div>

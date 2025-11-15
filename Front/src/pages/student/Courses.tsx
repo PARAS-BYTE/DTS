@@ -25,6 +25,7 @@ import {
   BookAudioIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { palette } from "../../theme/palette";
 
 interface Course {
   _id: string;
@@ -152,25 +153,25 @@ const Courses = () => {
   );
 
   return (
-    <div className="p-8 space-y-8 bg-white">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8" style={{ background: palette.bg }}>
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${palette.text}, ${palette.text2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
           My Courses
         </h1>
-        <p className="text-gray-700 text-lg">
+        <p className="text-sm sm:text-base md:text-lg" style={{ color: palette.text2 }}>
           Continue your learning journey
         </p>
       </div>
 
       {/* Search Bar */}
-      <div className="relative max-w-md mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+      <div className="relative w-full sm:max-w-md mb-4 sm:mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
         <Input
           placeholder="Search courses..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-9 sm:pl-10 text-sm"
         />
       </div>
 
@@ -179,30 +180,30 @@ const Courses = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex flex-wrap gap-4 mb-8"
+        className="flex flex-wrap gap-3 sm:gap-4 mb-6 sm:mb-8"
       >
         <Link to="/student/createcourse" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white gap-2 shadow-lg shadow-black/10">
+          <Button className="w-full sm:w-auto gap-2 shadow-lg" style={{ background: palette.accent, color: palette.card }} onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep} onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}>
             <PlusCircle className="w-4 h-4" />
             Create Your Own Course
           </Button>
         </Link>
 
         <Link to="/student/generatecourse" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white gap-2 shadow-lg shadow-black/10">
+          <Button className="w-full sm:w-auto gap-2 shadow-lg" style={{ background: palette.accent, color: palette.card }} onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep} onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}>
             <Brain className="w-4 h-4" />
             Build With Nova
           </Button>
         </Link>
 
         <Link to="/student/viaplaylist" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white gap-2 shadow-lg shadow-black/10">
+          <Button className="w-full sm:w-auto gap-2 shadow-lg" style={{ background: palette.accent, color: palette.card }} onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep} onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}>
             <Youtube className="w-4 h-4" />
             Build With Playlist
           </Button>
         </Link>
         <Link to="/student/roadmap" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white gap-2 shadow-lg shadow-black/10">
+          <Button className="w-full sm:w-auto gap-2 shadow-lg" style={{ background: palette.accent, color: palette.card }} onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep} onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}>
             <BookAudioIcon className="w-4 h-4" />
             RoadMaps
           </Button>
@@ -211,15 +212,15 @@ const Courses = () => {
 
       {/* Loading / Error */}
       {loading && (
-        <p className="text-center text-gray-600">
+        <p className="text-center" style={{ color: palette.text2 }}>
           Loading courses...
         </p>
       )}
-      {error && <p className="text-center text-red-600">{error}</p>}
+      {error && <p className="text-center" style={{ color: '#F87171' }}>{error}</p>}
 
       {/* Courses Grid */}
       {!loading && filteredCourses.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredCourses.map((course, index) => (
             <motion.div
               key={course._id}
@@ -227,9 +228,9 @@ const Courses = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              <Card className="h-full hover:scale-105 transition-transform cursor-pointer hover:shadow-xl border border-gray-200 bg-white shadow-sm">
+              <Card className="h-full hover:scale-105 transition-transform cursor-pointer hover:shadow-xl shadow-sm" style={{ background: palette.card, borderColor: palette.border, borderWidth: '1px' }}>
                 <CardHeader className="pb-4">
-                  <div className="aspect-video rounded-xl overflow-hidden mb-4 bg-gray-100">
+                  <div className="aspect-video rounded-xl overflow-hidden mb-4" style={{ background: palette.cardHover }}>
                     <img
                       src={
                         course.thumbnail ||
@@ -239,16 +240,16 @@ const Courses = () => {
                       className="object-cover w-full h-full"
                     />
                   </div>
-                  <CardTitle className="text-xl mb-2 text-black">
+                  <CardTitle className="text-lg sm:text-xl mb-2" style={{ color: palette.text }}>
                     {course.title}
                   </CardTitle>
-                  <p className="text-sm text-gray-600 line-clamp-2">
+                  <p className="text-xs sm:text-sm line-clamp-2" style={{ color: palette.text2 }}>
                     {course.description}
                   </p>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4 text-sm text-gray-400 flex-wrap">
+                  <div className="flex items-center gap-4 text-sm flex-wrap" style={{ color: palette.text2 }}>
                     <div className="flex items-center gap-1">
                       <User className="w-4 h-4" />
                       <span>
@@ -262,7 +263,7 @@ const Courses = () => {
                     {course.price !== undefined && course.price > 0 && (
                       <div className="flex items-center gap-1">
                         <DollarSign className="w-4 h-4" />
-                        <span className="font-semibold text-primary">${course.price}</span>
+                        <span className="font-semibold" style={{ color: palette.accent }}>${course.price}</span>
                       </div>
                     )}
                     {course.link && (
@@ -272,7 +273,8 @@ const Courses = () => {
                           href={course.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary hover:underline"
+                          className="hover:underline"
+                          style={{ color: palette.accent }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           Course Link
@@ -284,29 +286,32 @@ const Courses = () => {
                   {/* Progress Bar */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Progress</span>
-                      <span className="font-medium text-blue-400">
+                      <span style={{ color: palette.text2 }}>Progress</span>
+                      <span className="font-medium" style={{ color: palette.accent }}>
                         {course.progress || 0}%
                       </span>
                     </div>
-                    <Progress value={course.progress || 0} className="h-2" />
+                    <Progress value={course.progress || 0} className="h-2" style={{ background: palette.progressTrack }} />
                   </div>
 
                   {/* Enroll / Complete Buttons */}
                   <div className="flex gap-2">
                     {course.isEnrolled ? (
-                      <Button className="flex-1" disabled variant="outline">
+                      <Button className="flex-1" disabled variant="outline" style={{ borderColor: palette.border, color: palette.text2 }}>
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         You have already enrolled
                       </Button>
                     ) : course.progress === 100 ? (
-                      <Button className="flex-1 bg-black hover:bg-gray-800 text-white" disabled>
+                      <Button className="flex-1" disabled style={{ background: palette.accent, color: palette.card }}>
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         Completed
                       </Button>
                     ) : (
                       <Button
-                        className="flex-1 bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
+                        className="flex-1 shadow-lg"
+                        style={{ background: palette.accent, color: palette.card }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+                        onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
                         disabled={enrolling === course._id}
                         onClick={() => handleEnroll(course._id)}
                       >
@@ -323,8 +328,8 @@ const Courses = () => {
                   </div>
 
                   {/* Category Tag */}
-                  <div className="pt-2 border-t border-border">
-                    <span className="inline-block px-3 py-1 rounded-full bg-blue-900/40 text-blue-300 text-xs font-medium">
+                  <div className="pt-2 border-t" style={{ borderColor: palette.border }}>
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-medium" style={{ background: palette.accentSoft, color: palette.accent }}>
                       {course.category || "General"}
                     </span>
                   </div>
@@ -336,8 +341,8 @@ const Courses = () => {
       ) : (
         !loading && (
           <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400">
+            <BookOpen className="w-16 h-16 mx-auto mb-4" style={{ color: palette.text2 }} />
+            <p style={{ color: palette.text2 }}>
               No courses found matching your search.
             </p>
           </div>

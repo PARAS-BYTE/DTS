@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Youtube, Layers, FileText, Library, GraduationCap } from "lucide-react";
 import BackButton from "@/components/BackButton";
+import { palette } from "@/theme/palette";
 
 const CreateCourseFromPlaylist = () => {
   const [formData, setFormData] = useState({
@@ -42,19 +43,19 @@ const CreateCourseFromPlaylist = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center py-12 px-4">
+    <div className="min-h-screen flex flex-col items-center py-8 sm:py-12 px-4" style={{ background: palette.bg }}>
       {/* Header */}
       <div className="w-full max-w-lg mb-6">
         <BackButton to="/student/courses" label="Back to Courses" />
       </div>
-      <div className="flex flex-col items-center text-center mb-10">
-        <div className="flex items-center gap-3 text-black mb-2">
-          <Youtube className="w-8 h-8" />
-          <h1 className="text-3xl md:text-4xl font-bold text-black">
+      <div className="flex flex-col items-center text-center mb-8 sm:mb-10">
+        <div className="flex items-center gap-3 mb-2">
+          <Youtube className="w-6 h-6 sm:w-8 sm:h-8" style={{ color: palette.text }} />
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: palette.text }}>
             Create Course from Playlist
           </h1>
         </div>
-        <p className="text-gray-700 max-w-xl">
+        <p className="max-w-xl text-sm sm:text-base" style={{ color: palette.text2 }}>
           Generate a structured course automatically from any public YouTube
           playlist.
         </p>
@@ -63,12 +64,13 @@ const CreateCourseFromPlaylist = () => {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 w-full max-w-lg space-y-6"
+        className="p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-lg space-y-6"
+        style={{ background: palette.card, border: `1px solid ${palette.border}` }}
       >
         {/* Playlist URL */}
         <div>
-          <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
-            <Youtube className="w-4 h-4 text-black" /> Playlist URL *
+          <label className="flex items-center gap-2 mb-2 text-sm font-medium" style={{ color: palette.text2 }}>
+            <Youtube className="w-4 h-4" style={{ color: palette.text }} /> Playlist URL *
           </label>
           <input
             type="text"
@@ -77,14 +79,15 @@ const CreateCourseFromPlaylist = () => {
             value={formData.playlistUrl}
             onChange={handleChange}
             required
-            className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
+            className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-sm"
+            style={{ background: palette.card, color: palette.text, borderColor: palette.border, '--tw-ring-color': palette.accent } as React.CSSProperties}
           />
         </div>
 
         {/* Title */}
         <div>
-          <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
-            <Layers className="w-4 h-4 text-black" /> Course Title
+          <label className="flex items-center gap-2 mb-2 text-sm font-medium" style={{ color: palette.text2 }}>
+            <Layers className="w-4 h-4" style={{ color: palette.text }} /> Course Title
           </label>
           <input
             type="text"
@@ -92,14 +95,15 @@ const CreateCourseFromPlaylist = () => {
             placeholder="e.g. Mastering React with YouTube"
             value={formData.title}
             onChange={handleChange}
-            className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
+            className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-sm"
+            style={{ background: palette.card, color: palette.text, borderColor: palette.border, '--tw-ring-color': palette.accent } as React.CSSProperties}
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
-            <FileText className="w-4 h-4 text-black" /> Description
+          <label className="flex items-center gap-2 mb-2 text-sm font-medium" style={{ color: palette.text2 }}>
+            <FileText className="w-4 h-4" style={{ color: palette.text }} /> Description
           </label>
           <textarea
             name="description"
@@ -107,34 +111,37 @@ const CreateCourseFromPlaylist = () => {
             placeholder="Briefly describe the course..."
             value={formData.description}
             onChange={handleChange}
-            className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
+            className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-sm"
+            style={{ background: palette.card, color: palette.text, borderColor: palette.border, '--tw-ring-color': palette.accent } as React.CSSProperties}
           ></textarea>
         </div>
 
         {/* Category & Level */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
-            <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
-              <Library className="w-4 h-4 text-black" /> Category
+            <label className="flex items-center gap-2 mb-2 text-sm font-medium" style={{ color: palette.text2 }}>
+              <Library className="w-4 h-4" style={{ color: palette.text }} /> Category
             </label>
             <input
               type="text"
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
+              className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-sm"
+              style={{ background: palette.card, color: palette.text, borderColor: palette.border, '--tw-ring-color': palette.accent } as React.CSSProperties}
             />
           </div>
 
           <div className="flex-1">
-            <label className="flex items-center gap-2 text-gray-700 mb-2 text-sm font-medium">
-              <GraduationCap className="w-4 h-4 text-black" /> Level
+            <label className="flex items-center gap-2 mb-2 text-sm font-medium" style={{ color: palette.text2 }}>
+              <GraduationCap className="w-4 h-4" style={{ color: palette.text }} /> Level
             </label>
             <select
               name="level"
               value={formData.level}
               onChange={handleChange}
-              className="w-full bg-white text-black px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black"
+              className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 text-sm"
+              style={{ background: palette.card, color: palette.text, borderColor: palette.border, '--tw-ring-color': palette.accent } as React.CSSProperties}
             >
               <option>Beginner</option>
               <option>Intermediate</option>
@@ -147,11 +154,18 @@ const CreateCourseFromPlaylist = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-3 mt-2 rounded-lg font-semibold transition ${
+          className="w-full py-3 mt-2 rounded-lg font-semibold transition shadow-lg"
+          style={
             loading
-              ? "bg-gray-300 cursor-not-allowed text-gray-500"
-              : "bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30"
-          }`}
+              ? { background: palette.border, color: palette.text2, cursor: 'not-allowed' }
+              : { background: palette.accentDeep, color: palette.card }
+          }
+          onMouseEnter={(e) => {
+            if (!loading) e.currentTarget.style.background = palette.accent;
+          }}
+          onMouseLeave={(e) => {
+            if (!loading) e.currentTarget.style.background = palette.accentDeep;
+          }}
         >
           {loading ? "Creating Course..." : "Generate Course"}
         </button>
@@ -159,23 +173,23 @@ const CreateCourseFromPlaylist = () => {
 
       {/* Result */}
       {result && (
-        <div className="mt-10 w-full max-w-2xl bg-white border border-gray-200 p-6 rounded-2xl shadow-lg">
-          <h2 className="text-xl font-semibold text-black mb-4 flex items-center gap-2">
+        <div className="mt-8 sm:mt-10 w-full max-w-2xl p-6 rounded-2xl shadow-lg" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
+          <h2 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2" style={{ color: palette.text }}>
             <Layers className="w-5 h-5" /> Course Created Successfully
           </h2>
-          <div className="space-y-2 text-gray-700">
+          <div className="space-y-2" style={{ color: palette.text2 }}>
             <p>
-              <strong className="text-black">Title:</strong> {result.course.title}
+              <strong style={{ color: palette.text }}>Title:</strong> {result.course.title}
             </p>
             <p>
-              <strong className="text-black">Modules:</strong> {result.totalModules}
+              <strong style={{ color: palette.text }}>Modules:</strong> {result.totalModules}
             </p>
             <p>
-              <strong className="text-black">Total Videos:</strong> {result.totalVideos}
+              <strong style={{ color: palette.text }}>Total Videos:</strong> {result.totalVideos}
             </p>
-            <p className="text-gray-600 text-sm pt-2">
+            <p className="text-sm pt-2" style={{ color: palette.text2 }}>
               Course ID:{" "}
-              <span className="text-gray-700">{result.course._id}</span>
+              <span style={{ color: palette.text }}>{result.course._id}</span>
             </p>
           </div>
         </div>
@@ -183,7 +197,7 @@ const CreateCourseFromPlaylist = () => {
 
       {/* Error */}
       {error && (
-        <p className="text-red-600 mt-6 font-medium text-sm">{error}</p>
+        <p className="mt-6 font-medium text-sm" style={{ color: "#EF4444" }}>{error}</p>
       )}
     </div>
   );

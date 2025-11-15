@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { palette } from '@/theme/palette';
 
 const AdminSettings = () => {
   const [admin, setAdmin] = useState<any>(null);
@@ -81,82 +82,103 @@ const AdminSettings = () => {
 
   if (loading) {
     return (
-      <div className="p-8 space-y-8 bg-white">
+      <div className="p-8 space-y-8" style={{ background: palette.bg }}>
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-600">Loading profile...</p>
+          <p style={{ color: palette.text2 }}>Loading profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-8 bg-white">
+    <div className="p-8 space-y-8" style={{ background: palette.bg }}>
       <div>
-        <h1 className="text-4xl font-bold mb-2 text-black">Settings</h1>
-        <p className="text-gray-700 text-lg">Manage your instructor account and preferences</p>
+        <h1 className="text-4xl font-bold mb-2" style={{ color: palette.text }}>Settings</h1>
+        <p className="text-lg" style={{ color: palette.text2 }}>Manage your instructor account and preferences</p>
       </div>
 
       {/* Profile Settings - Full Width */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
         className="max-w-3xl"
-      >
-        <Card className="bg-white border border-gray-200 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-black">
-              <User className="w-5 h-5" />
-              Profile Information
-            </CardTitle>
-          </CardHeader>
+        >
+        <Card className="shadow-sm" style={{ background: palette.card, borderColor: palette.border, borderWidth: '1px' }}>
+            <CardHeader>
+            <CardTitle className="flex items-center gap-2" style={{ color: palette.text }}>
+                <User className="w-5 h-5" />
+                Profile Information
+              </CardTitle>
+            </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="instructor-name" className="text-gray-700 font-medium">Full Name</Label>
+                <Label htmlFor="instructor-name" className="font-medium" style={{ color: palette.text }}>Full Name</Label>
                 <Input
                   id="instructor-name"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20 h-11"
+                  className="h-11"
+                  style={{ 
+                    color: palette.text, 
+                    borderColor: palette.border, 
+                    backgroundColor: palette.card,
+                    '--tw-ring-color': palette.accent + '33'
+                  } as React.CSSProperties & { '--tw-ring-color': string }}
                   placeholder="Enter your full name"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="instructor-email" className="text-gray-700 font-medium">Email</Label>
+                <Label htmlFor="instructor-email" className="font-medium" style={{ color: palette.text }}>Email</Label>
                 <Input
                   id="instructor-email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20 h-11"
+                  className="h-11"
+                  style={{ 
+                    color: palette.text, 
+                    borderColor: palette.border, 
+                    backgroundColor: palette.card,
+                    '--tw-ring-color': palette.accent + '33'
+                  } as React.CSSProperties & { '--tw-ring-color': string }}
                   placeholder="Enter your email"
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="department" className="text-gray-700 font-medium">Department</Label>
-              <Input
-                id="department"
-                value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20 h-11"
+              </div>
+              <div className="space-y-2">
+              <Label htmlFor="department" className="font-medium" style={{ color: palette.text }}>Department</Label>
+                <Input
+                  id="department"
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                className="h-11"
+                style={{ 
+                  color: palette.text, 
+                  borderColor: palette.border, 
+                  backgroundColor: palette.card,
+                  '--tw-ring-color': palette.accent + '33'
+                } as React.CSSProperties & { '--tw-ring-color': string }}
                 placeholder="Enter your department"
-              />
-            </div>
-            <div className="pt-4 border-t border-gray-200">
+                />
+              </div>
+            <div className="pt-4 border-t" style={{ borderColor: palette.border }}>
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30 px-8 h-11"
+                className="shadow-lg px-8 h-11"
+                style={{ background: palette.accent, color: palette.card }}
+                onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+                onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
               >
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : 'Save Changes'}
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
     </div>
   );
 };

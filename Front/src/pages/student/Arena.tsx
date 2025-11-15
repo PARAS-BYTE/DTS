@@ -9,6 +9,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
+import { palette } from "@/theme/palette";
 
 const API_URL = "http://localhost:5000/api/battle";
 
@@ -138,7 +139,7 @@ const BattleSetup = () => {
       }
     };
     fetchRecent();
-    return () => (mounted = false);
+    return () => { mounted = false; };
   }, []);
 
   // CREATE BATTLE
@@ -211,14 +212,18 @@ const BattleSetup = () => {
   };
 
   // small helper
-  const safe = (v, d = "") => (v === undefined || v === null ? d : v);
+  const safe = (v: any, d: any = "") => (v === undefined || v === null ? d : v);
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6 relative overflow-hidden">
+    <div
+      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
+      style={{ backgroundColor: palette.bg }}
+    >
       {/* INTRO OVERLAY */}
       <div
         ref={introContainer}
-        className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white pointer-events-none"
+        className="absolute inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
+        style={{ backgroundColor: palette.bg }}
       >
         <div className="flex items-center gap-8">
           <img
@@ -238,7 +243,8 @@ const BattleSetup = () => {
         {/* Nova per-letter */}
         <div
           ref={novaTextRef}
-          className="mt-[100px] text-black text-4xl md:text-5xl font-extrabold text-center"
+          className="mt-[100px] text-4xl md:text-5xl font-extrabold text-center"
+          style={{ color: palette.text }}
           aria-hidden
         />
       </div>
@@ -251,10 +257,10 @@ const BattleSetup = () => {
           transition={{ duration: 0.35 }}
           className="text-center mb-10"
         >
-          <h1 className="text-5xl font-extrabold text-black tracking-wide">
+          <h1 className="text-5xl font-extrabold tracking-wide" style={{ color: palette.text }}>
             ⚔️ Battle Arena
           </h1>
-          <p className="mt-3 text-gray-700 text-lg">
+          <p className="mt-3 text-lg" style={{ color: palette.text2 }}>
             Create or Join a Battle — Let the clash begin.
           </p>
         </motion.div>
@@ -266,11 +272,12 @@ const BattleSetup = () => {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="rounded-2xl border border-gray-200 shadow-lg bg-white p-6"
+            className="rounded-2xl shadow-lg p-6"
+            style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}
           >
-            <Card className="bg-transparent shadow-none">
+            <Card className="bg-transparent shadow-none" style={{ backgroundColor: palette.card }}>
               <CardHeader>
-                <CardTitle className="text-2xl text-black font-semibold">
+                <CardTitle className="text-2xl font-semibold" style={{ color: palette.text }}>
                   Create Battle
                 </CardTitle>
               </CardHeader>
@@ -279,29 +286,34 @@ const BattleSetup = () => {
                 {!createdBattle ? (
                   <>
                     <div>
-                      <Label className="text-gray-700">Battle Name</Label>
+                      <Label style={{ color: palette.text2 }}>Battle Name</Label>
                       <Input
                         placeholder="Ex: JS Master Clash"
                         value={battleName}
                         onChange={(e) => setBattleName(e.target.value)}
-                        className="mt-2 bg-white text-black border-gray-300"
+                        className="mt-2"
+                        style={{ backgroundColor: palette.card, color: palette.text, borderColor: palette.border }}
                       />
                     </div>
 
                     <div>
-                      <Label className="text-gray-700">Tags (comma separated)</Label>
+                      <Label style={{ color: palette.text2 }}>Tags (comma separated)</Label>
                       <Input
                         placeholder="JavaScript, Arrays, Logic"
                         value={tags}
                         onChange={(e) => setTags(e.target.value)}
-                        className="mt-2 bg-white text-black border-gray-300"
+                        className="mt-2"
+                        style={{ backgroundColor: palette.card, color: palette.text, borderColor: palette.border }}
                       />
                     </div>
 
                     <Button
                       onClick={handleCreateBattle}
                       disabled={loading}
-                      className="w-full py-3 mt-2 bg-black hover:bg-gray-800 text-white rounded-lg shadow-lg shadow-black/10"
+                      className="w-full py-3 mt-2 rounded-lg shadow-lg"
+                      style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33, 0 2px 4px -2px ${palette.accentDeep}33` }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
                     >
                       {loading ? (
                         <>
@@ -315,13 +327,13 @@ const BattleSetup = () => {
                   </>
                 ) : (
                   <div className="text-center py-6">
-                    <h3 className="text-2xl font-bold text-green-600">Battle Created!</h3>
-                    <p className="mt-3 text-gray-700">
+                    <h3 className="text-2xl font-bold" style={{ color: palette.accentDeep }}>Battle Created!</h3>
+                    <p className="mt-3" style={{ color: palette.text2 }}>
                       <span className="font-medium">Name:</span> {safe(createdBattle.battleName)}
                     </p>
-                    <p className="mt-1 text-black text-lg">
+                    <p className="mt-1 text-lg" style={{ color: palette.text }}>
                       <span className="font-medium">Code:</span>{" "}
-                      <span className="text-black font-bold tracking-wide">
+                      <span className="font-bold tracking-wide" style={{ color: palette.accentDeep }}>
                         {safe(createdBattle.battleCode)}
                       </span>
                     </p>
@@ -334,7 +346,10 @@ const BattleSetup = () => {
                         setBattleName("");
                         setTags("");
                       }}
-                      className="mt-5 border-gray-300 text-black hover:bg-gray-50"
+                      className="mt-5"
+                      style={{ borderColor: palette.border, color: palette.text, backgroundColor: palette.card }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.card}
                     >
                       Create Another
                     </Button>
@@ -349,40 +364,46 @@ const BattleSetup = () => {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="rounded-2xl border border-gray-200 shadow-lg bg-white p-6"
+            className="rounded-2xl shadow-lg p-6"
+            style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}
           >
-            <Card className="bg-transparent shadow-none">
+            <Card className="bg-transparent shadow-none" style={{ backgroundColor: palette.card }}>
               <CardHeader>
-                <CardTitle className="text-2xl text-black font-semibold">
+                <CardTitle className="text-2xl font-semibold" style={{ color: palette.text }}>
                   Join Battle
                 </CardTitle>
               </CardHeader>
 
               <CardContent className="space-y-5">
                 <div>
-                  <Label className="text-gray-700">Your Name</Label>
+                  <Label style={{ color: palette.text2 }}>Your Name</Label>
                   <Input
                     placeholder="Enter your name"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="mt-2 bg-white text-black border-gray-300"
+                    className="mt-2"
+                    style={{ backgroundColor: palette.card, color: palette.text, borderColor: palette.border }}
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-700">Battle Code</Label>
+                  <Label style={{ color: palette.text2 }}>Battle Code</Label>
                   <Input
                     placeholder="Enter battle code"
                     value={battleCode}
                     onChange={(e) => setBattleCode(e.target.value)}
-                    className="mt-2 bg-white text-black border-gray-300"
+                    className="mt-2"
+                    style={{ backgroundColor: palette.card, color: palette.text, borderColor: palette.border }}
                   />
                 </div>
 
                 <Button
                   onClick={handleJoinBattle}
                   disabled={loading}
-                  className="w-full py-3 mt-2 bg-black hover:bg-gray-800 text-white rounded-lg shadow-lg shadow-black/10"
+                  className="w-full py-3 mt-2 rounded-lg shadow-lg"
+                  style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33, 0 2px 4px -2px ${palette.accentDeep}33` }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
                 >
                   {loading ? (
                     <>
@@ -403,30 +424,37 @@ const BattleSetup = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mt-12 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+          className="mt-12 rounded-2xl p-6 shadow-sm"
+          style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}
         >
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-2xl font-bold text-black">🔥 Recent Battles</h2>
-            <p className="text-sm text-gray-600">{recentLoading ? "Loading..." : `${recentBattles.length} available`}</p>
+            <h2 className="text-2xl font-bold" style={{ color: palette.text }}>🔥 Recent Battles</h2>
+            <p className="text-sm" style={{ color: palette.text2 }}>{recentLoading ? "Loading..." : `${recentBattles.length} available`}</p>
           </div>
 
           {recentBattles.length === 0 && !recentLoading ? (
-            <p className="text-gray-600 italic">No battles available.</p>
+            <p className="italic" style={{ color: palette.text2 }}>No battles available.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {recentBattles.map((battle) => (
                 <div
                   key={battle._id}
-                  className="bg-white border border-gray-200 p-5 rounded-xl hover:bg-gray-50 transition shadow-sm"
+                  className="border p-5 rounded-xl transition shadow-sm"
+                  style={{ backgroundColor: palette.card, borderColor: palette.border }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.card}
                 >
-                  <h3 className="text-black text-xl font-semibold">{safe(battle.battleName, "Untitled")}</h3>
-                  <p className="text-gray-600 text-sm mt-1">Code: <span className="text-black font-semibold">{safe(battle.battleCode)}</span></p>
-                  <p className="text-gray-600 text-sm">Players: {Array.isArray(battle.players) ? battle.players.length : safe(battle.players, 0)}</p>
-                  <p className="text-gray-600 text-sm">Tags: <span className="text-black">{Array.isArray(battle.tags) ? battle.tags.join(", ") : safe(battle.tags)}</span></p>
+                  <h3 className="text-xl font-semibold" style={{ color: palette.text }}>{safe(battle.battleName, "Untitled")}</h3>
+                  <p className="text-sm mt-1" style={{ color: palette.text2 }}>Code: <span className="font-semibold" style={{ color: palette.text }}>{safe(battle.battleCode)}</span></p>
+                  <p className="text-sm" style={{ color: palette.text2 }}>Players: {Array.isArray(battle.players) ? battle.players.length : safe(battle.players, 0)}</p>
+                  <p className="text-sm" style={{ color: palette.text2 }}>Tags: <span style={{ color: palette.text }}>{Array.isArray(battle.tags) ? battle.tags.join(", ") : safe(battle.tags)}</span></p>
 
                   <div className="mt-4 flex gap-3">
                     <Button
-                      className="flex-1 bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
+                      className="flex-1 shadow-lg"
+                      style={{ backgroundColor: palette.accent, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accent}33, 0 2px 4px -2px ${palette.accent}33` }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accent}
                       onClick={() => openBattleAnalysis(battle._id)}
                     >
                       View Analysis
@@ -439,7 +467,9 @@ const BattleSetup = () => {
                         setBattleCode(battle.battleCode || "");
                         toast({ description: "Battle code filled" });
                       }}
-                      className="border-gray-300 text-black hover:bg-gray-50"
+                      style={{ borderColor: palette.border, color: palette.text, backgroundColor: palette.card }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.card}
                     >
                       Use Code
                     </Button>

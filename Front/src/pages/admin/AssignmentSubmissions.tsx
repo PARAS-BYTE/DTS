@@ -241,33 +241,33 @@ const AssignmentSubmissions = () => {
   };
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/admin/assessments')}>
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8" style={{ background: palette.bg }}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <Button variant="ghost" size="sm" className="w-full sm:w-auto" style={{ color: palette.text }} onClick={() => navigate('/admin/assessments')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
-        <div>
-          <h1 className="text-4xl font-bold mb-2 text-gradient">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${palette.text}, ${palette.text2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             {assignment?.title || 'Assignment Submissions'}
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-sm sm:text-base md:text-lg" style={{ color: palette.text2 }}>
             Grade student submissions ({submissions.length} total)
           </p>
         </div>
       </div>
 
       {assignment && (
-        <Card>
+        <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
           <CardHeader>
-            <CardTitle>Assignment Details</CardTitle>
+            <CardTitle className="text-base sm:text-lg" style={{ color: palette.text }}>Assignment Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <p className="text-sm text-muted-foreground">{assignment.description}</p>
-            <div className="flex items-center gap-4 text-sm">
-              <span>Course: <strong>{assignment.course}</strong></span>
-              <span>Total Marks: <strong>{assignment.totalMarks}</strong></span>
-              <span>Due Date: <strong>{formatDate(assignment.dueDate)}</strong></span>
+            <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>{assignment.description}</p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+              <span style={{ color: palette.text }}>Course: <strong>{assignment.course}</strong></span>
+              <span style={{ color: palette.text }}>Total Marks: <strong>{assignment.totalMarks}</strong></span>
+              <span style={{ color: palette.text }}>Due Date: <strong>{formatDate(assignment.dueDate)}</strong></span>
             </div>
           </CardContent>
         </Card>
@@ -276,7 +276,7 @@ const AssignmentSubmissions = () => {
       {/* Loading State */}
       {loading && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Loading submissions...</p>
+          <p style={{ color: palette.text2 }}>Loading submissions...</p>
         </div>
       )}
 
@@ -290,28 +290,28 @@ const AssignmentSubmissions = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <Card className="hover:border-primary/50 transition-all">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
-                          <User className="w-6 h-6 text-primary" />
+              <Card className="transition-all" style={{ background: palette.card, border: `1px solid ${palette.border}` }} onMouseEnter={(e) => e.currentTarget.style.borderColor = palette.accent} onMouseLeave={(e) => e.currentTarget.style.borderColor = palette.border}>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col lg:flex-row items-start justify-between gap-4">
+                    <div className="flex-1 space-y-4 min-w-0">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: palette.accentSoft }}>
+                          <User className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: palette.accent }} />
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold">{submission.student.username}</h3>
-                          <p className="text-sm text-muted-foreground">{submission.student.email}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base sm:text-lg font-semibold" style={{ color: palette.text }}>{submission.student.username}</h3>
+                          <p className="text-xs sm:text-sm truncate" style={{ color: palette.text2 }}>{submission.student.email}</p>
+                          <p className="text-xs mt-1" style={{ color: palette.text2 }}>
                             Submitted: {formatDate(submission.submittedAt)}
                           </p>
                         </div>
-                        <div className="ml-auto">
+                        <div className="flex-shrink-0">
                           {submission.status === 'graded' ? (
-                            <span className="px-3 py-1 rounded-full bg-success/10 text-success text-sm font-medium">
+                            <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium" style={{ background: '#10B9811A', color: '#10B981' }}>
                               Graded: {submission.grade}/{submission.totalMarks}
                             </span>
                           ) : (
-                            <span className="px-3 py-1 rounded-full bg-warning/10 text-warning text-sm font-medium">
+                            <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium" style={{ background: '#F59E0B1A', color: '#F59E0B' }}>
                               Pending
                             </span>
                           )}
@@ -321,17 +321,17 @@ const AssignmentSubmissions = () => {
                       {/* Answers */}
                       <div className="space-y-3 mt-4">
                         {assignment?.questions.map((question, qIndex) => (
-                          <div key={question._id} className="p-3 border rounded-lg">
+                          <div key={question._id} className="p-3 rounded-lg" style={{ border: `1px solid ${palette.border}` }}>
                             <div className="flex items-start justify-between mb-2">
-                              <Label className="text-sm font-semibold">
+                              <Label className="text-xs sm:text-sm font-semibold" style={{ color: palette.text }}>
                                 Question {qIndex + 1} ({question.marks} marks)
                               </Label>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">
+                            <p className="text-xs sm:text-sm mb-2" style={{ color: palette.text2 }}>
                               {question.questionText}
                             </p>
-                            <div className="p-3 bg-muted/30 rounded-lg">
-                              <p className="text-sm whitespace-pre-wrap">
+                            <div className="p-3 rounded-lg" style={{ background: palette.cardHover }}>
+                              <p className="text-xs sm:text-sm whitespace-pre-wrap" style={{ color: palette.text }}>
                                 {getAnswerForQuestion(submission, question._id)}
                               </p>
                             </div>
@@ -340,11 +340,11 @@ const AssignmentSubmissions = () => {
                       </div>
 
                       {submission.status === 'graded' && submission.feedback && (
-                        <div className="mt-4 p-3 rounded-lg bg-muted/30">
-                          <p className="text-sm font-medium mb-1">Feedback:</p>
-                          <p className="text-sm text-muted-foreground">{submission.feedback}</p>
+                        <div className="mt-4 p-3 rounded-lg" style={{ background: palette.cardHover }}>
+                          <p className="text-xs sm:text-sm font-medium mb-1" style={{ color: palette.text }}>Feedback:</p>
+                          <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>{submission.feedback}</p>
                           {submission.gradedBy && (
-                            <p className="text-xs text-muted-foreground mt-2">
+                            <p className="text-xs mt-2" style={{ color: palette.text2 }}>
                               Graded by {submission.gradedBy.fullName || submission.gradedBy.username} on{' '}
                               {submission.gradedAt ? formatDate(submission.gradedAt) : 'N/A'}
                             </p>
@@ -353,31 +353,49 @@ const AssignmentSubmissions = () => {
                       )}
                     </div>
 
-                    <div className="ml-4 flex gap-2">
+                    <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto">
                       {submission.status !== 'graded' && (
                         <Button
                           onClick={() => handleAiGrade(submission)}
-                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                          className="text-xs sm:text-sm"
+                          style={{ background: palette.accentDeep, color: palette.card }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = palette.accent}
+                          onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}
                           disabled={aiGrading}
                         >
-                          <Brain className="w-4 h-4 mr-2" />
+                          <Brain className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                           {aiGrading ? 'AI Grading...' : 'AI Grade'}
                         </Button>
                       )}
                       <Button
                         onClick={() => handleGradeClick(submission)}
-                        className="glow-primary"
+                        className="text-xs sm:text-sm"
+                        style={
+                          submission.status === 'graded'
+                            ? { borderColor: palette.border, color: palette.text }
+                            : { background: palette.accentDeep, color: palette.card }
+                        }
+                        onMouseEnter={(e) => {
+                          if (submission.status !== 'graded') {
+                            e.currentTarget.style.background = palette.accent;
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (submission.status !== 'graded') {
+                            e.currentTarget.style.background = palette.accentDeep;
+                          }
+                        }}
                         variant={submission.status === 'graded' ? 'outline' : 'default'}
                         disabled={grading}
                       >
                         {submission.status === 'graded' ? (
                           <>
-                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                            <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                             Update Grade
                           </>
                         ) : (
                           <>
-                            <Save className="w-4 h-4 mr-2" />
+                            <Save className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                             Manual Grade
                           </>
                         )}
@@ -391,19 +409,19 @@ const AssignmentSubmissions = () => {
         </div>
       ) : !loading ? (
         <div className="text-center py-12">
-          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No submissions found.</p>
+          <FileText className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4" style={{ color: palette.text2 }} />
+          <p style={{ color: palette.text2 }}>No submissions found.</p>
         </div>
       ) : null}
 
       {/* Grade Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-base sm:text-lg" style={{ color: palette.text }}>
               Grade Assignment - {selectedSubmission?.student.username}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm" style={{ color: palette.text2 }}>
               Review the submission and provide a grade and feedback.
             </DialogDescription>
           </DialogHeader>
@@ -412,13 +430,13 @@ const AssignmentSubmissions = () => {
             <div className="space-y-4">
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {assignment.questions.map((question, qIndex) => (
-                  <div key={question._id} className="p-3 border rounded-lg">
-                    <Label className="text-sm font-semibold">
+                  <div key={question._id} className="p-3 rounded-lg" style={{ border: `1px solid ${palette.border}` }}>
+                    <Label className="text-xs sm:text-sm font-semibold" style={{ color: palette.text }}>
                       Question {qIndex + 1} ({question.marks} marks)
                     </Label>
-                    <p className="text-sm text-muted-foreground mb-2">{question.questionText}</p>
-                    <div className="p-3 bg-muted/30 rounded-lg">
-                      <p className="text-sm whitespace-pre-wrap">
+                    <p className="text-xs sm:text-sm mb-2" style={{ color: palette.text2 }}>{question.questionText}</p>
+                    <div className="p-3 rounded-lg" style={{ background: palette.cardHover }}>
+                      <p className="text-xs sm:text-sm whitespace-pre-wrap" style={{ color: palette.text }}>
                         {getAnswerForQuestion(selectedSubmission, question._id)}
                       </p>
                     </div>
@@ -426,9 +444,9 @@ const AssignmentSubmissions = () => {
                 ))}
               </div>
 
-              <div className="space-y-4 border-t pt-4">
+              <div className="space-y-4 pt-4" style={{ borderTop: `1px solid ${palette.border}` }}>
                 <div className="space-y-2">
-                  <Label htmlFor="grade">
+                  <Label htmlFor="grade" style={{ color: palette.text2 }}>
                     Grade (out of {assignment.totalMarks})
                   </Label>
                   <Input
@@ -439,17 +457,21 @@ const AssignmentSubmissions = () => {
                     value={grade}
                     onChange={(e) => setGrade(Number(e.target.value))}
                     required
+                    className="text-sm"
+                    style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="feedback">Feedback</Label>
+                  <Label htmlFor="feedback" style={{ color: palette.text2 }}>Feedback</Label>
                   <Textarea
                     id="feedback"
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
                     placeholder="Provide feedback for the student..."
                     rows={4}
+                    className="text-sm"
+                    style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
                   />
                 </div>
               </div>
@@ -462,10 +484,27 @@ const AssignmentSubmissions = () => {
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
               disabled={grading}
+              className="text-xs sm:text-sm"
+              style={{ borderColor: palette.border, color: palette.text }}
             >
               Cancel
             </Button>
-            <Button onClick={handleSubmitGrade} disabled={grading} className="glow-primary">
+            <Button 
+              onClick={handleSubmitGrade} 
+              disabled={grading} 
+              className="text-xs sm:text-sm"
+              style={
+                grading
+                  ? { background: palette.border, color: palette.text2, cursor: 'not-allowed' }
+                  : { background: palette.accentDeep, color: palette.card }
+              }
+              onMouseEnter={(e) => {
+                if (!grading) e.currentTarget.style.background = palette.accent;
+              }}
+              onMouseLeave={(e) => {
+                if (!grading) e.currentTarget.style.background = palette.accentDeep;
+              }}
+            >
               {grading ? 'Grading...' : 'Submit Grade'}
             </Button>
           </DialogFooter>

@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { palette } from '@/theme/palette';
 
 interface Question {
   questionNumber: number;
@@ -198,10 +199,10 @@ const DailyTask = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0b0d] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: palette.bg }}>
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading task...</p>
+          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: `${palette.accent} ${palette.accent} ${palette.accent} transparent` }}></div>
+          <p style={{ color: palette.text2 }}>Loading task...</p>
         </div>
       </div>
     );
@@ -217,38 +218,41 @@ const DailyTask = () => {
   const allAnswered = task.content.questions.every(q => answers[q.questionNumber]);
 
   return (
-    <div className="min-h-screen bg-[#0b0b0d] text-gray-200 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen p-4 sm:p-6 md:p-8" style={{ background: palette.bg }}>
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <Button
             variant="ghost"
             onClick={() => navigate('/student/calendar')}
-            className="text-gray-400 hover:text-white"
+            className="text-xs sm:text-sm"
+            style={{ color: palette.text2 }}
+            onMouseEnter={(e) => e.currentTarget.style.color = palette.text}
+            onMouseLeave={(e) => e.currentTarget.style.color = palette.text2}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
             Back to Calendar
           </Button>
-          <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/20">
+          <Badge variant="outline" style={{ background: palette.accentSoft, color: palette.accent, borderColor: palette.accent }}>
             <Sparkles className="w-3 h-3 mr-1" />
             AI Generated
           </Badge>
         </div>
 
         {/* Task Info */}
-        <Card className="bg-[#121214] border-gray-800">
+        <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
           <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-2xl text-indigo-300 mb-2">{task.title}</CardTitle>
-                <p className="text-gray-400">{task.description}</p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-xl sm:text-2xl mb-2" style={{ color: palette.accent }}>{task.title}</CardTitle>
+                <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>{task.description}</p>
               </div>
-              <div className="text-right">
-                <Badge variant="outline" className="capitalize mb-2">
+              <div className="text-left sm:text-right flex-shrink-0">
+                <Badge variant="outline" className="capitalize mb-2 text-xs sm:text-sm" style={{ borderColor: palette.border, color: palette.text }}>
                   {task.difficulty}
                 </Badge>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <Clock className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text2 }}>
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                   {task.estimatedDuration} min
                 </div>
               </div>
@@ -256,14 +260,14 @@ const DailyTask = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Progress</span>
-                <span className="text-indigo-300">
+              <div className="flex justify-between text-xs sm:text-sm">
+                <span style={{ color: palette.text2 }}>Progress</span>
+                <span style={{ color: palette.accent }}>
                   {currentQuestionIndex + 1} / {task.content.questions.length}
                 </span>
               </div>
-              <Progress value={progress} className="h-2" />
-              <div className="flex justify-between text-xs text-gray-500">
+              <Progress value={progress} className="h-2" style={{ background: palette.progressTrack }} />
+              <div className="flex justify-between text-xs" style={{ color: palette.text2 }}>
                 <span>Answered: {answeredCount}/{task.content.questions.length}</span>
                 <span>{task.category}</span>
               </div>
@@ -272,20 +276,20 @@ const DailyTask = () => {
         </Card>
 
         {/* Question Card */}
-        <Card className="bg-[#121214] border-gray-800">
+        <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-indigo-400" />
+            <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg" style={{ color: palette.text }}>
+              <Target className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: palette.accent }} />
               Question {currentQuestion.questionNumber}
-              <Badge variant="outline" className="ml-2 capitalize">
+              <Badge variant="outline" className="ml-2 capitalize text-xs" style={{ borderColor: palette.border, color: palette.text }}>
                 {currentQuestion.type}
               </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6">
             {/* Question */}
             <div>
-              <p className="text-lg text-gray-200 mb-4">{currentQuestion.question}</p>
+              <p className="text-base sm:text-lg mb-4" style={{ color: palette.text }}>{currentQuestion.question}</p>
             </div>
 
             {/* Answer Input */}
@@ -297,9 +301,15 @@ const DailyTask = () => {
                     onValueChange={(value) => handleAnswerChange(currentQuestion.questionNumber, value)}
                   >
                     {currentQuestion.options.map((option, index) => (
-                      <div key={index} className="flex items-center space-x-2 p-3 rounded-lg border border-gray-700 hover:border-indigo-500/50 transition-colors">
+                      <div 
+                        key={index} 
+                        className="flex items-center space-x-2 p-3 rounded-lg border transition-colors"
+                        style={{ borderColor: palette.border }}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = palette.accent}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = palette.border}
+                      >
                         <RadioGroupItem value={option} id={`option-${index}`} />
-                        <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer text-gray-300">
+                        <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer text-xs sm:text-sm" style={{ color: palette.text }}>
                           {option}
                         </Label>
                       </div>
@@ -312,13 +322,23 @@ const DailyTask = () => {
                     value={answers[currentQuestion.questionNumber] || ''}
                     onValueChange={(value) => handleAnswerChange(currentQuestion.questionNumber, value)}
                   >
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-700 hover:border-indigo-500/50 transition-colors">
+                    <div 
+                      className="flex items-center space-x-2 p-3 rounded-lg border transition-colors"
+                      style={{ borderColor: palette.border }}
+                      onMouseEnter={(e) => e.currentTarget.style.borderColor = palette.accent}
+                      onMouseLeave={(e) => e.currentTarget.style.borderColor = palette.border}
+                    >
                       <RadioGroupItem value="True" id="true" />
-                      <Label htmlFor="true" className="flex-1 cursor-pointer text-gray-300">True</Label>
+                      <Label htmlFor="true" className="flex-1 cursor-pointer text-xs sm:text-sm" style={{ color: palette.text }}>True</Label>
                     </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-700 hover:border-indigo-500/50 transition-colors">
+                    <div 
+                      className="flex items-center space-x-2 p-3 rounded-lg border transition-colors"
+                      style={{ borderColor: palette.border }}
+                      onMouseEnter={(e) => e.currentTarget.style.borderColor = palette.accent}
+                      onMouseLeave={(e) => e.currentTarget.style.borderColor = palette.border}
+                    >
                       <RadioGroupItem value="False" id="false" />
-                      <Label htmlFor="false" className="flex-1 cursor-pointer text-gray-300">False</Label>
+                      <Label htmlFor="false" className="flex-1 cursor-pointer text-xs sm:text-sm" style={{ color: palette.text }}>False</Label>
                     </div>
                   </RadioGroup>
                 )}
@@ -328,72 +348,94 @@ const DailyTask = () => {
                     placeholder={currentQuestion.type === 'fillblank' ? 'Enter your answer...' : 'Type your answer here...'}
                     value={answers[currentQuestion.questionNumber] || ''}
                     onChange={(e) => handleAnswerChange(currentQuestion.questionNumber, e.target.value)}
-                    className="min-h-[120px] bg-gray-900 border-gray-700 text-gray-200"
+                    className="min-h-[120px] text-sm"
+                    style={{ background: palette.card, borderColor: palette.border, color: palette.text }}
                   />
                 )}
               </div>
             ) : (
               <div className="space-y-4">
-                <div className={`p-4 rounded-lg border-2 ${
-                  results[currentQuestion.questionNumber]
-                    ? 'bg-green-500/10 border-green-500/50'
-                    : 'bg-red-500/10 border-red-500/50'
-                }`}>
+                <div 
+                  className="p-4 rounded-lg border-2"
+                  style={{
+                    background: results[currentQuestion.questionNumber] ? '#10B9811A' : '#EF44441A',
+                    borderColor: results[currentQuestion.questionNumber] ? '#10B98180' : '#EF444480'
+                  }}
+                >
                   <div className="flex items-center gap-2 mb-2">
                     {results[currentQuestion.questionNumber] ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-400" />
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#10B981' }} />
                     ) : (
-                      <XCircle className="w-5 h-5 text-red-400" />
+                      <XCircle className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#EF4444' }} />
                     )}
-                    <span className={`font-semibold ${
-                      results[currentQuestion.questionNumber] ? 'text-green-400' : 'text-red-400'
-                    }`}>
+                    <span className="font-semibold text-xs sm:text-sm" style={{ color: results[currentQuestion.questionNumber] ? '#10B981' : '#EF4444' }}>
                       {results[currentQuestion.questionNumber] ? 'Correct!' : 'Incorrect'}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-300 space-y-2">
+                  <div className="text-xs sm:text-sm space-y-2" style={{ color: palette.text }}>
                     <p><strong>Your answer:</strong> {answers[currentQuestion.questionNumber] || 'No answer'}</p>
                     <p><strong>Correct answer:</strong> {currentQuestion.correctAnswer}</p>
-                    <p className="text-gray-400 mt-2">{currentQuestion.explanation}</p>
+                    <p className="mt-2" style={{ color: palette.text2 }}>{currentQuestion.explanation}</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Navigation */}
-            <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0 pt-4" style={{ borderTop: `1px solid ${palette.border}` }}>
               <Button
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentQuestionIndex === 0}
-                className="border-gray-700"
+                className="w-full sm:w-auto text-xs sm:text-sm"
+                style={{ borderColor: palette.border, color: palette.text }}
+                onMouseEnter={(e) => {
+                  if (currentQuestionIndex > 0) e.currentTarget.style.background = palette.accentSoft;
+                }}
+                onMouseLeave={(e) => {
+                  if (currentQuestionIndex > 0) e.currentTarget.style.background = 'transparent';
+                }}
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
+                <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                 Previous
               </Button>
 
               {currentQuestionIndex < task.content.questions.length - 1 ? (
                 <Button
                   onClick={handleNext}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="w-full sm:w-auto text-xs sm:text-sm"
+                  style={{ background: palette.accentDeep, color: palette.card }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = palette.accent}
+                  onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}
                 >
                   Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2" />
                 </Button>
               ) : (
                 <Button
                   onClick={handleSubmit}
                   disabled={!allAnswered || submitting}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="w-full sm:w-auto text-xs sm:text-sm"
+                  style={
+                    !allAnswered || submitting
+                      ? { background: palette.border, color: palette.text2, cursor: 'not-allowed' }
+                      : { background: '#10B981', color: palette.card }
+                  }
+                  onMouseEnter={(e) => {
+                    if (!submitting && allAnswered) e.currentTarget.style.background = '#059669';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!submitting && allAnswered) e.currentTarget.style.background = '#10B981';
+                  }}
                 >
                   {submitting ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-t-transparent rounded-full animate-spin mr-2" style={{ borderColor: `${palette.card} ${palette.card} ${palette.card} transparent` }} />
                       Submitting...
                     </>
                   ) : (
                     <>
-                      <Send className="w-4 h-4 mr-2" />
+                      <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       Submit Task
                     </>
                   )}
@@ -409,13 +451,32 @@ const DailyTask = () => {
             <button
               key={q.questionNumber}
               onClick={() => setCurrentQuestionIndex(index)}
-              className={`w-10 h-10 rounded-lg border-2 transition-all ${
-                index === currentQuestionIndex
-                  ? 'bg-indigo-600 border-indigo-400'
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg border-2 transition-all text-xs sm:text-sm font-medium"
+              style={{
+                background: index === currentQuestionIndex
+                  ? palette.accentDeep
                   : answers[q.questionNumber]
-                  ? 'bg-green-500/20 border-green-500/50'
-                  : 'bg-gray-800 border-gray-700'
-              }`}
+                  ? '#10B9811A'
+                  : palette.cardHover,
+                borderColor: index === currentQuestionIndex
+                  ? palette.accent
+                  : answers[q.questionNumber]
+                  ? '#10B98180'
+                  : palette.border,
+                color: index === currentQuestionIndex
+                  ? palette.card
+                  : palette.text
+              }}
+              onMouseEnter={(e) => {
+                if (index !== currentQuestionIndex) {
+                  e.currentTarget.style.borderColor = palette.accent;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (index !== currentQuestionIndex) {
+                  e.currentTarget.style.borderColor = answers[q.questionNumber] ? '#10B98180' : palette.border;
+                }
+              }}
             >
               {q.questionNumber}
             </button>

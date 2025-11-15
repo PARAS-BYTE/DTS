@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
+// Removed: import gsap from "gsap"; // Animation removed
 import {
   Brain,
   Sparkles,
@@ -16,6 +16,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import BackButton from "@/components/BackButton";
+import { palette } from "@/theme/palette";
 
 const NovaCourseGenerator = () => {
   const [form, setForm] = useState({
@@ -47,14 +48,7 @@ const NovaCourseGenerator = () => {
 
   const levels = ["Beginner", "Intermediate", "Advanced"];
 
-  useEffect(() => {
-    gsap.from(".nova-title", {
-      opacity: 0,
-      y: -40,
-      duration: 1,
-      ease: "power3.out",
-    });
-  }, []);
+  // Removed useEffect with gsap animation
 
   const handleChange = (key, value) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -90,139 +84,160 @@ const NovaCourseGenerator = () => {
     }
   };
 
+  const handleLevelChange = (l) => {
+    handleChange("level", l);
+    setLevelOpen(false);
+  };
+
+  const handleCategoryChange = (c) => {
+    handleChange("category", c);
+    setCategoryOpen(false);
+    setShowCustom(c === "Other");
+  };
+
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden pb-20">
+    <div
+      className="min-h-screen overflow-x-hidden pb-20 p-4 sm:p-8"
+      style={{ backgroundColor: palette.bg }}
+    >
       {/* ─── Header ───────────────────────────── */}
-      <motion.div
-        className="py-16 space-y-4 nova-title"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+      <div
+        className="py-10 sm:py-16 space-y-4"
+        // Removed motion.div wrapper from header
       >
-        <div className="mb-6 px-8">
+        <div className="mb-6 max-w-7xl mx-auto">
           <BackButton to="/student/courses" label="Back to Courses" />
         </div>
         <div className="text-center">
           <div className="flex justify-center items-center gap-3">
-            <motion.div
-              animate={{ rotate: [0, 15, -15, 0] }}
-              transition={{ repeat: Infinity, duration: 6 }}
+            <div
+              // Removed motion.div wrapper for Brain icon animation
             >
-              <Brain className="w-12 h-12 text-black" />
-            </motion.div>
-            <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
+              <Brain className="w-10 h-10 sm:w-12 sm:h-12" style={{ color: palette.text }} />
+            </div>
+            <h1
+              className="text-4xl sm:text-5xl font-extrabold tracking-tight"
+              style={{ color: palette.text }}
+            >
               Nova Course Creator
             </h1>
           </div>
-          <p className="text-gray-700 text-lg max-w-2xl mx-auto leading-relaxed mt-4">
+          <p
+            className="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mt-4"
+            style={{ color: palette.text2 }}
+          >
             Create immersive, structured courses on{" "}
-            <span className="text-black font-semibold">any topic</span> —
+            <span style={{ color: palette.text, fontWeight: '600' }}>any topic</span> —
             art, finance, cooking, science, or anything else — powered by Gemini
             AI.
           </p>
         </div>
-      </motion.div>
+      </div>
 
       {/* ─── Input Section ───────────────────────────── */}
       <motion.div
-        className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-2xl shadow-xl p-8"
-        initial={{ opacity: 0, y: 40 }}
+        className="max-w-4xl mx-auto rounded-2xl shadow-xl p-6 sm:p-8"
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}
       >
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-black text-xl">
-            <Sparkles className="w-5 h-5" /> Generate a New Course
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl" style={{ color: palette.text }}>
+            <Sparkles className="w-5 h-5" style={{ color: palette.accentDeep }} /> Generate a New Course
           </CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">
           <Input
             placeholder="Enter your course topic (e.g., 'Astrophysics for Curious Minds', 'Vegan Cooking Basics')"
-            className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20"
+            className="focus:ring-0 focus:border-opacity-70"
+            style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text, outline: 'none' }}
             value={form.topic}
             onChange={(e) => handleChange("topic", e.target.value)}
           />
 
           {/* ─── Category Dropdown ───────────────── */}
-          <div className="relative">
+          <div className="relative z-30">
             <button
               onClick={() => setCategoryOpen((p) => !p)}
-              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-left flex justify-between items-center hover:border-black transition-all text-black"
+              className="w-full rounded-lg px-4 py-2 text-left flex justify-between items-center transition-all"
+              style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}`, color: palette.text }}
+              onMouseOver={(e) => e.currentTarget.style.borderColor = palette.accent}
+              onMouseOut={(e) => e.currentTarget.style.borderColor = palette.border}
             >
-              <span>{form.category}</span>
+              <span className="text-sm sm:text-base">{form.category}</span>
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  categoryOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform`}
+                style={{ transform: categoryOpen ? "rotate(180deg)" : "rotate(0deg)", color: palette.text2 }}
               />
             </button>
             {categoryOpen && (
-              <motion.ul
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute z-20 bg-white border border-gray-200 mt-1 rounded-lg shadow-lg w-full overflow-hidden max-h-60 overflow-y-auto"
+              <div
+                // Changed motion.ul to div to reduce unnecessary animation
+                className="absolute z-40 mt-1 rounded-lg shadow-lg w-full overflow-hidden max-h-60 overflow-y-auto"
+                style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}
               >
                 {categories.map((c, i) => (
                   <li
                     key={i}
-                    onClick={() => {
-                      handleChange("category", c);
-                      setCategoryOpen(false);
-                      setShowCustom(c === "Other");
-                    }}
-                    className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-all text-black ${
-                      c === form.category ? "bg-black/5" : ""
-                    }`}
+                    onClick={() => handleCategoryChange(c)}
+                    className={`px-4 py-2 cursor-pointer transition-all text-sm sm:text-base list-none`}
+                    style={{ color: palette.text, backgroundColor: c === form.category ? palette.bg : palette.card }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = c === form.category ? palette.bg : palette.card}
                   >
                     {c}
                   </li>
                 ))}
-              </motion.ul>
+              </div>
             )}
           </div>
 
           {showCustom && (
             <Input
               placeholder="Enter custom category name"
-              className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20"
+              className="focus:ring-0 focus:border-opacity-70"
+              style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text, outline: 'none' }}
               value={form.customCategory}
               onChange={(e) => handleChange("customCategory", e.target.value)}
             />
           )}
 
           {/* ─── Level Dropdown ───────────────── */}
-          <div className="relative">
+          <div className="relative z-20">
             <button
               onClick={() => setLevelOpen((p) => !p)}
-              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-left flex justify-between items-center hover:border-black transition-all text-black"
+              className="w-full rounded-lg px-4 py-2 text-left flex justify-between items-center transition-all"
+              style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}`, color: palette.text }}
+              onMouseOver={(e) => e.currentTarget.style.borderColor = palette.accent}
+              onMouseOut={(e) => e.currentTarget.style.borderColor = palette.border}
             >
-              <span>{form.level}</span>
+              <span className="text-sm sm:text-base">{form.level}</span>
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  levelOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform`}
+                style={{ transform: levelOpen ? "rotate(180deg)" : "rotate(0deg)", color: palette.text2 }}
               />
             </button>
             {levelOpen && (
-              <motion.ul
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute z-20 bg-white border border-gray-200 mt-1 rounded-lg shadow-lg w-full"
+              <div
+                // Changed motion.ul to div to reduce unnecessary animation
+                className="absolute z-30 mt-1 rounded-lg shadow-lg w-full"
+                style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}
               >
                 {levels.map((l, i) => (
                   <li
                     key={i}
-                    onClick={() => {
-                      handleChange("level", l);
-                      setLevelOpen(false);
-                    }}
-                    className={`px-4 py-2 cursor-pointer hover:bg-gray-50 transition-all text-black ${
-                      l === form.level ? "bg-black/5" : ""
-                    }`}
+                    onClick={() => handleLevelChange(l)}
+                    className={`px-4 py-2 cursor-pointer transition-all text-sm sm:text-base list-none`}
+                    style={{ color: palette.text, backgroundColor: l === form.level ? palette.bg : palette.card }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = l === form.level ? palette.bg : palette.card}
                   >
                     {l}
                   </li>
                 ))}
-              </motion.ul>
+              </div>
             )}
           </div>
 
@@ -230,7 +245,10 @@ const NovaCourseGenerator = () => {
             <Button
               onClick={handleGenerate}
               disabled={loading}
-              className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white font-semibold px-6 py-2 rounded-lg shadow-lg shadow-black/20 hover:shadow-black/30"
+              className="flex items-center gap-2 font-semibold px-6 py-2 rounded-lg shadow-lg"
+              style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33` }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
             >
               {loading ? (
                 <>
@@ -248,47 +266,51 @@ const NovaCourseGenerator = () => {
 
       {/* ─── Generated Course ───────────────── */}
       {loading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+        <div
+          // Simplified loading animation wrapper
           className="flex justify-center mt-12"
         >
-          <Loader2 className="w-12 h-12 animate-spin text-black" />
-        </motion.div>
+          <Loader2 className="w-12 h-12 animate-spin" style={{ color: palette.text }} />
+        </div>
       )}
 
       {course && (
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="max-w-5xl mx-auto mt-14 bg-white border border-gray-200 rounded-2xl p-8 shadow-xl"
+          transition={{ duration: 0.3 }}
+          className="max-w-5xl mx-auto mt-14 rounded-2xl p-6 sm:p-8 shadow-xl"
+          style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}
         >
-          <h2 className="text-3xl font-bold text-black mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: palette.text }}>
             {course.title}
           </h2>
-          <p className="text-gray-700 mb-4">{course.description}</p>
-          <p className="text-sm text-gray-600 mb-6">
-            Category: {course.category} • Level: {course.level} • Duration:{" "}
-            {course.duration} hrs
+          <p style={{ color: palette.text2 }} className="mb-4">
+            {course.description}
+          </p>
+          <p className="text-sm mb-6" style={{ color: palette.text2 }}>
+            Category: <span style={{ color: palette.text }}>{course.category}</span> • Level: <span style={{ color: palette.text }}>{course.level}</span> • Duration:{" "}
+            <span style={{ color: palette.text }}>{course.duration} hrs</span>
           </p>
 
           {course.modules?.map((mod, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }} // Subtle motion remaining
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6"
+              transition={{ delay: i * 0.05, duration: 0.2 }}
+              className="rounded-xl p-5 mb-6"
+              style={{ backgroundColor: palette.bg, border: `1px solid ${palette.border}` }}
             >
-              <h3 className="text-xl font-semibold text-black flex items-center gap-2 mb-2">
-                <Layers className="w-5 h-5" /> Module {i + 1}: {mod.title}
+              <h3 className="text-lg sm:text-xl font-semibold flex items-center gap-2 mb-2" style={{ color: palette.text }}>
+                <Layers className="w-5 h-5" style={{ color: palette.accentDeep }} /> Module {i + 1}: {mod.title}
               </h3>
-              <p className="text-gray-600 mb-3">{mod.description}</p>
-              <ul className="ml-5 space-y-1">
+              <p style={{ color: palette.text2 }} className="mb-3">
+                {mod.description}
+              </p>
+              <ul className="ml-5 space-y-1 list-disc" style={{ color: palette.text2 }}>
                 {mod.lessons?.map((lesson, j) => (
-                  <li key={j} className="text-gray-700 text-sm">
-                    <span className="text-black">•</span>{" "}
+                  <li key={j} className="text-sm">
                     {lesson.title} — {lesson.duration} min
                   </li>
                 ))}
@@ -299,7 +321,10 @@ const NovaCourseGenerator = () => {
           <div className="flex justify-end mt-6">
             <Button
               onClick={() => toast({ description: "✨ Course saved successfully!" })}
-              className="bg-black hover:bg-gray-800 text-white flex items-center gap-2 px-5 py-2 shadow-lg shadow-black/20 hover:shadow-black/30"
+              className="flex items-center gap-2 px-5 py-2 shadow-lg"
+              style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33` }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
             >
               <Lightbulb className="w-4 h-4" /> Save Course
             </Button>

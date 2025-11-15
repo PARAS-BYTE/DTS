@@ -18,6 +18,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { palette } from "@/theme/palette";
 
 const QUIZ_API = "http://localhost:5000/api/quiz/getquizattempts";
 const BATTLE_API = "http://localhost:5000/api/battle/battlehist";
@@ -106,41 +107,42 @@ const PerformanceHistory = () => {
   const safeNumber = (v) => (v === undefined || v === null ? "N/A" : v);
 
   return (
-    <div className="p-8 min-h-screen bg-white">
+    <div className="p-4 sm:p-6 md:p-8 min-h-screen" style={{ backgroundColor: palette.bg }}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-1 text-black flex items-center gap-3">
-              <BarChart3 className="w-8 h-8 text-black" />
-              Performance History
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 flex items-center gap-2 sm:gap-3" style={{ color: palette.text }}>
+              <BarChart3 className="w-6 h-6 sm:w-7 sm:h-8 flex-shrink-0" style={{ color: palette.text }} />
+              <span className="truncate">Performance History</span>
             </h1>
-            <p className="text-sm text-gray-700">
+            <p className="text-xs sm:text-sm mt-1" style={{ color: palette.text2 }}>
               Review your performance in quizzes and battles
             </p>
           </div>
 
-          <div className="w-80">
+          <div className="w-full sm:w-64 md:w-80">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" style={{ color: palette.text2 }} />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name..."
-                className="pl-10 bg-white text-black border-gray-300"
+                className="pl-9 sm:pl-10 text-sm"
+                style={{ backgroundColor: palette.card, color: palette.text, borderColor: palette.border }}
               />
             </div>
           </div>
         </div>
 
         {loading && (
-          <p className="text-center text-gray-600">Loading your history...</p>
+          <p className="text-center" style={{ color: palette.text2 }}>Loading your history...</p>
         )}
-        {error && <p className="text-center text-red-600">{error}</p>}
+        {error && <p className="text-center" style={{ color: "#EF4444" }}>{error}</p>}
 
         {!loading && filteredQuizzes.length === 0 && filteredBattles.length === 0 && (
-          <div className="py-12 text-center text-gray-600">
-            <Info className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+          <div className="py-12 text-center" style={{ color: palette.text2 }}>
+            <Info className="w-16 h-16 mx-auto mb-4" style={{ color: palette.text2 }} />
             <p>No history found yet.</p>
           </div>
         )}
@@ -148,12 +150,12 @@ const PerformanceHistory = () => {
         {/* Quiz History (UNCHANGED) */}
         {filteredQuizzes.length > 0 && (
           <>
-            <div className="flex items-center justify-between mt-10 mb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 sm:mt-10 mb-3 gap-2">
               <div className="flex items-center gap-2">
-                <BookOpen className="w-7 h-7 text-black" />
-                <h2 className="text-2xl font-bold text-black">Quiz History</h2>
+                <BookOpen className="w-5 h-5 sm:w-6 sm:h-7 flex-shrink-0" style={{ color: palette.text }} />
+                <h2 className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>Quiz History</h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>
                 You've attempted {filteredQuizzes.length} quizzes
               </p>
             </div>
@@ -170,19 +172,20 @@ const PerformanceHistory = () => {
                     transition={{ duration: 0.35, delay: index * 0.05 }}
                   >
                     <Card
-                      className="h-full transform hover:scale-[1.02] transition-transform bg-white border border-gray-200 shadow-sm"
+                      className="h-full transform hover:scale-[1.02] transition-transform shadow-sm"
+                      style={{ backgroundColor: palette.card, borderColor: palette.border }}
                     >
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
-                          <BookOpen className="w-5 h-5 text-black" />
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2" style={{ color: palette.text }}>
+                          <BookOpen className="w-5 h-5" style={{ color: palette.text }} />
                           {attempt.quizTitle || result.quizTitle || "Untitled Quiz"}
                         </CardTitle>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm" style={{ color: palette.text2 }}>
                           {new Date(attempt.attemptedOn || attempt.attemptDate).toLocaleString()}
                         </p>
                       </CardHeader>
 
-                      <CardContent className="space-y-3 text-sm text-gray-700">
+                      <CardContent className="space-y-3 text-sm" style={{ color: palette.text }}>
                         {isDetailed ? (
                           <div className="space-y-1">
                             <p className="flex items-center gap-2">
@@ -191,16 +194,16 @@ const PerformanceHistory = () => {
                               <XCircle className="w-4 h-4 text-red-600" /> Wrong: <b>{result.wrongCount}</b>
                             </p>
                             <p className="flex items-center gap-2">
-                              <Target className="w-4 h-4 text-black" />
+                              <Target className="w-4 h-4" style={{ color: palette.text }} />
                               Accuracy: <b>{result.accuracy}%</b>
                             </p>
                             <p className="flex items-center gap-2">
-                              <Clock className="w-4 h-4 text-black" />
+                              <Clock className="w-4 h-4" style={{ color: palette.text }} />
                               Time: <b>{result.timeTaken ? `${result.timeTaken} mins` : "N/A"}</b>
                             </p>
                           </div>
                         ) : (
-                          <p className="italic text-gray-600 flex items-center gap-2 mt-2">
+                          <p className="italic flex items-center gap-2 mt-2" style={{ color: palette.text2 }}>
                             <Info className="w-4 h-4" />
                             Old attempt — no detailed analysis
                           </p>
@@ -208,7 +211,10 @@ const PerformanceHistory = () => {
 
                         <div className="pt-3">
                           <Button
-                            className="w-full bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
+                            className="w-full shadow-lg"
+                            style={{ backgroundColor: palette.accentDeep, color: palette.card }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
                             onClick={() => openQuizAnalysis(result)}
                           >
                             <BarChart3 className="w-4 h-4 mr-2" /> View Analysis
@@ -226,12 +232,12 @@ const PerformanceHistory = () => {
         {/* Battle History */}
         {filteredBattles.length > 0 && (
           <>
-            <div className="flex items-center justify-between mt-10 mb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 sm:mt-10 mb-3 gap-2">
               <div className="flex items-center gap-2">
-                <Sword className="w-7 h-7 text-black" />
-                <h2 className="text-2xl font-bold text-black">Battle History</h2>
+                <Sword className="w-5 h-5 sm:w-6 sm:h-7 flex-shrink-0" style={{ color: palette.text }} />
+                <h2 className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>Battle History</h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>
                 You've fought {filteredBattles.length} battles
               </p>
             </div>
@@ -257,43 +263,47 @@ const PerformanceHistory = () => {
                     transition={{ duration: 0.35, delay: index * 0.05 }}
                   >
                     <Card
-                      className="h-full transform hover:scale-[1.02] transition-transform bg-white border border-gray-200 shadow-sm"
+                      className="h-full transform hover:scale-[1.02] transition-transform shadow-sm"
+                      style={{ backgroundColor: palette.card, borderColor: palette.border }}
                     >
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg font-semibold text-black flex items-center gap-2">
-                          <Trophy className="w-5 h-5 text-black" />
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2" style={{ color: palette.text }}>
+                          <Trophy className="w-5 h-5" style={{ color: palette.text }} />
                           {battle.battleName || "Untitled Battle"}
                         </CardTitle>
-                        <p className="text-sm text-gray-600">{date}</p>
+                        <p className="text-sm" style={{ color: palette.text2 }}>{date}</p>
                       </CardHeader>
 
-                      <CardContent className="space-y-3 text-sm text-gray-700">
+                      <CardContent className="space-y-3 text-sm" style={{ color: palette.text }}>
                         <div className="space-y-1">
                           <p className="flex items-center gap-2">
                             <CheckCircle className="w-4 h-4 text-green-600" />
                             Score: <b>{safeNumber(totalScore)}</b> / <b>{safeNumber(highest)}</b>
                           </p>
                           <p className="flex items-center gap-2">
-                            <Target className="w-4 h-4 text-black" />
+                            <Target className="w-4 h-4" style={{ color: palette.text }} />
                             Accuracy: <b>{safeNumber(accuracy)}%</b>
                           </p>
                           <p className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-black" />
+                            <Clock className="w-4 h-4" style={{ color: palette.text }} />
                             Total Questions: <b>{safeNumber(totalQuestions)}</b>
                           </p>
                           <p className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-black" />
+                            <Users className="w-4 h-4" style={{ color: palette.text }} />
                             Total Players: <b>{safeNumber(totalPlayers)}</b>
                           </p>
                         </div>
 
-                        <div className="mt-2 text-gray-600 text-sm italic">
+                        <div className="mt-2 text-sm italic" style={{ color: palette.text2 }}>
                           Avg Score: {avgScore ? Number(avgScore).toFixed(1) : "N/A"} | High: {highest || "N/A"} | Low: {lowest || "N/A"}
                         </div>
 
                         <div className="pt-3">
                           <Button
-                            className="w-full bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
+                            className="w-full shadow-lg"
+                            style={{ backgroundColor: palette.accentDeep, color: palette.card }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
                             onClick={() => openBattleAnalysis(battle)}
                           >
                             <BarChart3 className="w-4 h-4 mr-2" /> View Analysis

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VideoPlayer from "@/components/VideoPlayer";
+import { palette } from "@/theme/palette";
 
 const MyLearning = () => {
   const [courses, setCourses] = useState<any[]>([]);
@@ -116,39 +117,40 @@ const MyLearning = () => {
         (course?.title || "").toLowerCase().includes((searchQuery || "").toLowerCase())
     );
     return (
-        <div className="p-8 space-y-8">
+        <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8" style={{ background: palette.bg }}>
             {/* Header */}
             <div>
-                <h1 className="text-4xl font-bold mb-2 text-gradient">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${palette.text}, ${palette.text2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                     My Learning
                 </h1>
-                <p className="text-muted-foreground text-lg">
+                <p className="text-sm sm:text-base md:text-lg" style={{ color: palette.text2 }}>
                     Continue your enrolled courses
                 </p>
             </div>
 
             {/* Search */}
-            <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <div className="relative w-full sm:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" style={{ color: palette.text2 }} />
                 <Input
                     placeholder="Search enrolled courses..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-9 sm:pl-10 text-sm"
+                    style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
                 />
             </div>
             
             {/* Loading & Error States */}
             {loading && (
-                <p className="text-center text-muted-foreground">
+                <p className="text-center" style={{ color: palette.text2 }}>
                     Loading your courses...
                 </p>
             )}
-            {error && <p className="text-center text-destructive">{error}</p>}
+            {error && <p className="text-center" style={{ color: "#EF4444" }}>{error}</p>}
 
             {/* Course Cards */}
             {!loading && filteredCourses.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {filteredCourses.map((course, index) => (
                   <motion.div
                     key={course._id}
@@ -156,9 +158,9 @@ const MyLearning = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
-                    <Card className="h-full hover:scale-105 transition-transform cursor-pointer hover:glow-primary border-primary/20">
+                    <Card className="h-full hover:scale-105 transition-transform cursor-pointer" style={{ background: palette.card, border: `1px solid ${palette.border}` }} onMouseEnter={(e) => e.currentTarget.style.borderColor = palette.accent} onMouseLeave={(e) => e.currentTarget.style.borderColor = palette.border}>
                       <CardHeader className="pb-4">
-                        <div className="aspect-video rounded-xl overflow-hidden mb-4 bg-muted/30">
+                        <div className="aspect-video rounded-xl overflow-hidden mb-4" style={{ background: palette.cardHover }}>
                           <img
                             src={
                               course.thumbnail ||
@@ -168,40 +170,43 @@ const MyLearning = () => {
                             className="object-cover w-full h-full"
                           />
                         </div>
-                        <CardTitle className="text-xl mb-2">{course.title}</CardTitle>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        <CardTitle className="text-lg sm:text-xl mb-2" style={{ color: palette.text }}>{course.title}</CardTitle>
+                        <p className="text-xs sm:text-sm line-clamp-2" style={{ color: palette.text2 }}>
                           {course.description}
                         </p>
                       </CardHeader>
 
                       <CardContent className="space-y-4">
                         {/* Duration + Progress */}
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-4 text-xs sm:text-sm" style={{ color: palette.text2 }}>
                           <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
+                            <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                             <span>Duration: {course.duration || 0}h</span>
                           </div>
                         </div>
 
                         {/* Progress */}
                         <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Progress</span>
-                            <span className="font-medium text-primary">
+                          <div className="flex justify-between text-xs sm:text-sm">
+                            <span style={{ color: palette.text2 }}>Progress</span>
+                            <span className="font-medium" style={{ color: palette.accent }}>
                               {course.progress || 0}%
                             </span>
                           </div>
-                          <Progress value={course.progress || 0} className="h-2" />
+                          <Progress value={course.progress || 0} className="h-2" style={{ background: palette.progressTrack }} />
                         </div>
 
                         {/* Buttons */}
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <Button
-                            className="flex-1 glow-primary"
+                            className="flex-1"
+                            style={{ background: palette.accentDeep, color: palette.card }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = palette.accent}
+                            onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}
                             onClick={() => handleContinue(course._id)}
                             disabled={courseLoading && activeCourse?._id === course._id}
                           >
-                            <Play className="w-4 h-4 mr-2" />
+                            <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                             {courseLoading && activeCourse?._id === course._id
                               ? "Loading..."
                               : "Continue"}
@@ -209,6 +214,7 @@ const MyLearning = () => {
                           <Button
                             className="flex-1"
                             variant="outline"
+                            style={{ borderColor: palette.border, color: palette.text }}
                             onClick={() => navigate("/student/ground", { state: course._id })}
                           >
                             Open Workspace
@@ -222,26 +228,28 @@ const MyLearning = () => {
             ) : (
               !loading && (
                 <div className="text-center py-12">
-                  <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    You haven’t enrolled in any courses yet.
+                  <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4" style={{ color: palette.text2 }} />
+                  <p style={{ color: palette.text2 }}>
+                    You haven't enrolled in any courses yet.
                   </p>
                 </div>
               )
             )}
 
             {(courseLoading || activeCourse) && (
-              <div className="space-y-6 pt-6">
-                <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="space-y-4 sm:space-y-6 pt-4 sm:pt-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-bold">Course Player</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>Course Player</h2>
                     {activeCourse && (
-                      <p className="text-muted-foreground">{activeCourse.title}</p>
+                      <p style={{ color: palette.text2 }}>{activeCourse.title}</p>
                     )}
                   </div>
                   {activeCourse && (
                     <Button
                       variant="outline"
+                      className="w-full sm:w-auto"
+                      style={{ borderColor: palette.border, color: palette.text }}
                       onClick={() => navigate("/student/ground", { state: activeCourse._id })}
                     >
                       Open Full Course Workspace
@@ -250,15 +258,15 @@ const MyLearning = () => {
                 </div>
 
                 {courseLoading && !activeCourse && (
-                  <div className="text-center text-muted-foreground py-8">
+                  <div className="text-center py-8" style={{ color: palette.text2 }}>
                     Loading course content...
                   </div>
                 )}
 
                 {activeCourse && (
-                  <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-                    <div className="space-y-6">
-                      <Card className="border-none shadow-lg">
+                  <div className="grid gap-4 sm:gap-6 lg:grid-cols-[2fr_1fr]">
+                    <div className="space-y-4 sm:space-y-6">
+                      <Card className="shadow-lg" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
                         <CardContent className="space-y-4 p-4">
                           {activeLesson ? (
                             <>
@@ -269,16 +277,16 @@ const MyLearning = () => {
                                 />
                               </div>
                               <div>
-                                <h3 className="text-lg font-semibold">
+                                <h3 className="text-base sm:text-lg font-semibold" style={{ color: palette.text }}>
                                   {activeLesson.title}
                                 </h3>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>
                                   Duration: {activeLesson.duration || 0} minutes
                                 </p>
                               </div>
                             </>
                           ) : (
-                            <div className="h-[320px] flex items-center justify-center text-muted-foreground">
+                            <div className="h-[320px] flex items-center justify-center" style={{ color: palette.text2 }}>
                               Select a lesson to begin watching.
                             </div>
                           )}
@@ -286,14 +294,14 @@ const MyLearning = () => {
                       </Card>
 
                       {activeLesson && (
-                        <Card className="border border-primary/20">
+                        <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
                           <CardHeader>
-                            <CardTitle className="text-lg font-semibold text-primary">
+                            <CardTitle className="text-base sm:text-lg font-semibold" style={{ color: palette.accent }}>
                               Transcript
                             </CardTitle>
                           </CardHeader>
                           <CardContent>
-                            <p className="text-sm leading-relaxed text-muted-foreground max-h-[260px] overflow-y-auto whitespace-pre-line">
+                            <p className="text-xs sm:text-sm leading-relaxed max-h-[260px] overflow-y-auto whitespace-pre-line" style={{ color: palette.text2 }}>
                               {transcript || "Transcript unavailable for this video."}
                             </p>
                           </CardContent>
@@ -301,9 +309,9 @@ const MyLearning = () => {
                       )}
                     </div>
 
-                    <Card className="border border-primary/20">
+                    <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
                       <CardHeader>
-                        <CardTitle className="text-lg font-semibold">
+                        <CardTitle className="text-base sm:text-lg font-semibold" style={{ color: palette.text }}>
                           Course Lessons
                         </CardTitle>
                       </CardHeader>
@@ -311,7 +319,7 @@ const MyLearning = () => {
                         {activeCourse.modules?.length ? (
                           activeCourse.modules.map((mod: any, modIndex: number) => (
                             <div key={modIndex} className="space-y-2">
-                              <h4 className="text-sm font-semibold text-primary">
+                              <h4 className="text-xs sm:text-sm font-semibold" style={{ color: palette.accent }}>
                                 {mod.title || `Module ${modIndex + 1}`}
                               </h4>
                               <div className="space-y-2">
@@ -322,25 +330,36 @@ const MyLearning = () => {
                                       <Button
                                         key={lesson._id || `${modIndex}-${lesson.title}`}
                                         variant={isActive ? "default" : "outline"}
-                                        className="w-full justify-between"
+                                        className="w-full justify-between text-xs sm:text-sm"
+                                        style={
+                                          isActive
+                                            ? { background: palette.accentDeep, color: palette.card }
+                                            : { borderColor: palette.border, color: palette.text }
+                                        }
+                                        onMouseEnter={(e) => {
+                                          if (!isActive) e.currentTarget.style.background = palette.cardHover;
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          if (!isActive) e.currentTarget.style.background = 'transparent';
+                                        }}
                                         onClick={() => handleLessonSelect(lesson)}
                                       >
                                         <span className="flex items-center gap-2">
                                           {isActive ? (
-                                            <CheckCircle2 className="w-4 h-4" />
+                                            <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" />
                                           ) : (
-                                            <Play className="w-4 h-4" />
+                                            <Play className="w-3 h-3 sm:w-4 sm:h-4" />
                                           )}
                                           {lesson.title}
                                         </span>
-                                        <span className="text-xs text-muted-foreground">
+                                        <span className="text-xs" style={{ color: palette.text2 }}>
                                           {lesson.duration || 0} min
                                         </span>
                                       </Button>
                                     );
                                   })
                                 ) : (
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs" style={{ color: palette.text2 }}>
                                     No lessons available in this module yet.
                                   </p>
                                 )}
@@ -348,7 +367,7 @@ const MyLearning = () => {
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>
                             This course does not contain any modules yet.
                           </p>
                         )}

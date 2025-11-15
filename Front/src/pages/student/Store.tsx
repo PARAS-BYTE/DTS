@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gift, Coins, RefreshCw, Star } from "lucide-react";
+import { palette } from "@/theme/palette";
 
 const StorePage = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -50,24 +51,24 @@ const StorePage = () => {
 
   if (loading)
     return (
-      <div className="h-[80vh] flex justify-center items-center text-gray-600">
+      <div className="h-[80vh] flex justify-center items-center" style={{ color: palette.text2 }}>
         Loading store...
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-white text-black py-12 px-6 flex flex-col items-center">
+    <div className="min-h-screen py-12 px-4 sm:px-6 flex flex-col items-center" style={{ background: palette.bg, color: palette.text }}>
       {/* ─── HEADER ───────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-6xl text-center mb-10"
+        className="w-full max-w-6xl text-center mb-8 sm:mb-10"
       >
-        <h1 className="text-4xl font-extrabold flex justify-center items-center gap-3 text-black tracking-tight">
-          <Gift className="w-8 h-8 text-black" /> Nova XP Store
+        <h1 className="text-3xl sm:text-4xl font-extrabold flex justify-center items-center gap-3 tracking-tight" style={{ color: palette.text }}>
+          <Gift className="w-6 h-6 sm:w-8 sm:h-8" style={{ color: palette.text }} /> Nova XP Store
         </h1>
-        <p className="text-gray-700 mt-1 text-base">
+        <p className="mt-1 text-sm sm:text-base" style={{ color: palette.text2 }}>
           Redeem your XP for exclusive digital & physical rewards.
         </p>
       </motion.div>
@@ -77,16 +78,20 @@ const StorePage = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4 }}
-        className="w-full max-w-5xl bg-white border border-gray-200 rounded-2xl shadow-sm flex justify-between items-center px-8 py-4 mb-8"
+        className="w-full max-w-5xl rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 px-4 sm:px-8 py-4 mb-6 sm:mb-8"
+        style={{ background: palette.card, border: `1px solid ${palette.border}` }}
       >
-        <div className="flex items-center gap-3 text-lg font-semibold">
-          <Coins className="w-6 h-6 text-black" />
-          <span className="text-gray-700">Your XP:</span>
-          <span className="text-black font-extrabold">{xp}</span>
+        <div className="flex items-center gap-3 text-base sm:text-lg font-semibold">
+          <Coins className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: palette.text }} />
+          <span style={{ color: palette.text2 }}>Your XP:</span>
+          <span className="font-extrabold" style={{ color: palette.text }}>{xp}</span>
         </div>
         <Button
           onClick={fetchStore}
-          className="flex items-center gap-2 bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
+          className="flex items-center gap-2 w-full sm:w-auto shadow-lg"
+          style={{ background: palette.accentDeep, color: palette.card }}
+          onMouseEnter={(e) => e.currentTarget.style.background = palette.accent}
+          onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}
         >
           <RefreshCw className="w-4 h-4" /> Refresh
         </Button>
@@ -101,7 +106,7 @@ const StorePage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
           >
-            <Card className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <Card className="rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
               {/* Image */}
               <CardHeader className="p-0 relative">
                 <div className="aspect-[4/3] overflow-hidden">
@@ -114,7 +119,7 @@ const StorePage = () => {
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                   />
                 </div>
-                <div className="absolute top-3 right-3 bg-black text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                <div className="absolute top-3 right-3 text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: palette.accentDeep, color: palette.card }}>
                   {item.category}
                 </div>
               </CardHeader>
@@ -122,16 +127,16 @@ const StorePage = () => {
               {/* Content */}
               <CardContent className="p-4 space-y-2 flex flex-col justify-between h-[140px]">
                 <div>
-                  <CardTitle className="text-base font-semibold text-black truncate">
+                  <CardTitle className="text-base font-semibold truncate" style={{ color: palette.text }}>
                     {item.name}
                   </CardTitle>
-                  <p className="text-xs text-gray-600 line-clamp-2 mt-1">
+                  <p className="text-xs line-clamp-2 mt-1" style={{ color: palette.text2 }}>
                     {item.description}
                   </p>
                 </div>
 
                 <div className="flex justify-between items-center mt-2">
-                  <span className="text-black font-bold text-sm flex items-center gap-1">
+                  <span className="font-bold text-sm flex items-center gap-1" style={{ color: palette.text }}>
                     <Coins className="w-4 h-4" /> {item.cost} XP
                   </span>
                   <Button
@@ -140,11 +145,22 @@ const StorePage = () => {
                       xp < item.cost || item.stock <= 0 || redeeming === item._id
                     }
                     onClick={() => handleRedeem(item._id)}
-                    className={`text-sm px-3 py-1 ${
+                    className="text-sm px-3 py-1"
+                    style={
                       xp < item.cost || item.stock <= 0
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
-                    }`}
+                        ? { background: palette.border, color: palette.text2, cursor: 'not-allowed' }
+                        : { background: palette.accentDeep, color: palette.card }
+                    }
+                    onMouseEnter={(e) => {
+                      if (!(xp < item.cost || item.stock <= 0)) {
+                        e.currentTarget.style.background = palette.accent;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!(xp < item.cost || item.stock <= 0)) {
+                        e.currentTarget.style.background = palette.accentDeep;
+                      }
+                    }}
                   >
                     {redeeming === item._id ? "..." : "Redeem"}
                   </Button>
@@ -157,14 +173,14 @@ const StorePage = () => {
 
       {/* ─── EMPTY STATE ─────────────────────── */}
       {items.length === 0 && (
-        <div className="text-gray-600 mt-8 text-center">
+        <div className="mt-8 text-center" style={{ color: palette.text2 }}>
           No items available yet. Check back later!
         </div>
       )}
 
       {/* ─── FOOTER ─────────────────────────── */}
-      <div className="text-gray-600 text-xs mt-12">
-        <Star className="inline-block w-4 h-4 text-black mr-1" />
+      <div className="text-xs mt-12" style={{ color: palette.text2 }}>
+        <Star className="inline-block w-4 h-4 mr-1" style={{ color: palette.text }} />
         Earn XP through learning & challenges to unlock these rewards.
       </div>
     </div>

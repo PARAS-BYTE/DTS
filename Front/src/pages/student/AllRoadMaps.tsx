@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { palette } from "@/theme/palette";
 
 export default function AllRoadMaps() {
   const [roadmaps, setRoadmaps] = useState([]);
@@ -27,35 +28,44 @@ export default function AllRoadMaps() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: palette.bg, color: palette.text }}>
         Loading Roadmaps...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-10 text-white">
-      <h1 className="text-3xl font-bold mb-8 text-center">All Roadmaps</h1>
+    <div className="min-h-screen p-6 sm:p-10" style={{ background: palette.bg, color: palette.text }}>
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center" style={{ color: palette.text }}>All Roadmaps</h1>
 
       {roadmaps.length === 0 ? (
-        <p className="text-center text-zinc-400">No roadmaps found.</p>
+        <p className="text-center" style={{ color: palette.text2 }}>No roadmaps found.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {roadmaps.map((r) => (
             <Card
               key={r._id}
-              className="bg-zinc-900 border border-zinc-800 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-900/20 transition cursor-pointer"
+              className="transition cursor-pointer hover:shadow-lg"
+              style={{ background: palette.card, border: `1px solid ${palette.border}` }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = palette.accent;
+                e.currentTarget.style.backgroundColor = palette.cardHover;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = palette.border;
+                e.currentTarget.style.backgroundColor = palette.card;
+              }}
               onClick={() => navigate("/student/viewroadmap", { state: r._id })}
             >
               <CardHeader>
-                <CardTitle className="text-xl">{r.title}</CardTitle>
+                <CardTitle className="text-lg sm:text-xl" style={{ color: palette.text }}>{r.title}</CardTitle>
               </CardHeader>
 
               <CardContent>
-                <p className="text-sm text-zinc-400 mb-1">
+                <p className="text-sm mb-1" style={{ color: palette.text2 }}>
                   Modules: {r.modules.length}
                 </p>
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm" style={{ color: palette.text2 }}>
                   Created: {new Date(r.createdAt).toLocaleDateString()}
                 </p>
               </CardContent>

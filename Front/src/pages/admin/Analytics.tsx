@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TrendingUp, Users, BookOpen, Target, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { palette } from '@/theme/palette';
 
 const Analytics = () => {
   const completionData = [
@@ -27,31 +28,31 @@ const Analytics = () => {
   ];
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold mb-2 text-gradient">Analytics & Insights</h1>
-          <p className="text-muted-foreground text-lg">Deep dive into your teaching performance</p>
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8" style={{ background: palette.bg }}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${palette.text}, ${palette.text2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Analytics & Insights</h1>
+          <p className="text-sm sm:text-base md:text-lg" style={{ color: palette.text2 }}>Deep dive into your teaching performance</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="w-full sm:w-auto" style={{ borderColor: palette.border, color: palette.text }}>
           <Download className="w-4 h-4 mr-2" />
           Export Report
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
-          <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30">
+          <Card style={{ background: palette.cardHover, border: `1px solid ${palette.border}` }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Users className="w-4 h-4" />
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-2" style={{ color: palette.text }}>
+                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                 Active Students
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">185</div>
-              <p className="text-xs text-muted-foreground mt-1">88% engagement rate</p>
+              <div className="text-2xl sm:text-3xl font-bold" style={{ color: palette.accent }}>185</div>
+              <p className="text-xs mt-1" style={{ color: palette.text2 }}>88% engagement rate</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -61,16 +62,16 @@ const Analytics = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Card className="bg-gradient-to-br from-secondary/20 to-secondary/5 border-secondary/30">
+          <Card style={{ background: palette.cardHover, border: `1px solid ${palette.border}` }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-2" style={{ color: palette.text }}>
+                <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
                 Course Completion
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-secondary">71%</div>
-              <p className="text-xs text-success mt-1 flex items-center gap-1">
+              <div className="text-2xl sm:text-3xl font-bold" style={{ color: palette.accent }}>71%</div>
+              <p className="text-xs mt-1 flex items-center gap-1" style={{ color: '#10B981' }}>
                 <TrendingUp className="w-3 h-3" />
                 +5% this month
               </p>
@@ -83,16 +84,16 @@ const Analytics = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/30">
+          <Card style={{ background: palette.cardHover, border: `1px solid ${palette.border}` }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Target className="w-4 h-4" />
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-2" style={{ color: palette.text }}>
+                <Target className="w-3 h-3 sm:w-4 sm:h-4" />
                 Avg Performance
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-success">79%</div>
-              <p className="text-xs text-muted-foreground mt-1">Above target</p>
+              <div className="text-2xl sm:text-3xl font-bold" style={{ color: '#10B981' }}>79%</div>
+              <p className="text-xs mt-1" style={{ color: palette.text2 }}>Above target</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -102,46 +103,47 @@ const Analytics = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, delay: 0.3 }}
         >
-          <Card className="bg-gradient-to-br from-warning/20 to-warning/5 border-warning/30">
+          <Card style={{ background: palette.cardHover, border: `1px solid ${palette.border}` }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-2" style={{ color: palette.text }}>
+                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                 Satisfaction
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-warning">4.7/5</div>
-              <p className="text-xs text-muted-foreground mt-1">Student rating</p>
+              <div className="text-2xl sm:text-3xl font-bold" style={{ color: '#F59E0B' }}>4.7/5</div>
+              <p className="text-xs mt-1" style={{ color: palette.text2 }}>Student rating</p>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
       {/* Charts */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <Card>
+          <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
             <CardHeader>
-              <CardTitle>Course Completion Rates</CardTitle>
+              <CardTitle className="text-base sm:text-lg" style={{ color: palette.text }}>Course Completion Rates</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={completionData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="course" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
+                  <CartesianGrid strokeDasharray="3 3" style={{ stroke: palette.chartGrid }} />
+                  <XAxis dataKey="course" style={{ stroke: palette.text2 }} tick={{ fill: palette.text2, fontSize: 12 }} />
+                  <YAxis style={{ stroke: palette.text2 }} tick={{ fill: palette.text2, fontSize: 12 }} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
+                      backgroundColor: palette.card,
+                      border: `1px solid ${palette.border}`,
                       borderRadius: '8px',
+                      color: palette.text,
                     }}
                   />
-                  <Bar dataKey="rate" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="rate" style={{ fill: palette.chartLine }} radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -153,24 +155,25 @@ const Analytics = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <Card>
+          <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
             <CardHeader>
-              <CardTitle>Common Weak Topics</CardTitle>
+              <CardTitle className="text-base sm:text-lg" style={{ color: palette.text }}>Common Weak Topics</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={weakTopicsData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis dataKey="topic" type="category" stroke="hsl(var(--muted-foreground))" width={120} />
+                  <CartesianGrid strokeDasharray="3 3" style={{ stroke: palette.chartGrid }} />
+                  <XAxis type="number" style={{ stroke: palette.text2 }} tick={{ fill: palette.text2, fontSize: 12 }} />
+                  <YAxis dataKey="topic" type="category" style={{ stroke: palette.text2 }} width={120} tick={{ fill: palette.text2, fontSize: 12 }} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
+                      backgroundColor: palette.card,
+                      border: `1px solid ${palette.border}`,
                       borderRadius: '8px',
+                      color: palette.text,
                     }}
                   />
-                  <Bar dataKey="students" fill="hsl(var(--warning))" radius={[0, 8, 8, 0]} />
+                  <Bar dataKey="students" style={{ fill: '#F59E0B' }} radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -184,38 +187,39 @@ const Analytics = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6 }}
       >
-        <Card>
+        <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
           <CardHeader>
-            <CardTitle>Student Engagement Trend</CardTitle>
+            <CardTitle className="text-base sm:text-lg" style={{ color: palette.text }}>Student Engagement Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={engagementData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
+                <CartesianGrid strokeDasharray="3 3" style={{ stroke: palette.chartGrid }} />
+                <XAxis dataKey="month" style={{ stroke: palette.text2 }} tick={{ fill: palette.text2, fontSize: 12 }} />
+                <YAxis style={{ stroke: palette.text2 }} tick={{ fill: palette.text2, fontSize: 12 }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
+                    backgroundColor: palette.card,
+                    border: `1px solid ${palette.border}`,
                     borderRadius: '8px',
+                    color: palette.text,
                   }}
                 />
-                <Legend />
+                <Legend wrapperStyle={{ color: palette.text }} />
                 <Line
                   type="monotone"
                   dataKey="active"
-                  stroke="hsl(var(--success))"
+                  style={{ stroke: '#10B981' }}
                   strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--success))', r: 5 }}
+                  dot={{ fill: '#10B981', r: 5 }}
                   name="Active Students"
                 />
                 <Line
                   type="monotone"
                   dataKey="total"
-                  stroke="hsl(var(--primary))"
+                  style={{ stroke: palette.chartLine }}
                   strokeWidth={3}
-                  dot={{ fill: 'hsl(var(--primary))', r: 5 }}
+                  dot={{ fill: palette.chartLine, r: 5 }}
                   name="Total Enrolled"
                 />
               </LineChart>

@@ -28,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import { palette } from "@/theme/palette";
 
 const Quizzes = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -123,56 +124,60 @@ const Quizzes = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-[80vh] text-muted-foreground">
+      <div className="flex justify-center items-center h-[80vh]" style={{ color: palette.text2 }}>
         Loading quizzes...
       </div>
     );
 
   return (
-    <div className="p-8 space-y-10">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-10" style={{ background: palette.bg }}>
       {/* ─── Header ─────────────────────────────── */}
       <div>
-        <h1 className="text-4xl font-bold mb-2 text-gradient">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${palette.text}, ${palette.text2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
           Quizzes & Assessments
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-sm sm:text-base md:text-lg" style={{ color: palette.text2 }}>
           Test your skills and boost your XP
         </p>
       </div>
 
       {/* ─── Search ─────────────────────────────── */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+      <div className="relative w-full sm:max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5" style={{ color: palette.text2 }} />
         <Input
           placeholder="Search quizzes..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-9 sm:pl-10 text-sm"
+          style={{ background: palette.card, color: palette.text, borderColor: palette.border }}
         />
       </div>
 
       {/* ─── Quiz Modes ─────────────────────────── */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Random Quiz */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <Card className="bg-gradient-to-br from-secondary/20 to-secondary/5 border-secondary/30 hover:scale-105 transition-transform cursor-pointer glow-accent h-full">
+          <Card className="hover:scale-105 transition-transform cursor-pointer h-full" style={{ background: palette.cardHover, border: `1px solid ${palette.border}` }}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-secondary" />
+              <CardTitle className="flex items-center gap-2" style={{ color: palette.text }}>
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: palette.accent }} />
                 Random Quiz
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-xs sm:text-sm mb-4" style={{ color: palette.text2 }}>
                 Start a random quiz instantly from the available ones.
               </p>
               <Button
                 variant="outline"
-                className="w-full hover:bg-secondary/10"
+                className="w-full"
+                style={{ borderColor: palette.border, color: palette.text }}
+                onMouseEnter={(e) => e.currentTarget.style.background = palette.accentSoft}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 onClick={handleRandomQuiz}
               >
                 Surprise Me
@@ -189,18 +194,18 @@ const Quizzes = () => {
         >
           <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
             <DialogTrigger asChild>
-              <Card className="bg-gradient-to-br from-yellow-200/20 to-yellow-50 border-yellow-300/40 hover:scale-105 transition-transform cursor-pointer h-full">
+              <Card className="hover:scale-105 transition-transform cursor-pointer h-full" style={{ background: palette.cardHover, border: `1px solid ${palette.border}` }}>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="w-6 h-6 text-yellow-600" />
+                  <CardTitle className="flex items-center gap-2" style={{ color: palette.text }}>
+                    <Brain className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: palette.accent }} />
                     AI Quiz Generator
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-xs sm:text-sm mb-4" style={{ color: palette.text2 }}>
                     Instantly create a new quiz using AI on your chosen topic.
                   </p>
-                  <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">
+                  <Button className="w-full" style={{ background: palette.accentDeep, color: palette.card }} onMouseEnter={(e) => e.currentTarget.style.background = palette.accent} onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}>
                     Generate Quiz
                   </Button>
                 </CardContent>
@@ -208,19 +213,20 @@ const Quizzes = () => {
             </DialogTrigger>
 
             {/* Dialog */}
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Brain className="w-6 h-6 text-yellow-600" />
+                <DialogTitle className="flex items-center gap-2" style={{ color: palette.text }}>
+                  <Brain className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: palette.accent }} />
                   Generate AI Quiz
                 </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-4 py-4">
                 <div>
-                  <label className="text-sm font-medium">Topic</label>
+                  <label className="text-sm font-medium" style={{ color: palette.text2 }}>Topic</label>
                   <input
-                    className="w-full border p-2 rounded-md mt-1"
+                    className="w-full p-2 rounded-md mt-1 text-sm"
+                    style={{ background: palette.card, color: palette.text, border: `1px solid ${palette.border}` }}
                     placeholder="e.g., Data Structures"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
@@ -228,9 +234,10 @@ const Quizzes = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">Difficulty</label>
+                  <label className="text-sm font-medium" style={{ color: palette.text2 }}>Difficulty</label>
                   <select
-                    className="w-full border p-2 rounded-md mt-1"
+                    className="w-full p-2 rounded-md mt-1 text-sm"
+                    style={{ background: palette.card, color: palette.text, border: `1px solid ${palette.border}` }}
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
                   >
@@ -241,12 +248,13 @@ const Quizzes = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">
+                  <label className="text-sm font-medium" style={{ color: palette.text2 }}>
                     Number of Questions
                   </label>
                   <input
                     type="number"
-                    className="w-full border p-2 rounded-md mt-1"
+                    className="w-full p-2 rounded-md mt-1 text-sm"
+                    style={{ background: palette.card, color: palette.text, border: `1px solid ${palette.border}` }}
                     min="5"
                     max="20"
                     value={numQuestions}
@@ -258,12 +266,16 @@ const Quizzes = () => {
                   <Button
                     variant="outline"
                     className="flex-1"
+                    style={{ borderColor: palette.border, color: palette.text }}
                     onClick={() => setShowAIDialog(false)}
                   >
                     Cancel
                   </Button>
                   <Button
-                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white flex items-center justify-center gap-2"
+                    className="flex-1 flex items-center justify-center gap-2"
+                    style={{ background: palette.accentDeep, color: palette.card }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = palette.accent}
+                    onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}
                     onClick={generateAIQuiz}
                     disabled={aiLoading}
                   >
@@ -289,10 +301,10 @@ const Quizzes = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Trophy className="w-6 h-6 text-yellow-500" /> Featured Quizzes
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2" style={{ color: palette.text }}>
+            <Trophy className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: palette.accent }} /> Featured Quizzes
           </h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {featured.map((quiz, i) => (
               <motion.div
                 key={quiz._id || i}
@@ -301,16 +313,17 @@ const Quizzes = () => {
                 transition={{ duration: 0.4, delay: i * 0.1 }}
               >
                 <Card
-                  className="border-primary/30 hover:scale-105 transition-transform cursor-pointer"
+                  className="hover:scale-105 transition-transform cursor-pointer"
+                  style={{ background: palette.card, border: `1px solid ${palette.border}` }}
                   onClick={() => handleNavigate(quiz._id)}
                 >
                   <CardHeader>
-                    <CardTitle>{quiz.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
+                    <CardTitle className="text-base sm:text-lg" style={{ color: palette.text }}>{quiz.title}</CardTitle>
+                    <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>
                       {quiz.category} • {quiz.level}
                     </p>
                   </CardHeader>
-                  <CardContent className="flex justify-between text-sm text-muted-foreground">
+                  <CardContent className="flex justify-between text-xs sm:text-sm" style={{ color: palette.text2 }}>
                     <span>{quiz.totalMarks} Marks</span>
                     <span>{quiz.timeLimit} min</span>
                   </CardContent>
@@ -327,8 +340,8 @@ const Quizzes = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <h2 className="text-2xl font-bold mb-4">All Quizzes</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4" style={{ color: palette.text }}>All Quizzes</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {displayedQuizzes.map((quiz, index) => (
             <motion.div
               key={quiz._id}
@@ -337,30 +350,35 @@ const Quizzes = () => {
               transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
             >
               <Card
-                className="hover:scale-105 transition-transform cursor-pointer hover:border-primary/50"
+                className="hover:scale-105 transition-transform cursor-pointer"
+                style={{ background: palette.card, border: `1px solid ${palette.border}` }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = palette.accent}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = palette.border}
                 onClick={() => handleNavigate(quiz._id)}
               >
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mb-2">
-                    <FileQuestion className="w-6 h-6 text-primary" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-2" style={{ background: palette.accentSoft }}>
+                    <FileQuestion className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: palette.accent }} />
                   </div>
-                  <CardTitle>{quiz.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
+                  <CardTitle className="text-base sm:text-lg" style={{ color: palette.text }}>{quiz.title}</CardTitle>
+                  <p className="text-xs sm:text-sm" style={{ color: palette.text2 }}>
                     {quiz.course?.title || quiz.category}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="w-4 h-4" />
+                  <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
+                    <div className="flex items-center gap-2" style={{ color: palette.text2 }}>
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                       <span>{quiz.timeLimit} min</span>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Zap className="w-4 h-4" />
+                    <div className="flex items-center gap-2" style={{ color: palette.text2 }}>
+                      <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
                       <span>{quiz.totalMarks} Marks</span>
                     </div>
                   </div>
-                  <Button className="w-full glow-primary">Start Quiz</Button>
+                  <Button className="w-full" style={{ background: palette.accentDeep, color: palette.card }} onMouseEnter={(e) => e.currentTarget.style.background = palette.accent} onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}>
+                    Start Quiz
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>
@@ -368,14 +386,14 @@ const Quizzes = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center items-center gap-4 mt-8">
+        <div className="flex justify-center items-center gap-4 mt-6 sm:mt-8">
           {hasPrev && (
-            <Button variant="outline" onClick={() => setPage(page - 1)}>
+            <Button variant="outline" onClick={() => setPage(page - 1)} style={{ borderColor: palette.border, color: palette.text }}>
               Previous
             </Button>
           )}
           {hasNext && (
-            <Button variant="outline" onClick={() => setPage(page + 1)}>
+            <Button variant="outline" onClick={() => setPage(page + 1)} style={{ borderColor: palette.border, color: palette.text }}>
               Next
             </Button>
           )}

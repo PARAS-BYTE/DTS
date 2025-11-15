@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   Flame,
-  Clock,
   CheckCircle2,
   Target,
   BookOpen,
@@ -16,7 +15,7 @@ import {
   Lock,
   RefreshCw,
   Settings,
-  Plus
+  Plus,
 } from "lucide-react";
 import {
   Card,
@@ -45,8 +44,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar as DatePicker } from "@/components/ui/calendar"; 
 import { toast } from "sonner";
+import { palette } from "@/theme/palette";
 
 // Types
 interface Task {
@@ -58,7 +58,7 @@ interface Task {
   status: "pending" | "completed" | "in-progress";
   category: string;
   priority: "low" | "medium" | "high";
-  type: "study" | "quiz" | "reading" | "practice" | "assignment";
+  type: "study" | "quiz" | "reading" | "practice" | "assignment" | "review";
   estimatedDuration: number;
   difficulty: "beginner" | "intermediate" | "advanced";
   aiGenerated: boolean;
@@ -90,6 +90,7 @@ interface CalendarData {
   };
   studyPreferences: StudyPreferences;
 }
+
 // Update these in your TaskItem component
 const typeIcons = {
   study: BookOpen,
@@ -97,28 +98,28 @@ const typeIcons = {
   reading: FileText,
   practice: TrendingUp,
   assignment: Zap,
-  review: RefreshCw  // Add this line
+  review: RefreshCw 
 };
 
-  const typeColors = {
-    study: "text-blue-600",
-    quiz: "text-purple-600", 
-    reading: "text-green-600",
-    practice: "text-yellow-600",
-    assignment: "text-orange-600",
-    review: "text-pink-600"
-  };
+const typeColors = {
+  study: "text-blue-600",
+  quiz: "text-purple-600",
+  reading: "text-green-600",
+  practice: "text-yellow-600",
+  assignment: "text-orange-600",
+  review: "text-pink-600"
+};
 
 // Shape Cell Component
-const ShapeCell = ({ 
-  day, 
-  color, 
+const ShapeCell = ({
+  day,
+  color,
   isToday,
   isCompleted,
   isFuture,
   hasTask,
   onClick
-}: { 
+}: {
   day: number;
   color: string;
   isToday: boolean;
@@ -127,68 +128,73 @@ const ShapeCell = ({
   hasTask: boolean;
   onClick?: () => void;
 }) => {
+  
+  // *** READABILITY FIX: Ensure text is white on dark completed cells ***
+  const textColor = isToday || isCompleted ? palette.card : palette.text;
+  
+  const hoverScale = hasTask && !isFuture ? 1.05 : 1;
+  const cursorStyle = isFuture ? "cursor-not-allowed opacity-60" : hasTask ? "cursor-pointer hover:scale-105 hover:shadow-md" : "cursor-default";
+  
+  // Mapping provided colors to palette
+  // Use accentDeep for completed days for better contrast (it's darker than accent)
+  const cellColor = isCompleted ? palette.accentDeep : hasTask ? palette.text : palette.card;
+
   return (
     <motion.div
-      whileHover={{ scale: hasTask && !isFuture ? 1.05 : 1 }}
+      // REVERTED to original fixed size for small calendar look
+      whileHover={{ scale: hoverScale }}
       onClick={hasTask && !isFuture ? onClick : undefined}
-      className={`relative w-12 h-12 flex items-center justify-center ${color} rounded-lg text-sm font-semibold transition-all border-2 ${
-        isToday ? "border-black shadow-lg shadow-black/20" :
-        isCompleted ? "border-green-500 shadow-lg shadow-green-500/20" :
-        "border-gray-200"
-      } ${isFuture ? "cursor-not-allowed opacity-60" : hasTask ? "cursor-pointer hover:scale-105 hover:shadow-md" : "cursor-default"}`}
+      className={`relative w-12 h-12 flex items-center justify-center rounded-lg text-sm font-semibold transition-all border-2 ${cursorStyle}`}
+      style={{
+        backgroundColor: cellColor,
+        borderColor: isToday ? palette.accentDeep : isCompleted ? palette.accent : palette.border,
+        boxShadow: isToday ? `0 4px 10px ${palette.text}40` : isCompleted ? `0 4px 10px ${palette.accent}40` : 'none'
+      }}
     >
-      <span className={`${isToday ? "text-white" : isCompleted ? "text-white" : "text-black"}`}>
+      <span style={{ color: textColor }}>
         {day}
       </span>
-      
+
       {/* Completion checkmark */}
       {isCompleted && (
-        <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
-          <CheckCircle2 className="w-3 h-3 text-white" />
+        <div
+          className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2"
+          style={{ backgroundColor: palette.accent, borderColor: palette.card }}
+        >
+          <CheckCircle2 className="w-3 h-3" style={{ color: palette.card }} />
         </div>
       )}
 
       {/* Today's indicator */}
       {isToday && !isCompleted && (
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-black rounded-full border-2 border-white animate-pulse" />
+        <div
+          className="absolute -top-1 -right-1 w-2 h-2 rounded-full border-2 animate-pulse"
+          style={{ backgroundColor: palette.accent, borderColor: palette.card }}
+        />
       )}
 
       {/* Task indicator dot */}
       {hasTask && !isCompleted && !isToday && (
-        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black rounded-full" />
+        <div
+          className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full"
+          style={{ backgroundColor: palette.accent }}
+        />
       )}
     </motion.div>
   );
 };
 
 // Task Item Component
-const TaskItem = ({ 
-  task, 
+const TaskItem = ({
+  task,
   onComplete,
   onRegenerate
-}: { 
-  task: Task; 
+}: {
+  task: Task;
   onComplete?: (taskId: string) => void;
   onRegenerate?: () => void;
 }) => {
   const navigate = useNavigate();
-  
-  const typeIcons = {
-    study: BookOpen,
-    quiz: HelpCircle,
-    reading: FileText,
-    practice: TrendingUp,
-    assignment: Zap
-  };
-
-  const typeColors = {
-    study: "text-blue-600",
-    quiz: "text-purple-600", 
-    reading: "text-green-600",
-    practice: "text-yellow-600",
-    assignment: "text-orange-600",
-    review: "text-pink-600"
-  };
 
   const TypeIcon = typeIcons[task.type] || BookOpen;
 
@@ -220,95 +226,97 @@ const TaskItem = ({
     }
   };
 
+  const isCompleted = task.status === "completed";
+  const isLocked = !isTaskAvailable();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex items-start gap-3 p-4 rounded-lg border transition-all ${
-        !isTaskAvailable() 
-          ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
-          : task.status === "completed"
-          ? "bg-green-50 border-green-200 cursor-default"
-          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-md cursor-pointer"
-      }`}
+      className={`flex items-start gap-3 p-4 rounded-lg border transition-all`}
+      style={{
+        backgroundColor: isCompleted ? palette.accentSoft : isLocked ? palette.bg : palette.card,
+        borderColor: isCompleted ? palette.accent : isLocked ? palette.border : palette.border,
+        cursor: isLocked || isCompleted ? "default" : "pointer"
+      }}
       onClick={handleTaskClick}
     >
-      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all mt-0.5 ${
-        task.status === "completed" 
-          ? "bg-green-500 border-green-500" 
-          : !isTaskAvailable()
-          ? "border-gray-300"
-          : "border-gray-300"
-      }`}>
-        {task.status === "completed" && <CheckCircle2 className="w-3 h-3 text-white" />}
-        {!isTaskAvailable() && <Lock className="w-3 h-3 text-gray-400" />}
+      {/* Status Icon */}
+      <div
+        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all mt-0.5`}
+        style={{
+          backgroundColor: isCompleted ? palette.accent : isLocked ? palette.border : palette.card,
+          borderColor: isCompleted ? palette.accent : palette.border,
+        }}
+      >
+        {isCompleted && <CheckCircle2 className="w-3 h-3" style={{ color: palette.card }} />}
+        {isLocked && <Lock className="w-3 h-3" style={{ color: palette.text2 }} />}
       </div>
-      
+
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
           <TypeIcon className={`w-4 h-4 ${typeColors[task.type]}`} />
-          <h4 className={`text-sm font-medium ${
-            task.status === "completed" ? "text-green-700" : 
-            !isTaskAvailable() ? "text-gray-500" : "text-black"
-          }`}>
+          <h4
+            className={`text-sm font-medium`}
+            style={{ color: isCompleted ? palette.accentDeep : isLocked ? palette.text2 : palette.text }}
+          >
             {task.title}
           </h4>
           {task.aiGenerated ? (
-            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-600 border-purple-200">
+            <Badge variant="outline" className="text-xs" style={{ backgroundColor: palette.accentSoft, color: palette.accentDeep, borderColor: palette.accent }}>
               AI
             </Badge>
           ) : (
-            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+            <Badge variant="outline" className="text-xs" style={{ backgroundColor: palette.card, color: palette.text, borderColor: palette.border }}>
               Custom
             </Badge>
           )}
-          {task.status === "completed" && (
-            <Badge variant="outline" className="text-xs bg-green-50 text-green-600 border-green-200">
+          {isCompleted && (
+            <Badge variant="outline" className="text-xs" style={{ backgroundColor: palette.accent, color: palette.card, borderColor: palette.accent }}>
               Done
             </Badge>
           )}
           {isTaskAvailable() && task.status !== "completed" && (
-            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+            <Badge variant="outline" className="text-xs" style={{ backgroundColor: palette.bg, color: palette.text2, borderColor: palette.border }}>
               Available
             </Badge>
           )}
         </div>
-        <p className={`text-xs mb-2 ${
-          !isTaskAvailable() ? "text-gray-500" : "text-gray-600"
-        }`}>
+        <p className={`text-xs mb-2`} style={{ color: isLocked ? palette.text2 : palette.text2 }}>
           {task.description}
         </p>
-        
+
         {/* Learning Objectives */}
         {task.content?.learningObjectives && (
           <div className="mb-2">
-            <p className="text-xs text-gray-600 mb-1">Learning Objectives:</p>
-            <ul className="text-xs text-gray-600 list-disc list-inside">
+            <p className="text-xs mb-1" style={{ color: palette.text2 }}>Learning Objectives:</p>
+            <ul className="text-xs list-disc list-inside" style={{ color: palette.text2 }}>
               {task.content.learningObjectives.slice(0, 2).map((obj, index) => (
                 <li key={index}>{obj}</li>
               ))}
             </ul>
           </div>
         )}
-        
-        <div className={`flex items-center gap-4 text-xs ${
-          !isTaskAvailable() ? "text-gray-500" : "text-gray-600"
-        }`}>
+
+        <div className={`flex flex-wrap items-center gap-4 text-xs`} style={{ color: isLocked ? palette.text2 : palette.text2 }}>
           <span>{task.estimatedDuration}min</span>
           <span>•</span>
           <span className="capitalize">{task.difficulty}</span>
           <span>•</span>
           <span>{task.category}</span>
         </div>
-        
+
         {/* Action Buttons */}
-        <div className="flex gap-2 mt-3">
+        <div className="flex flex-wrap gap-2 mt-3">
           {isTaskAvailable() && task.status !== "completed" && (
             <>
               <Button
                 size="sm"
                 onClick={handleComplete}
-                className="bg-black hover:bg-gray-800 text-white text-xs shadow-lg shadow-black/20 hover:shadow-black/30"
+                className="text-xs shadow-lg"
+                style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33` }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
               >
                 Mark Complete
               </Button>
@@ -316,7 +324,10 @@ const TaskItem = ({
                 size="sm"
                 variant="outline"
                 onClick={handleRegenerate}
-                className="text-xs border-gray-300 hover:bg-gray-50 text-black"
+                className="text-xs"
+                style={{ borderColor: palette.border, color: palette.text, backgroundColor: palette.card }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.card}
               >
                 <RefreshCw className="w-3 h-3 mr-1" />
                 Regenerate
@@ -333,56 +344,56 @@ const TaskItem = ({
 const StudyPreferencesCard = ({ preferences }: { preferences: StudyPreferences }) => {
   const getDifficultyColor = (level: string) => {
     switch (level) {
-      case "beginner": return "text-green-600";
-      case "intermediate": return "text-yellow-600";
-      case "advanced": return "text-red-600";
-      default: return "text-gray-600";
+      case "beginner": return "text-green-500";
+      case "intermediate": return "text-yellow-500";
+      case "advanced": return "text-red-500";
+      default: return "text-gray-500";
     }
   };
 
   return (
-    <Card className="bg-white border border-gray-200 shadow-sm">
+    <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-black text-sm">
+        <CardTitle className="flex items-center gap-2 text-sm" style={{ color: palette.text }}>
           <Settings className="w-4 h-4" /> Study Profile
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-gray-700 text-sm">Difficulty Level</span>
-          <Badge variant="outline" className={`capitalize ${getDifficultyColor(preferences.difficultyLevel)} border-gray-200`}>
+          <span className="text-sm" style={{ color: palette.text2 }}>Difficulty Level</span>
+          <Badge variant="outline" className={`capitalize ${getDifficultyColor(preferences.difficultyLevel)}`} style={{ borderColor: palette.border, backgroundColor: palette.card }}>
             {preferences.difficultyLevel}
           </Badge>
         </div>
-        
+
         <div className="flex items-center justify-between">
-          <span className="text-gray-700 text-sm">Daily Study Time</span>
-          <span className="text-black text-sm font-medium">
+          <span className="text-sm" style={{ color: palette.text2 }}>Daily Study Time</span>
+          <span className="text-sm font-medium" style={{ color: palette.text }}>
             {preferences.dailyStudyTime} min
           </span>
         </div>
-        
+
         <div>
-          <span className="text-gray-700 text-sm">Subjects</span>
+          <span className="text-sm" style={{ color: palette.text2 }}>Subjects</span>
           <div className="flex flex-wrap gap-1 mt-1">
             {preferences.subjects.slice(0, 4).map((subject, index) => (
-              <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-black border-gray-200">
+              <Badge key={index} variant="secondary" className="text-xs" style={{ backgroundColor: palette.bg, color: palette.text, borderColor: palette.border }}>
                 {subject}
               </Badge>
             ))}
             {preferences.subjects.length > 4 && (
-              <Badge variant="secondary" className="text-xs bg-gray-100 text-black border-gray-200">
+              <Badge variant="secondary" className="text-xs" style={{ backgroundColor: palette.bg, color: palette.text, borderColor: palette.border }}>
                 +{preferences.subjects.length - 4} more
               </Badge>
             )}
           </div>
         </div>
-        
+
         <div>
-          <span className="text-gray-700 text-sm">Learning Goals</span>
+          <span className="text-sm" style={{ color: palette.text2 }}>Learning Goals</span>
           <div className="flex flex-wrap gap-1 mt-1">
             {preferences.learningGoals.slice(0, 2).map((goal, index) => (
-              <Badge key={index} variant="outline" className="text-xs bg-black/5 text-black border-gray-200">
+              <Badge key={index} variant="outline" className="text-xs" style={{ backgroundColor: palette.card, color: palette.text, borderColor: palette.border }}>
                 {goal}
               </Badge>
             ))}
@@ -401,11 +412,11 @@ const Calendar = () => {
     todayTasks: [],
     upcomingTasks: [],
     streak: { currentStreak: 0, longestStreak: 0 },
-    statistics: { 
-      totalTasksCompleted: 0, 
-      completionRate: 0, 
-      totalStudyTime: 0, 
-      averageDailyTasks: 0 
+    statistics: {
+      totalTasksCompleted: 0,
+      completionRate: 0,
+      totalStudyTime: 0,
+      averageDailyTasks: 0
     },
     studyPreferences: {
       subjects: [],
@@ -457,12 +468,12 @@ const Calendar = () => {
 
     const questions = Array.isArray(task.content?.questions)
       ? task.content.questions.map((question: any, index: number) => ({
-          ...question,
-          questionNumber:
-            question?.questionNumber !== undefined
-              ? question.questionNumber
-              : index + 1,
-        }))
+        ...question,
+        questionNumber:
+          question?.questionNumber !== undefined
+            ? question.questionNumber
+            : index + 1,
+      }))
       : undefined;
 
     return {
@@ -472,7 +483,7 @@ const Calendar = () => {
         ...task.content,
         questions,
       },
-    };
+    } as Task; // Added type assertion for safety
   };
 
   const fetchCalendarData = async () => {
@@ -484,10 +495,10 @@ const Calendar = () => {
       console.log("📅 Calendar data received:", res.data);
       console.log("📅 Today's tasks:", res.data.todayTasks);
       console.log("📅 All tasks:", res.data.tasks);
-      
+
       // Ensure todayTasks is always an array
       const todayTasks = Array.isArray(res.data.todayTasks) ? res.data.todayTasks : [];
-      
+
       // If no todayTasks but tasks exist, try to find today's task manually
       if (todayTasks.length === 0 && res.data.tasks && res.data.tasks.length > 0) {
         const today = new Date();
@@ -502,7 +513,7 @@ const Calendar = () => {
           res.data.todayTasks = [todayTask];
         }
       }
-      
+
       setCalendarData({
         ...res.data,
         tasks: Array.isArray(res.data.tasks) ? res.data.tasks.map(normalizeTask) : [],
@@ -510,7 +521,7 @@ const Calendar = () => {
           ? res.data.todayTasks.map(normalizeTask)
           : [],
       });
-      
+
       // Show message if no task for today
       if (!res.data.todayTasks || res.data.todayTasks.length === 0) {
         console.warn("⚠️ No task found for today");
@@ -545,7 +556,7 @@ const Calendar = () => {
         {},
         { withCredentials: true }
       );
-      
+
       await fetchCalendarData();
       const xpGained = res.data.xpGained || 0;
       toast.success(`${res.data.message} +${xpGained} XP earned! 🎉`);
@@ -565,7 +576,7 @@ const Calendar = () => {
         {},
         { withCredentials: true }
       );
-      
+
       await fetchCalendarData();
       toast.success("Task regenerated with AI!");
     } catch (err: any) {
@@ -592,7 +603,7 @@ const Calendar = () => {
         },
         { withCredentials: true }
       );
-      
+
       await fetchCalendarData();
       toast.success(res.data.message || "Custom task created successfully! 🎉");
       setIsCreateDialogOpen(false);
@@ -625,9 +636,9 @@ const Calendar = () => {
     const completed = dayTasks.some((t: Task) => t.status === "completed");
     const hasTask = dayTasks.length > 0;
 
-    if (completed) return "bg-green-500";
-    if (hasTask) return "bg-black";
-    return "bg-gray-100";
+    if (completed) return "bg-green-500"; // Theme color applied in ShapeCell
+    if (hasTask) return "bg-black"; // Theme color applied in ShapeCell
+    return "bg-gray-100"; // Theme color applied in ShapeCell
   };
 
   const isToday = (date: Date) => {
@@ -683,79 +694,118 @@ const Calendar = () => {
 
   if (loading) {
     return (
-      <div className="p-8 bg-white min-h-screen text-black flex items-center justify-center">
+      <div className="p-8 min-h-screen flex items-center justify-center" style={{ backgroundColor: palette.bg, color: palette.text }}>
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">AI is generating your daily task...</p>
+          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: palette.text }}></div>
+          <p style={{ color: palette.text2 }}>AI is generating your daily task...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 bg-white min-h-screen text-black space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 min-h-screen space-y-8" style={{ backgroundColor: palette.bg, color: palette.text }}>
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-        <div>
-          <h1 className="text-4xl font-bold flex items-center gap-2 text-black">
-            <CalendarDays className="w-7 h-7" /> Daily Learning
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-3xl sm:text-4xl font-bold flex items-center gap-2" style={{ color: palette.text }}>
+            <CalendarDays className="w-6 h-6 sm:w-7 sm:h-7" /> Daily Learning
           </h1>
-          <p className="text-gray-400">
+          <p className="text-sm sm:text-base mt-1" style={{ color: palette.text2 }}>
             Complete your AI-generated daily task or create your own to maintain your streak!
           </p>
         </div>
 
-        {/* Create Task Button */}
-        <Button
-          onClick={() => setIsCreateDialogOpen(true)}
-          className="bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Custom Task
-        </Button>
-
-        {/* Streak & Stats */}
-        <div className="flex gap-4">
-          <Card className="bg-white border border-gray-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+             {/* Create Task Button (Moved for better mobile layout) */}
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="w-full sm:w-auto shadow-lg text-sm"
+              style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33` }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Custom Task
+            </Button>
+        </div>
+      </div>
+      
+      {/* Streak & Stats Row (Combined and made fully responsive) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-black text-sm">
+              <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
                 <Flame className="w-4 h-4 text-orange-500" /> Current Streak
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl font-bold text-black">
+              <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
                 {calendarData.streak.currentStreak} days
               </div>
-              <div className="text-xs text-gray-600">
+              <div className="text-xs" style={{ color: palette.text2 }}>
                 Best: {calendarData.streak.longestStreak} days
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-black text-sm">
-                <CheckCircle2 className="w-4 h-4 text-green-500" /> Completed
+              <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
+                <CheckCircle2 className="w-4 h-4" style={{ color: palette.accentDeep }} /> Completed
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl font-bold text-black">
+              <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
                 {calendarData.statistics.totalTasksCompleted}
               </div>
-              <div className="text-xs text-gray-600">
+              <div className="text-xs" style={{ color: palette.text2 }}>
                 Total tasks
               </div>
             </CardContent>
           </Card>
-        </div>
+
+          {/* New: Completion Rate (Moved from Stats Card) */}
+          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
+                <TrendingUp className="w-4 h-4" /> Completion Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.accentDeep }}>
+                {calendarData.statistics.completionRate}%
+              </div>
+              <div className="text-xs" style={{ color: palette.text2 }}>
+                Overall
+              </div>
+            </CardContent>
+          </Card>
+
+           {/* New: Total Study Time (Moved from Stats Card) */}
+          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
+                <Zap className="w-4 h-4" /> Total Study Time
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
+                {Math.round(calendarData.statistics.totalStudyTime / 60)}h
+              </div>
+              <div className="text-xs" style={{ color: palette.text2 }}>
+                Lifetime
+              </div>
+            </CardContent>
+          </Card>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Calendar Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/* Calendar Section (2/3 width on desktop) */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
             <CardHeader>
-              <CardTitle className="text-black text-lg flex items-center gap-2">
+              <CardTitle className="text-lg flex items-center gap-2" style={{ color: palette.text }}>
                 <CalendarDays className="w-5 h-5" />{" "}
                 {new Date().toLocaleString("default", {
                   month: "long",
@@ -765,20 +815,25 @@ const Calendar = () => {
             </CardHeader>
             <CardContent>
               {/* Week Headers */}
-              <div className="grid grid-cols-7 text-center mb-4 text-gray-700 text-sm font-medium">
+              <div className="grid grid-cols-7 text-center mb-4 text-sm font-medium mx-auto" style={{ color: palette.text2, maxWidth: '360px' }}>
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                   <div key={d}>{d}</div>
                 ))}
               </div>
 
-              {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-3 justify-items-center">
+              {/* Calendar Grid - REVERTED for fixed size design */}
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 mx-auto justify-center" style={{ maxWidth: '360px' }}>
+                {/* Placeholder for initial offset */}
+                {Array.from({ length: new Date(today.getFullYear(), today.getMonth(), 1).getDay() }, (_, i) => (
+                    <div key={`empty-${i}`} className="w-12 h-12"></div>
+                ))}
+                
                 {Array.from({ length: totalDays }, (_, i) => {
                   const day = i + 1;
                   const date = new Date(today.getFullYear(), today.getMonth(), day);
                   const color = getColorForDay(date);
                   const hasTask = hasTaskForDate(date);
-                  
+
                   return (
                     <ShapeCell
                       key={day}
@@ -795,32 +850,32 @@ const Calendar = () => {
               </div>
 
               {/* Legend */}
-              <div className="flex justify-center gap-6 mt-6 text-xs">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-6 text-xs">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded"></div>
-                  <span className="text-gray-700">Completed</span>
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: palette.accent }}></div>
+                  <span style={{ color: palette.text2 }}>Completed</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-black rounded"></div>
-                  <span className="text-gray-700">Pending</span>
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: palette.text }}></div>
+                  <span style={{ color: palette.text2 }}>Pending</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-100 rounded border border-gray-200"></div>
-                  <span className="text-gray-700">No Task</span>
+                  <div className="w-3 h-3 rounded border" style={{ backgroundColor: palette.bg, borderColor: palette.border }}></div>
+                  <span style={{ color: palette.text2 }}>No Task</span>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tasks Sidebar */}
+        {/* Tasks Sidebar (1/3 width on desktop, full width on mobile) */}
         <div className="space-y-6">
           {/* Today's Task */}
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-black text-sm">
+              <CardTitle className="flex items-center gap-2 text-sm" style={{ color: palette.text }}>
                 <Target className="w-4 h-4" /> Today's AI Task
-                <Badge variant="secondary" className="ml-2 bg-gray-100 text-black border-gray-200">
+                <Badge variant="secondary" className="ml-2 text-xs" style={{ backgroundColor: palette.bg, color: palette.text, borderColor: palette.border }}>
                   {calendarData.todayTasks?.length || 0}/1
                 </Badge>
               </CardTitle>
@@ -828,10 +883,10 @@ const Calendar = () => {
             <CardContent className="space-y-4">
               {calendarData.todayTasks?.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CalendarDays className="w-6 h-6 text-black" />
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: palette.bg }}>
+                    <CalendarDays className="w-6 h-6" style={{ color: palette.text }} />
                   </div>
-                  <p className="text-gray-600 text-sm mb-4">
+                  <p className="text-sm mb-4" style={{ color: palette.text2 }}>
                     No task for today. Generating one now...
                   </p>
                   <Button
@@ -854,7 +909,10 @@ const Calendar = () => {
                       }
                     }}
                     disabled={regenerating}
-                    className="bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30"
+                    className="w-full shadow-lg"
+                    style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33` }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
                   >
                     {regenerating ? (
                       <>
@@ -881,16 +939,18 @@ const Calendar = () => {
               )}
 
               {/* Daily Progress */}
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4" style={{ borderTop: `1px solid ${palette.border}` }}>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-700">Daily Progress</span>
-                  <span className="text-black font-medium">
+                  <span style={{ color: palette.text2 }}>Daily Progress</span>
+                  <span className="font-medium" style={{ color: palette.text }}>
                     {calendarData.todayTasks?.some(t => t.status === "completed") ? "100%" : "0%"}
                   </span>
                 </div>
-                <Progress 
-                  value={calendarData.todayTasks?.some(t => t.status === "completed") ? 100 : 0} 
+                <Progress
+                  value={calendarData.todayTasks?.some(t => t.status === "completed") ? 100 : 0}
                   className="h-2"
+                  style={{ backgroundColor: palette.progressTrack }}
+                  indicatorStyle={{ backgroundColor: palette.progressFill }}
                 />
               </div>
             </CardContent>
@@ -898,32 +958,23 @@ const Calendar = () => {
 
           {/* Study Preferences */}
           <StudyPreferencesCard preferences={calendarData.studyPreferences} />
-
-          {/* Statistics */}
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          
+          {/* Statistics (Removed total study time and tasks completed, as they were moved up) */}
+          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-black text-sm">
-                <TrendingUp className="w-4 h-4" /> Statistics
+              <CardTitle className="flex items-center gap-2 text-sm" style={{ color: palette.text }}>
+                <TrendingUp className="w-4 h-4" /> Other Metrics
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-700 text-sm">Completion Rate</span>
-                <span className="text-green-600 font-semibold">
-                  {calendarData.statistics.completionRate}%
+                <span className="text-sm" style={{ color: palette.text2 }}>Average Daily Tasks</span>
+                <span className="font-medium" style={{ color: palette.text }}>
+                  {calendarData.statistics.averageDailyTasks.toFixed(1)}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700 text-sm">Total Study Time</span>
-                <span className="text-black font-medium">
-                  {Math.round(calendarData.statistics.totalStudyTime / 60)}h
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700 text-sm">Tasks Completed</span>
-                <span className="text-black font-medium">
-                  {calendarData.statistics.totalTasksCompleted}
-                </span>
+              <div className="text-xs mt-3 p-3 rounded" style={{ backgroundColor: palette.bg, color: palette.text2, border: `1px solid ${palette.border}` }}>
+                 Tip: Consistency is key! Keep your streak alive to maximize your learning.
               </div>
             </CardContent>
           </Card>
@@ -932,65 +983,70 @@ const Calendar = () => {
 
       {/* Create Task Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-gray-200 text-black">
+        <DialogContent className="max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}`, color: palette.text }}>
           <DialogHeader>
-            <DialogTitle className="text-black text-xl font-semibold">Create Custom Task</DialogTitle>
-            <DialogDescription className="text-gray-600">
+            <DialogTitle className="text-xl font-semibold" style={{ color: palette.text }}>Create Custom Task</DialogTitle>
+            <DialogDescription style={{ color: palette.text2 }}>
               Create your own task and earn XP when you complete it!
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-black font-medium">Task Title *</Label>
+              <Label htmlFor="title" className="font-medium" style={{ color: palette.text }}>Task Title *</Label>
               <Input
                 id="title"
                 value={taskForm.title}
                 onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
                 placeholder="e.g., Review JavaScript fundamentals"
-                className="bg-white border-gray-200 text-black focus:border-black"
+                className="focus:border-black"
+                style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text }}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-black font-medium">Description *</Label>
+              <Label htmlFor="description" className="font-medium" style={{ color: palette.text }}>Description *</Label>
               <Textarea
                 id="description"
                 value={taskForm.description}
                 onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
                 placeholder="Describe what you want to accomplish..."
-                rows={4}
-                className="bg-white border-gray-200 text-black focus:border-black"
+                rows={3}
+                className="focus:border-black"
+                style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text }}
                 required
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="date" className="text-black font-medium">Date *</Label>
-                <div className="border border-gray-200 rounded-md p-2 bg-white">
-                  <Calendar
-                    mode="single"
-                    selected={taskForm.date}
-                    onSelect={(date) => date && setTaskForm({ ...taskForm, date })}
-                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                    className="bg-white"
-                  />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date" className="font-medium" style={{ color: palette.text }}>Date *</Label>
+                  <div className="rounded-md p-2" style={{ border: `1px solid ${palette.border}`, backgroundColor: palette.card }}>
+                    <DatePicker
+                      mode="single"
+                      selected={taskForm.date}
+                      onSelect={(date) => date && setTaskForm({ ...taskForm, date })}
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      style={{ backgroundColor: palette.card }}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="type" className="text-black font-medium">Task Type</Label>
+                  <Label htmlFor="type" className="font-medium" style={{ color: palette.text }}>Task Type</Label>
                   <Select
                     value={taskForm.type}
-                    onValueChange={(value) => setTaskForm({ ...taskForm, type: value })}
+                    onValueChange={(value) => setTaskForm({ ...taskForm, type: value as Task['type'] })}
                   >
-                    <SelectTrigger className="bg-white border-gray-200 text-black focus:border-black">
+                    <SelectTrigger className="focus:border-black" style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text }}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
+                    <SelectContent style={{ backgroundColor: palette.card, borderColor: palette.border }}>
                       <SelectItem value="study">Study</SelectItem>
                       <SelectItem value="quiz">Quiz</SelectItem>
                       <SelectItem value="reading">Reading</SelectItem>
@@ -1001,79 +1057,88 @@ const Calendar = () => {
                   </Select>
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="duration" className="font-medium" style={{ color: palette.text }}>Duration (min)</Label>
+                      <Input
+                        id="duration"
+                        type="number"
+                        min="1"
+                        value={taskForm.estimatedDuration}
+                        onChange={(e) => setTaskForm({ ...taskForm, estimatedDuration: parseInt(e.target.value) || 30 })}
+                        className="focus:border-black"
+                        style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="priority" className="font-medium" style={{ color: palette.text }}>Priority</Label>
+                      <Select
+                        value={taskForm.priority}
+                        onValueChange={(value) => setTaskForm({ ...taskForm, priority: value as Task['priority'] })}
+                      >
+                        <SelectTrigger className="focus:border-black" style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text }}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent style={{ backgroundColor: palette.card, borderColor: palette.border }}>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="difficulty" className="text-black font-medium">Difficulty</Label>
+                  <Label htmlFor="difficulty" className="font-medium" style={{ color: palette.text }}>Difficulty</Label>
                   <Select
                     value={taskForm.difficulty}
-                    onValueChange={(value) => setTaskForm({ ...taskForm, difficulty: value })}
+                    onValueChange={(value) => setTaskForm({ ...taskForm, difficulty: value as Task['difficulty'] })}
                   >
-                    <SelectTrigger className="bg-white border-gray-200 text-black focus:border-black">
+                    <SelectTrigger className="focus:border-black" style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text }}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
+                    <SelectContent style={{ backgroundColor: palette.card, borderColor: palette.border }}>
                       <SelectItem value="beginner">Beginner</SelectItem>
                       <SelectItem value="intermediate">Intermediate</SelectItem>
                       <SelectItem value="advanced">Advanced</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-
+                
                 <div className="space-y-2">
-                  <Label htmlFor="priority" className="text-black font-medium">Priority</Label>
-                  <Select
-                    value={taskForm.priority}
-                    onValueChange={(value) => setTaskForm({ ...taskForm, priority: value })}
-                  >
-                    <SelectTrigger className="bg-white border-gray-200 text-black focus:border-black">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="duration" className="text-black font-medium">Duration (minutes)</Label>
-                  <Input
-                    id="duration"
-                    type="number"
-                    min="1"
-                    value={taskForm.estimatedDuration}
-                    onChange={(e) => setTaskForm({ ...taskForm, estimatedDuration: parseInt(e.target.value) || 30 })}
-                    className="bg-white border-gray-200 text-black focus:border-black"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="category" className="text-black font-medium">Category</Label>
+                  <Label htmlFor="category" className="font-medium" style={{ color: palette.text }}>Category</Label>
                   <Input
                     id="category"
                     value={taskForm.category}
                     onChange={(e) => setTaskForm({ ...taskForm, category: e.target.value })}
                     placeholder="e.g., Programming, Math"
-                    className="bg-white border-gray-200 text-black focus:border-black"
+                    className="focus:border-black"
+                    style={{ backgroundColor: palette.card, borderColor: palette.border, color: palette.text }}
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => setIsCreateDialogOpen(false)}
               disabled={creating}
-              className="border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-black"
+              className="w-full sm:w-auto hover:text-black"
+              style={{ borderColor: palette.border, color: palette.text2, backgroundColor: palette.card }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.card}
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateTask}
               disabled={creating}
-              className="bg-black hover:bg-gray-800 text-white"
+              className="w-full sm:w-auto"
+              style={{ backgroundColor: palette.accentDeep, color: palette.card }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
             >
               {creating ? "Creating..." : "Create Task"}
             </Button>

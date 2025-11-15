@@ -24,185 +24,195 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { useStopwatch } from "../../App"; // ✅ Import the stopwatch hook
+import { useStopwatch } from "../../App";
+import { palette } from "../../theme/palette";
+
+
+
 
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
-  // ✅ Use the global stopwatch
   const { elapsedTime, formatTime } = useStopwatch();
 
-  // ---------------------------------------------
-  // ✅ Fetch User Data
-  // ---------------------------------------------
+  /* FETCH DATA */
   useEffect(() => {
-    const fetchDashboard = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
         const headers: any = {};
-        
-        // Only add Authorization header if token exists in localStorage
-        // Otherwise, rely on httpOnly cookie (which is set during signup/login)
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
-        }
-        
+        if (token) headers.Authorization = `Bearer ${token}`;
+
         const res = await axios.get("http://localhost:5000/api/auth/dashboard", {
           headers,
-          withCredentials: true, // This ensures cookies are sent
+          withCredentials: true,
         });
+
         setUser(res.data);
       } catch (err: any) {
-        console.error("Dashboard fetch error:", err);
         setError(err.response?.data?.message || "Failed to load dashboard");
       } finally {
         setLoading(false);
       }
     };
-    fetchDashboard();
+    fetchData();
   }, []);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="p-8 bg-white min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
-        </div>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: palette.bg }}
+      >
+        <p style={{ color: palette.text2 }}>Loading dashboard…</p>
       </div>
     );
-  }
-  
-  if (error) {
+
+  if (error)
     return (
-      <div className="p-8 bg-white min-h-screen flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: palette.bg }}
+      >
         <div className="text-center">
-          <p className="text-red-600 text-lg mb-4">{error}</p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            className="bg-black hover:bg-gray-800 text-white"
+          <p className="mb-4" style={{ color: "#F87171" }}>
+            {error}
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="text-white font-semibold"
+            style={{ background: palette.accent }}
           >
             Retry
           </Button>
         </div>
       </div>
     );
-  }
 
-  // Process real data from backend
-  const studyTimeData = (user?.last7DaysStudy ?? []).map((item: any) => ({
-    day: item.day || item.week || 'Mon',
+  /* MAP DATA */
+  const studyTimeData = (user?.last7DaysStudy || []).map((item: any) => ({
+    day: item.day || "Mon",
     hours: item.hours || 0,
   }));
 
-  // XP History - backend sends day-based data, we'll use it as-is
-  const xpGrowthData = (user?.xpHistory ?? []).map((item: any) => ({
-    day: item.day || item.week || 'Mon',
+  const xpGrowthData = (user?.xpHistory || []).map((item: any) => ({
+    day: item.day || "Mon",
     xp: item.xp || 0,
   }));
 
-  const courses = user?.courses ?? [];
-  const upcomingTasks = user?.upcomingTasks ?? [];
-  const statistics = user?.statistics ?? {};
+  const courses = user?.courses || [];
+  const upcomingTasks = user?.upcomingTasks || [];
+  const stats = user?.statistics || {};
   const streakStats =
-    user?.streakStats ?? {
-      currentStreak: user?.streak ?? user?.streakDays ?? 0,
-      longestStreak: user?.personalBestStreak ?? 0,
-    };
-  const weeklyXP = user?.weeklyXP ?? 0;
+    user?.streakStats || { currentStreak: 0, longestStreak: 0 };
+
+  const masteryScore = Math.round(
+    stats?.completionRate || user?.masteryScore || 0
+  );
+
   const xpGoal = Math.max((user?.level || 1) * 100, 100);
   const xpProgress = Math.min(
     100,
-    xpGoal > 0 ? Math.round(((user?.xp || 0) / xpGoal) * 100) : 0
+    Math.round(((user?.xp || 0) / xpGoal) * 100)
   );
-  const masteryScore = Math.round(
-    statistics?.completionRate ?? user?.masteryScore ?? 0
-  );
-  const weakTopics =
-    user?.weakTopics ?? 
-    (user?.learningPreferences?.weakAreas && user.learningPreferences.weakAreas.length > 0
-      ? user.learningPreferences.weakAreas
-      : ["No weak areas identified yet"]);
+
+  const weakTopics = user?.weakTopics || [
+    "No weak areas identified yet",
+  ];
 
   return (
-    <div className="p-8 space-y-8 bg-white">
-      {/* ✅ Welcome Section */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-4xl font-bold mb-2 text-black">
-          Welcome back, <span className="bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">{user?.name || user?.username || "Student"}</span>! 👋
-        </h1>
-        <p className="text-gray-700 text-lg">
-          You are learning with <b>learnNova</b>. Keep up the momentum 🔥
-        </p>
-      </motion.div>
+    <div
+      className="flex flex-col h-screen "
+      style={{ background: palette.bg }}
+    >
+      {/* HEADER - Similar to ChatBot */}
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b " style={{ borderColor: palette.border, background: palette.card }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1 }} className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: palette.accent }}>
+            <Zap className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: palette.card }} />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold truncate " style={{ color: palette.text }}>
+              Welcome back,{" "}
+              <span style={{ color: palette.accent }}>
+                {user?.name || "Student"}
+              </span>{" "}
+              👋
+            </h1>
+            <p className="text-xs sm:text-sm mt-0.5 hidden sm:block mb-5" style={{ color: palette.text2 }}>
+              Continue learning with{" "}
+              <span style={{ color: palette.accent }}>LearnNova</span>
+            </p>
+          </div>
+        </motion.div>
+      </div>
 
-      {/* ✅ Stats Section */}
+      {/* MAIN CONTENT AREA - Scrollable like ChatBot */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6" style={{ background: palette.bg }}>
+
+      {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total XP"
           icon={Zap}
-          value={user?.xp?.toLocaleString() || "0"}
-          sub={`+${weeklyXP} this week`}
+          value={user?.xp || 0}
+          sub={`+${user?.weeklyXP || 0} this week`}
           progress={xpProgress}
-          color="blue"
         />
 
         <StatCard
           title="Study Streak"
           icon={Flame}
           value={`${streakStats.currentStreak} days`}
-          sub={`Personal best: ${streakStats.longestStreak || 0} days`}
+          sub={`Best: ${streakStats.longestStreak}`}
           streak={streakStats.currentStreak}
-          color="orange"
         />
 
         <StatCard
           title="Avg. Mastery"
           icon={Target}
           value={`${masteryScore}%`}
-          sub={`Total tasks completed: ${statistics.totalTasksCompleted || 0}`}
+          sub={`Tasks: ${stats.totalTasksCompleted || 0}`}
           progress={masteryScore}
-          color="green"
         />
 
-        {/* ✅ Stopwatch Card - Now using global stopwatch */}
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-          <Card className="bg-white border border-gray-200 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-black">App Usage Time</CardTitle>
-              <Clock className="w-4 h-4 text-black" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-black font-mono">
-                {formatTime(elapsedTime)}
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                Time spent in Nova Learn today
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+        {/* Stopwatch */}
+        <Card
+          className="border shadow-md"
+          style={{ background: palette.card, borderColor: palette.border }}
+        >
+          <CardHeader className="flex justify-between">
+            <CardTitle className="text-sm" style={{ color: palette.text }}>
+              App Usage Time
+            </CardTitle>
+            <Clock className="w-4 h-4" style={{ color: palette.accent }} />
+          </CardHeader>
+          <CardContent>
+            <div
+              className="text-3xl font-bold font-mono"
+              style={{ color: palette.text }}
+            >
+              {formatTime(elapsedTime)}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* ✅ Charts */}
+      {/* CHARTS */}
       <div className="grid lg:grid-cols-2 gap-6">
         <ChartCard
           title="Weekly Study Time"
           icon={Clock}
-          color="black"
           type="area"
           data={studyTimeData}
           xKey="day"
           yKey="hours"
-          fillId="colorHours"
         />
 
         <ChartCard
           title="XP Growth"
           icon={Zap}
-          color="black"
           type="line"
           data={xpGrowthData}
           xKey="day"
@@ -210,16 +220,12 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* ✅ Upcoming, Courses, Focus */}
+      {/* TASKS / COURSES / FOCUS */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Upcoming Tasks */}
         <TaskSection upcomingTasks={upcomingTasks} />
-
-        {/* Continue Learning */}
         <CoursesSection courses={courses} />
-
-        {/* Focus Areas */}
         <FocusSection weakTopics={weakTopics} />
+      </div>
       </div>
     </div>
   );
@@ -227,191 +233,179 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-/* -----------------------------------------------------------
- ✅ Reusable Components
------------------------------------------------------------ */
-
-const StatCard = ({ title, icon: Icon, value, sub, progress, streak, color }: any) => {
-  const colorClasses: any = {
-    blue: "from-blue-500/20 to-blue-500/5 border-blue-500/30 text-blue-500",
-    orange: "from-orange-500/20 to-orange-500/5 border-orange-500/30 text-orange-500",
-    green: "from-green-500/20 to-green-500/5 border-green-500/30 text-green-500",
-    purple: "from-purple-500/20 to-purple-500/5 border-purple-500/30 text-purple-500",
-  };
-
-  const bgClasses: any = {
-    blue: "bg-blue-500",
-    orange: "bg-orange-500",
-    green: "bg-green-500",
-    purple: "bg-purple-500",
-  };
-
-  return (
-    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-      <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-black">{title}</CardTitle>
-          <Icon className={`w-4 h-4 text-black`} />
-        </CardHeader>
-        <CardContent>
-          <div className={`text-3xl font-bold text-black`}>{value}</div>
-          <p className="text-xs text-gray-600 mt-1">{sub}</p>
-
-          {progress && <Progress value={progress} className="mt-3 h-2" />}
-
-          {streak && (
-            <div className="flex gap-1 mt-3">
-              {Array.from({ length: 7 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`flex-1 h-2 rounded-full ${
-                    i < streak ? "bg-black" : "bg-gray-200"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-};
-
-/* ✅ Chart Component */
-const ChartCard = ({ title, icon: Icon, color, type, data, xKey, yKey, fillId }: any) => {
-  // Use black/gray theme colors
-  const strokeColor = color === "black" ? "#000000" : "#4B5563";
-  const fillColor = color === "black" ? "#000000" : "#4B5563";
-
-  return (
-    <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-black">
-          <Icon className="w-5 h-5 text-black" />
+/* ---------------------- STAT CARD ---------------------- */
+const StatCard = ({ title, icon: Icon, value, sub, progress, streak }: any) => (
+  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1 }}>
+    <Card
+      className="border p-4 transition rounded-xl shadow-sm"
+      style={{
+        background: palette.card,
+        borderColor: palette.border,
+      }}
+    >
+      <CardHeader className="flex justify-between items-center">
+        <CardTitle
+          className="text-sm flex items-center gap-2"
+          style={{ color: palette.text }}
+        >
+          <Icon className="w-4 h-4" style={{ color: palette.accent }} />{" "}
           {title}
         </CardTitle>
       </CardHeader>
 
       <CardContent>
-        {data && data.length > 0 ? (
-          <ResponsiveContainer width="100%" height={200}>
-            {type === "area" ? (
-              <AreaChart data={data}>
-                <defs>
-                  <linearGradient id={fillId || "colorFill"} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={fillColor} stopOpacity={0.2} />
-                    <stop offset="95%" stopColor={fillColor} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+        <p className="text-3xl font-bold" style={{ color: palette.text }}>
+          {value}
+        </p>
+        <p className="text-xs mt-1" style={{ color: palette.text2 }}>
+          {sub}
+        </p>
 
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis 
-                  dataKey={xKey} 
-                  stroke="#6B7280"
-                  style={{ fontSize: '12px' }}
-                />
-                <YAxis 
-                  stroke="#6B7280"
-                  style={{ fontSize: '12px' }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    color: '#000000'
-                  }}
-                />
+        {progress !== undefined && (
+          <Progress
+            value={progress}
+            className="mt-3 h-2"
+            style={{ background: palette.chartGrid }}
+          />
+        )}
 
-                <Area
-                  type="monotone"
-                  dataKey={yKey}
-                  stroke={strokeColor}
-                  strokeWidth={2}
-                  fill={`url(#${fillId || "colorFill"})`}
-                />
-              </AreaChart>
-            ) : (
-              <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis 
-                  dataKey={xKey} 
-                  stroke="#6B7280"
-                  style={{ fontSize: '12px' }}
-                />
-                <YAxis 
-                  stroke="#6B7280"
-                  style={{ fontSize: '12px' }}
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    color: '#000000'
-                  }}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey={yKey}
-                  stroke={strokeColor}
-                  strokeWidth={3}
-                  dot={{ fill: strokeColor, r: 4 }}
-                />
-              </LineChart>
-            )}
-          </ResponsiveContainer>
-        ) : (
-          <div className="h-[200px] flex items-center justify-center text-gray-500">
-            <p className="text-sm">No data available yet. Complete tasks to see your progress!</p>
+        {streak && (
+          <div className="flex gap-1 mt-2">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex-1 h-2 rounded-full"
+                style={{
+                  background: i < streak ? palette.accent : palette.chartGrid,
+                }}
+              />
+            ))}
           </div>
         )}
       </CardContent>
     </Card>
-  );
-};
+  </motion.div>
+);
 
-/* ✅ Upcoming tasks */
-const TaskSection = ({ upcomingTasks }: any) => (
-  <Card className="bg-white border border-gray-200 shadow-sm">
+/* ---------------------- CHART CARD ---------------------- */
+const ChartCard = ({ title, icon: Icon, type, data, xKey, yKey }: any) => (
+  <Card
+    className="border shadow-sm rounded-xl"
+    style={{
+      background: palette.card,
+      borderColor: palette.border,
+    }}
+  >
     <CardHeader>
-      <CardTitle className="text-lg text-black">Upcoming Tasks</CardTitle>
+      <CardTitle
+        className="flex items-center gap-2 text-lg"
+        style={{ color: palette.text }}
+      >
+        <Icon className="w-5 h-5" style={{ color: palette.accent }} /> {title}
+      </CardTitle>
     </CardHeader>
+
+    <CardContent>
+      <ResponsiveContainer width="100%" height={220}>
+        {type === "area" ? (
+          <AreaChart data={data}>
+            <CartesianGrid stroke={palette.chartGrid} />
+            <XAxis dataKey={xKey} stroke={palette.text2} />
+            <YAxis stroke={palette.text2} />
+            <Tooltip
+              contentStyle={{
+                background: palette.card,
+                border: `1px solid ${palette.border}`,
+                color: palette.text,
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey={yKey}
+              stroke={palette.accent}
+              fill={palette.chartFill}
+              strokeWidth={2}
+            />
+          </AreaChart>
+        ) : (
+          <LineChart data={data}>
+            <CartesianGrid stroke={palette.chartGrid} />
+            <XAxis dataKey={xKey} stroke={palette.text2} />
+            <YAxis stroke={palette.text2} />
+            <Tooltip
+              contentStyle={{
+                background: palette.card,
+                border: `1px solid ${palette.border}`,
+                color: palette.text,
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey={yKey}
+              stroke={palette.accent}
+              strokeWidth={3}
+              dot={{ fill: palette.accent, r: 4 }}
+            />
+          </LineChart>
+        )}
+      </ResponsiveContainer>
+    </CardContent>
+  </Card>
+);
+
+/* ---------------------- TASK SECTION ---------------------- */
+const TaskSection = ({ upcomingTasks }: any) => (
+  <Card
+    className="border shadow-sm rounded-xl"
+    style={{
+      background: palette.card,
+      borderColor: palette.border,
+    }}
+  >
+    <CardHeader>
+      <CardTitle className="text-lg" style={{ color: palette.text }}>
+        Upcoming Tasks
+      </CardTitle>
+    </CardHeader>
+
     <CardContent className="space-y-3">
-      {upcomingTasks && upcomingTasks.length > 0 ? (
+      {upcomingTasks?.length > 0 ? (
         upcomingTasks.slice(0, 3).map((task: any, i: number) => (
           <div
             key={i}
-            className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors"
+            className="p-3 rounded-xl"
+            style={{
+              background: palette.cardHover,
+              border: `1px solid ${palette.border}`,
+            }}
           >
-            <div
-              className={`w-2 h-2 rounded-full mt-2 ${
-                task.type === "quiz"
-                  ? "bg-orange-500"
-                  : task.type === "assignment"
-                  ? "bg-red-500"
-                  : "bg-green-500"
-              }`}
-            />
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm text-black">{task.title || "Untitled Task"}</p>
-              <p className="text-xs text-gray-600 truncate">
-                Due:{" "}
-                {task.dueDate
-                  ? new Date(task.dueDate).toLocaleDateString()
-                  : task.date
-                  ? new Date(task.date).toLocaleDateString()
-                  : "TBD"}
-              </p>
-            </div>
+            <p
+              className="font-medium text-sm"
+              style={{ color: palette.text }}
+            >
+              {task.title || "Untitled Task"}
+            </p>
+            <p className="text-xs" style={{ color: palette.text2 }}>
+              Due:{" "}
+              {task.dueDate
+                ? new Date(task.dueDate).toLocaleDateString()
+                : "TBD"}
+            </p>
           </div>
         ))
       ) : (
-        <p className="text-gray-600 text-sm">No upcoming tasks. Check your calendar to add tasks!</p>
+        <p className="text-sm" style={{ color: palette.text2 }}>
+          No upcoming tasks yet.
+        </p>
       )}
+
       <Link to="/student/calendar">
-        <Button variant="ghost" className="w-full mt-2 text-gray-700 hover:text-black">
+        <Button
+          className="w-full mt-2 rounded-xl shadow-lg transition-all duration-200"
+          style={{ background: palette.accent, color: palette.card }}
+          onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+          onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
+        >
           View All <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </Link>
@@ -419,36 +413,66 @@ const TaskSection = ({ upcomingTasks }: any) => (
   </Card>
 );
 
-/* ✅ Courses Section */
+/* ---------------------- COURSES SECTION ---------------------- */
 const CoursesSection = ({ courses }: any) => (
-  <Card className="bg-white border border-gray-200 shadow-sm">
+  <Card
+    className="border shadow-sm rounded-xl"
+    style={{
+      background: palette.card,
+      borderColor: palette.border,
+    }}
+  >
     <CardHeader>
-      <CardTitle className="text-lg text-black">Continue Learning</CardTitle>
+      <CardTitle className="text-lg" style={{ color: palette.text }}>
+        Continue Learning
+      </CardTitle>
     </CardHeader>
+
     <CardContent className="space-y-3">
-      {courses && courses.length > 0 ? (
+      {courses?.length > 0 ? (
         courses.slice(0, 2).map((course: any, i: number) => (
           <div
             key={i}
-            className="p-3 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
+            className="p-3 rounded-xl"
+            style={{
+              background: palette.cardHover,
+              border: `1px solid ${palette.border}`,
+            }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <BookOpen className="w-4 h-4 text-black" />
-              <p className="font-medium text-sm text-black">{course.title || "Untitled Course"}</p>
+              <BookOpen className="w-4 h-4" style={{ color: palette.accent }} />
+              <p
+                className="font-medium text-sm"
+                style={{ color: palette.text }}
+              >
+                {course.title}
+              </p>
             </div>
 
-            <Progress value={course.progress || 0} className="h-2" />
-            <p className="text-xs text-gray-600 mt-2">
-              {course.progress || 0}% complete
+            <Progress
+              value={course.progress}
+              className="h-2"
+              style={{ background: palette.chartGrid }}
+            />
+
+            <p className="text-xs mt-1" style={{ color: palette.text2 }}>
+              {course.progress}% complete
             </p>
           </div>
         ))
       ) : (
-        <p className="text-gray-600 text-sm">No enrolled courses yet. Browse courses to get started!</p>
+        <p className="text-sm" style={{ color: palette.text2 }}>
+          No courses enrolled yet.
+        </p>
       )}
 
       <Link to="/student/courses">
-        <Button variant="ghost" className="w-full mt-2 text-gray-700 hover:text-black">
+        <Button
+          className="w-full mt-2 rounded-xl shadow-lg transition-all duration-200"
+          style={{ background: palette.accent, color: palette.card }}
+          onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+          onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
+        >
           View All Courses <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </Link>
@@ -456,39 +480,63 @@ const CoursesSection = ({ courses }: any) => (
   </Card>
 );
 
-/* ✅ Focus Area Section */
+/* ---------------------- FOCUS SECTION ---------------------- */
 const FocusSection = ({ weakTopics }: any) => (
-  <Card className="bg-white border border-gray-200 shadow-sm">
+  <Card
+    className="border shadow-sm rounded-xl"
+    style={{
+      background: palette.card,
+      borderColor: palette.border,
+    }}
+  >
     <CardHeader>
-      <CardTitle className="text-lg flex items-center gap-2 text-black">
-        <Target className="w-5 h-5 text-black" />
-        Focus Areas
+      <CardTitle
+        className="flex items-center gap-2 text-lg"
+        style={{ color: palette.text }}
+      >
+        <Target className="w-5 h-5" style={{ color: palette.accent }} /> Focus
+        Areas
       </CardTitle>
     </CardHeader>
 
-    <CardContent className="space-y-2">
-      <p className="text-sm text-gray-700 mb-2">
-        Nova Learn recommends reviewing these topics:
-      </p>
-
-      {weakTopics && weakTopics.length > 0 ? (
+    <CardContent className="space-y-3">
+      {weakTopics?.length > 0 ? (
         weakTopics.map((topic: string, i: number) => (
           <div
             key={i}
-            className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-xl flex items-center gap-2"
+            style={{
+              background: palette.cardHover,
+              border: `1px solid ${palette.border}`,
+            }}
           >
-            <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center text-xs font-medium text-black">
+            <span
+              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
+              style={{
+                background: palette.chartFill,
+                color: palette.text,
+              }}
+            >
               {i + 1}
-            </div>
-            <span className="text-sm text-black">{topic}</span>
+            </span>
+            <span className="text-sm" style={{ color: palette.text }}>
+              {topic}
+            </span>
           </div>
         ))
       ) : (
-        <p className="text-sm text-gray-600">No weak areas identified. Keep up the great work! 🎉</p>
+        <p className="text-sm" style={{ color: palette.text2 }}>
+          No weak areas identified 🎉
+        </p>
       )}
 
-      {weakTopics && weakTopics.length > 0 && (
-        <Button className="w-full mt-3 bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30">
+      {weakTopics?.length > 0 && (
+        <Button
+          className="w-full rounded-xl shadow-lg transition-all duration-200"
+          style={{ background: palette.accent, color: palette.card }}
+          onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+          onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
+        >
           Start Review Session
         </Button>
       )}

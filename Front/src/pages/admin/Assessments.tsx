@@ -58,6 +58,7 @@ const Assessments = () => {
     description: '',
     courseId: '',
     module: '',
+    videoUrl: '',
     dueDate: '',
     allowLateSubmission: false,
     latePenalty: 0,
@@ -173,6 +174,7 @@ const Assessments = () => {
       description: '',
       courseId: '',
       module: '',
+      videoUrl: '',
       dueDate: '',
       allowLateSubmission: false,
       latePenalty: 0,
@@ -205,6 +207,7 @@ const Assessments = () => {
           description: assignment.description || '',
           courseId: assignment.courseId || '',
           module: assignment.module || '',
+          videoUrl: assignment.videoUrl || '',
           dueDate: assignment.dueDate
             ? new Date(assignment.dueDate).toISOString().slice(0, 16)
             : '',
@@ -310,19 +313,19 @@ const Assessments = () => {
         }
       } else {
         // Create new assignment
-        const { data } = await axios.post(
-          'http://localhost:5000/api/assignments',
-          payload,
-          {
-            withCredentials: true,
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
-        );
+      const { data } = await axios.post(
+        'http://localhost:5000/api/assignments',
+        payload,
+        {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
 
-        if (data.success) {
-          toast.success('Assignment created successfully');
-          setIsDialogOpen(false);
-          fetchAssignments();
+      if (data.success) {
+        toast.success('Assignment created successfully');
+        setIsDialogOpen(false);
+        fetchAssignments();
         }
       }
     } catch (err: any) {
@@ -355,17 +358,18 @@ const Assessments = () => {
   };
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold mb-2 text-gradient">Assignments</h1>
-          <p className="text-muted-foreground text-lg">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-gradient">Assignments</h1>
+          <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
             Create and grade student assignments ({assignments.length} total)
           </p>
         </div>
-        <Button size="lg" className="glow-primary" onClick={handleCreateClick}>
-          <Plus className="w-5 h-5 mr-2" />
-          Create Assignment
+        <Button size="lg" className="glow-primary w-full sm:w-auto" onClick={handleCreateClick}>
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+          <span className="hidden sm:inline">Create Assignment</span>
+          <span className="sm:hidden">Create</span>
         </Button>
       </div>
 
@@ -475,8 +479,8 @@ const Assessments = () => {
                             variant="outline"
                             onClick={() => handleEditClick(assignment._id)}
                           >
-                            Edit Assignment
-                          </Button>
+                          Edit Assignment
+                        </Button>
                         )}
                       </div>
                     </div>
@@ -562,6 +566,22 @@ const Assessments = () => {
                 placeholder="Assignment description..."
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="videoUrl">Video URL (Optional)</Label>
+              <Input
+                id="videoUrl"
+                type="url"
+                value={formData.videoUrl}
+                onChange={(e) =>
+                  setFormData({ ...formData, videoUrl: e.target.value })
+                }
+                placeholder="https://youtube.com/watch?v=... or video file URL"
+              />
+              <p className="text-xs text-muted-foreground">
+                Supports YouTube, Vimeo, Google Drive, or direct video file URLs
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

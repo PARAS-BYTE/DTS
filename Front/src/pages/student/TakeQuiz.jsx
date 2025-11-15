@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Clock, CheckCircle2, RefreshCw, XCircle } from "lucide-react";
+import { palette } from "@/theme/palette";
 
 const TakeQuiz = () => {
   const { state: quizId } = useLocation();
@@ -141,14 +142,14 @@ const TakeQuiz = () => {
   // ─── Loading ───────────────────────────
   if (loading)
     return (
-      <div className="flex justify-center items-center h-[80vh] text-muted-foreground">
+      <div className="flex justify-center items-center h-[80vh]" style={{ background: palette.bg, color: palette.text2 }}>
         Loading quiz...
       </div>
     );
 
   if (!quiz)
     return (
-      <div className="flex justify-center items-center h-[80vh] text-destructive">
+      <div className="flex justify-center items-center h-[80vh]" style={{ background: palette.bg, color: '#EF4444' }}>
         Quiz not found.
       </div>
     );
@@ -156,30 +157,41 @@ const TakeQuiz = () => {
   // ─── After Submission ────────────────────────
   if (submitted)
     return (
-      <div className="flex flex-col justify-center items-center h-[80vh] text-center space-y-6">
-        <CheckCircle2 className="w-16 h-16 text-green-500" />
-        <h2 className="text-3xl font-bold">Quiz Submitted!</h2>
-        <p className="text-muted-foreground">
-          Time taken: <strong>{submissionData?.timeTaken}</strong>
+      <div className="flex flex-col justify-center items-center h-[80vh] text-center space-y-6 p-4 sm:p-6" style={{ background: palette.bg }}>
+        <CheckCircle2 className="w-12 h-12 sm:w-16 sm:h-16" style={{ color: '#10B981' }} />
+        <h2 className="text-2xl sm:text-3xl font-bold" style={{ color: palette.text }}>Quiz Submitted!</h2>
+        <p style={{ color: palette.text2 }}>
+          Time taken: <strong style={{ color: palette.text }}>{submissionData?.timeTaken}</strong>
         </p>
 
-        <div className="bg-muted/20 p-4 rounded-lg w-full max-w-md text-left">
-          <h3 className="font-semibold mb-2 text-primary">Submitted Answers:</h3>
-          <pre className="text-sm bg-background p-3 rounded-md overflow-x-auto">
+        <div className="p-4 rounded-lg w-full max-w-md text-left" style={{ background: palette.accentSoft }}>
+          <h3 className="font-semibold mb-2 text-sm sm:text-base" style={{ color: palette.accent }}>Submitted Answers:</h3>
+          <pre className="text-xs sm:text-sm p-3 rounded-md overflow-x-auto" style={{ background: palette.card, color: palette.text, border: `1px solid ${palette.border}` }}>
             {JSON.stringify(submissionData, null, 2)}
           </pre>
         </div>
 
-        <Button onClick={handleRetake} className="flex items-center gap-2">
-          <RefreshCw className="w-4 h-4" /> Retake Quiz
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => navigate("/student/quizzes")}
-          className="mt-2"
-        >
-          Back to Quizzes
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+          <Button 
+            onClick={handleRetake} 
+            className="flex items-center gap-2 w-full sm:w-auto"
+            style={{ background: palette.accentDeep, color: palette.card }}
+            onMouseEnter={(e) => e.currentTarget.style.background = palette.accent}
+            onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}
+          >
+            <RefreshCw className="w-4 h-4" /> Retake Quiz
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/student/quizzes")}
+            className="w-full sm:w-auto"
+            style={{ borderColor: palette.border, color: palette.text }}
+            onMouseEnter={(e) => e.currentTarget.style.background = palette.accentSoft}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            Back to Quizzes
+          </Button>
+        </div>
       </div>
     );
 
@@ -188,20 +200,20 @@ const TakeQuiz = () => {
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto space-y-4 sm:space-y-6" style={{ background: palette.bg, minHeight: '100vh' }}>
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{quiz.title}</h1>
-        <div className="flex items-center gap-2 text-primary font-semibold">
-          <Clock className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: palette.text }}>{quiz.title}</h1>
+        <div className="flex items-center gap-2 font-semibold text-sm sm:text-base" style={{ color: palette.accent }}>
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>{formatTime(timeLeft)}</span>
         </div>
       </div>
 
-      <Progress value={progress} className="h-2" />
+      <Progress value={progress} className="h-2" style={{ background: palette.progressTrack }} />
 
       {error && (
-        <div className="flex items-center gap-2 text-red-600 text-sm mt-2">
+        <div className="flex items-center gap-2 text-sm mt-2 p-3 rounded-lg" style={{ background: '#EF44441A', color: '#EF4444', border: `1px solid #EF444480` }}>
           <XCircle className="w-4 h-4" /> {error}
         </div>
       )}
@@ -213,20 +225,37 @@ const TakeQuiz = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Card className="border-primary/20 shadow-md">
+        <Card style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
           <CardHeader>
-            <CardTitle className="text-xl">
+            <CardTitle className="text-lg sm:text-xl" style={{ color: palette.text }}>
               Question {currentQuestion + 1} of {quiz.questions.length}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg mb-6">{q.questionText}</p>
-            <div className="space-y-3">
+            <p className="text-base sm:text-lg mb-4 sm:mb-6" style={{ color: palette.text }}>{q.questionText}</p>
+            <div className="space-y-2 sm:space-y-3">
               {q.options.map((opt, i) => (
                 <Button
                   key={i}
                   variant={answers[q.id] === i + 1 ? "default" : "outline"}
-                  className="w-full justify-start"
+                  className="w-full justify-start text-sm sm:text-base"
+                  style={
+                    answers[q.id] === i + 1
+                      ? { background: palette.accentDeep, color: palette.card }
+                      : { borderColor: palette.border, color: palette.text }
+                  }
+                  onMouseEnter={(e) => {
+                    if (answers[q.id] !== i + 1) {
+                      e.currentTarget.style.background = palette.accentSoft;
+                      e.currentTarget.style.borderColor = palette.accent;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (answers[q.id] !== i + 1) {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.borderColor = palette.border;
+                    }
+                  }}
                   onClick={() => handleOptionSelect(q.id, i)}
                 >
                   {opt}
@@ -238,23 +267,44 @@ const TakeQuiz = () => {
       </motion.div>
 
       {/* Navigation */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
         <Button
           variant="outline"
           onClick={() => setCurrentQuestion((prev) => prev - 1)}
           disabled={currentQuestion === 0}
+          className="w-full sm:w-auto text-sm sm:text-base"
+          style={{ borderColor: palette.border, color: palette.text }}
+          onMouseEnter={(e) => {
+            if (currentQuestion > 0) {
+              e.currentTarget.style.background = palette.accentSoft;
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentQuestion > 0) {
+              e.currentTarget.style.background = 'transparent';
+            }
+          }}
         >
           Previous
         </Button>
 
         {currentQuestion === quiz.questions.length - 1 ? (
-          <Button onClick={() => handleSubmit(false)} className="bg-green-500 text-white">
+          <Button 
+            onClick={() => handleSubmit(false)} 
+            className="w-full sm:w-auto text-sm sm:text-base"
+            style={{ background: '#10B981', color: palette.card }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#059669'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#10B981'}
+          >
             Submit Quiz
           </Button>
         ) : (
           <Button
             onClick={() => setCurrentQuestion((prev) => prev + 1)}
-            className="bg-primary text-white"
+            className="w-full sm:w-auto text-sm sm:text-base"
+            style={{ background: palette.accentDeep, color: palette.card }}
+            onMouseEnter={(e) => e.currentTarget.style.background = palette.accent}
+            onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}
           >
             Next
           </Button>

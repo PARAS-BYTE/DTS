@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import {palette} from '../../theme/palette'
 import {
   BookOpen,
   Clock,
@@ -234,37 +235,38 @@ const StudyGround = () => {
     );
 
   return (
-    <div className="min-h-screen bg-white text-black p-6 lg:p-10">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-10" style={{ background: palette.bg, color: palette.text }}>
       {/* ─── Top Section ───────────────────────────── */}
-      <div className="flex flex-col gap-3 mb-6 border-b border-gray-200 pb-4">
+      <div className="flex flex-col gap-3 mb-6 pb-4" style={{ borderBottom: `1px solid ${palette.border}` }}>
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate('/student/learning')}
+            style={{ color: palette.text }}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Courses
           </Button>
         </div>
-        <h1 className="text-3xl font-bold text-black">{course.title}</h1>
-        <p className="text-gray-700">{course.description}</p>
+        <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: palette.text }}>{course.title}</h1>
+        <p style={{ color: palette.text2 }}>{course.description}</p>
 
-        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+        <div className="flex flex-wrap gap-4 text-sm" style={{ color: palette.text2 }}>
           <span className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-black" /> {course.category}
+            <BookOpen className="w-4 h-4" style={{ color: palette.text }} /> {course.category}
           </span>
           <span className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-black" /> {course.duration} hrs
+            <Clock className="w-4 h-4" style={{ color: palette.text }} /> {course.duration} hrs
           </span>
-          <span className="text-black font-medium">{course.level}</span>
+          <span className="font-medium" style={{ color: palette.text }}>{course.level}</span>
         </div>
 
         <div className="mt-3">
-          <Progress value={course.userProgress?.progress || 0} className="h-2" />
-          <div className="flex justify-between text-xs mt-1 text-gray-600">
+          <Progress value={course.userProgress?.progress || 0} className="h-2" style={{ background: palette.progressTrack }} />
+          <div className="flex justify-between text-xs mt-1" style={{ color: palette.text2 }}>
             <span>Your Progress</span>
-            <span className="font-medium text-black">
+            <span className="font-medium" style={{ color: palette.text }}>
               {course.userProgress?.progress || 0}%
             </span>
           </div>
@@ -276,7 +278,7 @@ const StudyGround = () => {
         {/* Video + Transcript Section */}
         <div className="space-y-6">
           {/* Video Player */}
-          <Card className="border border-gray-200 shadow-lg bg-white">
+          <Card className="shadow-lg" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
             <CardContent className="p-0">
               {activeVideo ? (
                 <div className="space-y-4">
@@ -290,21 +292,24 @@ const StudyGround = () => {
                   
                   <div className="px-4 pb-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">{activeVideo.title}</h3>
+                      <h3 className="text-base sm:text-lg font-semibold" style={{ color: palette.text }}>{activeVideo.title}</h3>
                       {isLessonCompleted(activeVideo) && (
-                        <span className="px-3 py-1 rounded-full bg-success/10 text-success text-sm font-medium flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2" style={{ background: '#10B9811A', color: '#10B981' }}>
                           <CheckCircle2 className="w-4 h-4" />
                           Completed
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">
+                    <p className="text-sm mt-2" style={{ color: palette.text2 }}>
                       Duration: {activeVideo.duration || 0} minutes
                     </p>
                     {!isLessonCompleted(activeVideo) && (
                       <Button
                         onClick={() => markLessonComplete(activeVideo)}
-                        className="mt-4 bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/10"
+                        className="mt-4 shadow-lg"
+                        style={{ background: palette.accentDeep, color: palette.card }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = palette.accent}
+                        onMouseLeave={(e) => e.currentTarget.style.background = palette.accentDeep}
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         Mark as Completed
@@ -313,7 +318,7 @@ const StudyGround = () => {
                   </div>
                 </div>
               ) : (
-                <div className="h-[450px] flex justify-center items-center text-gray-600">
+                <div className="h-[450px] flex justify-center items-center" style={{ color: palette.text2 }}>
                   Select a lesson to begin
                 </div>
               )}
@@ -322,14 +327,14 @@ const StudyGround = () => {
 
           {/* Transcript Section */}
           {activeVideo && (
-            <Card className="border border-gray-200 bg-white shadow-sm">
+            <Card className="shadow-sm" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-black">
+                <CardTitle className="text-base sm:text-lg font-semibold" style={{ color: palette.text }}>
                   Transcript
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-sm leading-relaxed text-gray-700 max-h-[300px] overflow-y-auto whitespace-pre-line scrollbar-thin">
+                <div className="text-sm leading-relaxed max-h-[300px] overflow-y-auto whitespace-pre-line scrollbar-thin" style={{ color: palette.text2 }}>
                   {transcript}
                 </div>
               </CardContent>
@@ -338,7 +343,7 @@ const StudyGround = () => {
         </div>
 
         {/* ─── Sidebar (Scrollable Modules List) ───────────────────────────── */}
-        <div className="lg:h-[calc(100vh-180px)] overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+        <div className="lg:h-[calc(100vh-180px)] overflow-y-auto pr-2 space-y-4 scrollbar-thin" style={{ scrollbarColor: `${palette.border} ${palette.bg}` }}>
           {course.modules?.map((mod: any, modIndex: number) => (
             <motion.div
               key={modIndex}
@@ -346,7 +351,7 @@ const StudyGround = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: modIndex * 0.05 }}
             >
-              <Card className="border border-gray-200 bg-white hover:border-black/30 transition-all duration-200 shadow-sm">
+              <Card className="transition-all duration-200 shadow-sm" style={{ background: palette.card, border: `1px solid ${palette.border}` }} onMouseEnter={(e) => e.currentTarget.style.borderColor = palette.accent} onMouseLeave={(e) => e.currentTarget.style.borderColor = palette.border}>
                 <CardHeader
                   className="cursor-pointer flex flex-row justify-between items-center p-4"
                   onClick={() =>
@@ -355,11 +360,11 @@ const StudyGround = () => {
                     )
                   }
                 >
-                  <CardTitle className="text-base font-semibold flex items-center gap-2 text-black">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2" style={{ color: palette.text }}>
                     {expandedModule === modIndex ? (
-                      <ChevronDown className="w-4 h-4 text-black" />
+                      <ChevronDown className="w-4 h-4" style={{ color: palette.text }} />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-600" />
+                      <ChevronRight className="w-4 h-4" style={{ color: palette.text2 }} />
                     )}
                     {mod.title}
                   </CardTitle>
@@ -375,22 +380,33 @@ const StudyGround = () => {
                         <Button
                           key={index}
                           variant={isActive ? 'default' : 'outline'}
-                          className={`w-full justify-between text-left text-sm ${
+                          className={`w-full justify-between text-left text-sm ${isCompleted ? '' : ''}`}
+                          style={
                             isActive
-                              ? "bg-black hover:bg-gray-800 text-white"
-                              : "bg-white hover:bg-gray-50 text-black border border-gray-200"
-                          } ${isCompleted ? 'border-green-500' : ''}`}
+                              ? { background: palette.accentDeep, color: palette.card, border: isCompleted ? `2px solid #10B981` : 'none' }
+                              : { background: palette.card, color: palette.text, border: `1px solid ${isCompleted ? '#10B981' : palette.border}` }
+                          }
+                          onMouseEnter={(e) => {
+                            if (!isActive) {
+                              e.currentTarget.style.background = palette.cardHover;
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive) {
+                              e.currentTarget.style.background = palette.card;
+                            }
+                          }}
                           onClick={() => handleLessonSelect(lesson)}
                         >
                           <div className="flex items-center gap-2 truncate">
                             {isCompleted ? (
-                              <CheckCircle2 className="w-4 h-4 text-success" />
+                              <CheckCircle2 className="w-4 h-4" style={{ color: '#10B981' }} />
                             ) : (
-                              <Play className="w-4 h-4" />
+                              <Play className="w-4 h-4" style={{ color: palette.text }} />
                             )}
                             <span className="truncate">{lesson.title}</span>
                           </div>
-                          <span className="text-gray-600 text-xs">
+                          <span className="text-xs" style={{ color: palette.text2 }}>
                             {lesson.duration || 0} mins
                           </span>
                         </Button>
@@ -407,7 +423,7 @@ const StudyGround = () => {
       {/* ─── Navigation Buttons ───────────────────────────── */}
       {activeVideo && (
         <div className="flex justify-end gap-4 mt-6">
-          <Button variant="outline" onClick={handleNextLesson}>
+          <Button variant="outline" onClick={handleNextLesson} style={{ borderColor: palette.border, color: palette.text }}>
             Next Lesson
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
@@ -416,9 +432,9 @@ const StudyGround = () => {
 
       {/* ─── Completion Banner ───────────────────────────── */}
       {course.userProgress?.completed && (
-        <div className="text-center mt-10 p-6 bg-green-50 rounded-xl border border-green-200">
-          <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto mb-2" />
-          <p className="text-green-700 font-semibold text-lg">
+        <div className="text-center mt-8 sm:mt-10 p-4 sm:p-6 rounded-xl" style={{ background: '#10B9811A', border: `1px solid #10B981` }}>
+          <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2" style={{ color: '#10B981' }} />
+          <p className="font-semibold text-base sm:text-lg" style={{ color: '#10B981' }}>
             🎉 Congratulations! You've completed this course!
           </p>
         </div>

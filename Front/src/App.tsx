@@ -203,9 +203,9 @@ const App = () => (
             <Route
               path="/task/:taskId"
               element={
-                <StudentLayout>
+                // <StudentLayout>
                   <DailyTask />
-                </StudentLayout>
+                // </StudentLayout>
               }
             />
             <Route
@@ -259,9 +259,9 @@ const App = () => (
             <Route
               path="/student/ground"
               element={
-                <StudentLayout>
+                // <StudentLayout>
                   <StudyGroud />
-                </StudentLayout>
+                // </StudentLayout>
               }
             />
             <Route

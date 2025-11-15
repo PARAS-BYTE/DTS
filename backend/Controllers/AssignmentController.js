@@ -23,6 +23,7 @@ export const createAssignment = asyncHandler(async (req, res) => {
       description,
       courseId,
       module,
+      videoUrl,
       questions,
       dueDate,
       allowLateSubmission,
@@ -60,6 +61,7 @@ export const createAssignment = asyncHandler(async (req, res) => {
       description: description || "",
       course: courseId,
       module: module || "",
+      videoUrl: videoUrl || "",
       questions: questions.map((q, index) => ({
         questionText: q.questionText,
         questionType: q.questionType || "text",
@@ -112,6 +114,7 @@ export const updateAssignment = asyncHandler(async (req, res) => {
       title,
       description,
       module,
+      videoUrl,
       questions,
       dueDate,
       allowLateSubmission,
@@ -140,6 +143,7 @@ export const updateAssignment = asyncHandler(async (req, res) => {
     if (title !== undefined) assignment.title = title;
     if (description !== undefined) assignment.description = description;
     if (module !== undefined) assignment.module = module;
+    if (videoUrl !== undefined) assignment.videoUrl = videoUrl;
     if (dueDate !== undefined) assignment.dueDate = new Date(dueDate);
     if (allowLateSubmission !== undefined) assignment.allowLateSubmission = allowLateSubmission;
     if (latePenalty !== undefined) assignment.latePenalty = latePenalty;
@@ -188,7 +192,7 @@ export const getAssignmentById = asyncHandler(async (req, res) => {
     const assignmentId = req.params.id;
     const assignment = await Assignment.findById(assignmentId)
       .populate("course", "title")
-      .select("title description course module questions dueDate allowLateSubmission latePenalty published");
+      .select("title description course module questions dueDate allowLateSubmission latePenalty published videoUrl");
 
     if (!assignment) {
       return res.status(404).json({ message: "Assignment not found" });
@@ -225,6 +229,7 @@ export const getAssignmentById = asyncHandler(async (req, res) => {
         allowLateSubmission: assignment.allowLateSubmission,
         latePenalty: assignment.latePenalty,
         published: assignment.published,
+        videoUrl: assignment.videoUrl || "",
       },
     });
   } catch (error) {
@@ -354,7 +359,7 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
     })
       .populate("course", "title")
       .select(
-        "title description course dueDate totalMarks questions allowLateSubmission latePenalty submissions createdAt"
+        "title description course dueDate totalMarks questions allowLateSubmission latePenalty submissions createdAt videoUrl"
       )
       .sort({ dueDate: 1 });
 
@@ -389,6 +394,7 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
         })),
         allowLateSubmission: assignment.allowLateSubmission,
         latePenalty: assignment.latePenalty,
+        videoUrl: assignment.videoUrl || "",
         isSubmitted,
         isGraded,
         isOverdue,
