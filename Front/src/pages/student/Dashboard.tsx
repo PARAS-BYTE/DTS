@@ -127,9 +127,9 @@ const Dashboard = () => {
       style={{ background: palette.bg }}
     >
       {/* HEADER - Similar to ChatBot */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b " style={{ borderColor: palette.border, background: palette.card }}>
+      <div className="flex items-center justify-between px-2 sm:px-6 sm:py-2 border-b" style={{ borderColor: palette.border, background: palette.card }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1 }} className="flex items-center gap-2 sm:gap-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0" style={{ background: palette.accent }}>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 mb-12" style={{ background: palette.accent }}>
             <Zap className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: palette.card }} />
           </div>
           <div className="min-w-0">
@@ -138,9 +138,9 @@ const Dashboard = () => {
               <span style={{ color: palette.accent }}>
                 {user?.name || "Student"}
               </span>{" "}
-              👋
+              
             </h1>
-            <p className="text-xs sm:text-sm mt-0.5 hidden sm:block mb-5" style={{ color: palette.text2 }}>
+            <p className="text-xs sm:text-sm mt-0.5 hidden sm:block mb-12" style={{ color: palette.text2 }}>
               Continue learning with{" "}
               <span style={{ color: palette.accent }}>LearnNova</span>
             </p>

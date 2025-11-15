@@ -21,9 +21,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FileText, Plus, Clock, Users, CheckCircle, Brain, X, Trash2 } from 'lucide-react';
+import { FileText, Plus, Clock, Users, CheckCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+
+/* 🎨 Centralized Theme Palette */
+export const palette = {
+  bg: "#F7F5FF",
+  card: "#FFFFFF",
+  cardHover: "#F1ECFF",
+
+  text: "#3B2F5D",
+  text2: "#6B5E85",
+
+  accent: "#A78BFA",
+  accentSoft: "#DDD5FF",
+  accentDeep: "#7C5BDA",
+
+  border: "#E5E1F7",
+
+  chartLine: "#A78BFA",
+  chartFill: "rgba(167,139,250,0.18)",
+  chartGrid: "#E5E1F7",
+
+  progressTrack: "#EDE8FF",
+  progressFill: "#A78BFA"
+};
+
+// Extended palette with status colors
+const extendedPalette = {
+  ...palette,
+  success: "#10B981",
+  successSoft: "#D1FAE5",
+  warning: "#F59E0B",
+  warningSoft: "#FEF3C7",
+  destructive: "#EF4444",
+  danger: "#EF4444",
+  dangerSoft: "#FEE2E2",
+};
 
 interface Assignment {
   _id: string;
@@ -358,15 +393,27 @@ const Assessments = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8" style={{ backgroundColor: palette.bg }}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-gradient">Assignments</h1>
-          <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: palette.text }}>
+            Assignments
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg" style={{ color: palette.text2 }}>
             Create and grade student assignments ({assignments.length} total)
           </p>
         </div>
-        <Button size="lg" className="glow-primary w-full sm:w-auto" onClick={handleCreateClick}>
+        <Button 
+          size="lg" 
+          className="w-full sm:w-auto transition-all duration-300 hover:shadow-lg"
+          style={{ 
+            background: palette.accent,
+            color: palette.card
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+          onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
+          onClick={handleCreateClick}
+        >
           <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           <span className="hidden sm:inline">Create Assignment</span>
           <span className="sm:hidden">Create</span>
@@ -376,7 +423,7 @@ const Assessments = () => {
       {/* Loading State */}
       {loading && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Loading assignments...</p>
+          <p style={{ color: palette.text2 }}>Loading assignments...</p>
         </div>
       )}
 
@@ -390,74 +437,109 @@ const Assessments = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              <Card className="hover:border-primary/50 transition-all cursor-pointer hover:glow-primary">
+              <Card 
+                className="transition-all cursor-pointer hover:shadow-lg border"
+                style={{ 
+                  backgroundColor: palette.card,
+                  borderColor: palette.border,
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = palette.card}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start gap-6">
-                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-8 h-8 text-primary" />
+                    <div 
+                      className="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ 
+                        background: `linear-gradient(135deg, ${palette.accentSoft}, ${palette.accent})` 
+                      }}
+                    >
+                      <FileText className="w-8 h-8" style={{ color: palette.accentDeep }} />
                     </div>
 
                     <div className="flex-1 space-y-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h3 className="text-xl font-semibold">{assignment.title}</h3>
-                          <p className="text-sm text-muted-foreground">{assignment.course}</p>
+                          <h3 className="text-xl font-semibold" style={{ color: palette.text }}>
+                            {assignment.title}
+                          </h3>
+                          <p className="text-sm" style={{ color: palette.text2 }}>
+                            {assignment.course}
+                          </p>
                           {assignment.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-sm mt-1" style={{ color: palette.text2 }}>
                               {assignment.description}
                             </p>
                           )}
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                          <Clock className="w-4 h-4 text-warning" />
-                          <span className="text-warning font-medium">
+                          <Clock className="w-4 h-4" style={{ color: extendedPalette.warning }} />
+                          <span className="font-medium" style={{ color: extendedPalette.warning }}>
                             Due: {formatDate(assignment.dueDate)}
                           </span>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-3 gap-4">
-                        <div className="p-3 rounded-xl bg-muted/30">
+                        <div className="p-3 rounded-xl" style={{ backgroundColor: palette.cardHover }}>
                           <div className="flex items-center gap-2 mb-1">
-                            <Users className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">Total Students</span>
+                            <Users className="w-4 h-4" style={{ color: palette.text2 }} />
+                            <span className="text-sm" style={{ color: palette.text2 }}>Total Students</span>
                           </div>
-                          <p className="text-2xl font-bold">{assignment.totalStudents}</p>
+                          <p className="text-2xl font-bold" style={{ color: palette.text }}>
+                            {assignment.totalStudents}
+                          </p>
                         </div>
 
-                        <div className="p-3 rounded-xl bg-success/10 border border-success/20">
+                        <div 
+                          className="p-3 rounded-xl border"
+                          style={{ 
+                            backgroundColor: extendedPalette.successSoft,
+                            borderColor: extendedPalette.success 
+                          }}
+                        >
                           <div className="flex items-center gap-2 mb-1">
-                            <CheckCircle className="w-4 h-4 text-success" />
-                            <span className="text-sm text-success">Graded</span>
+                            <CheckCircle className="w-4 h-4" style={{ color: extendedPalette.success }} />
+                            <span className="text-sm" style={{ color: extendedPalette.success }}>Graded</span>
                           </div>
-                          <p className="text-2xl font-bold text-success">{assignment.graded}</p>
+                          <p className="text-2xl font-bold" style={{ color: extendedPalette.success }}>
+                            {assignment.graded}
+                          </p>
                         </div>
 
-                        <div className="p-3 rounded-xl bg-warning/10 border border-warning/20">
+                        <div 
+                          className="p-3 rounded-xl border"
+                          style={{ 
+                            backgroundColor: extendedPalette.warningSoft,
+                            borderColor: extendedPalette.warning 
+                          }}
+                        >
                           <div className="flex items-center gap-2 mb-1">
-                            <Clock className="w-4 h-4 text-warning" />
-                            <span className="text-sm text-warning">Pending</span>
+                            <Clock className="w-4 h-4" style={{ color: extendedPalette.warning }} />
+                            <span className="text-sm" style={{ color: extendedPalette.warning }}>Pending</span>
                           </div>
-                          <p className="text-2xl font-bold text-warning">{assignment.pending}</p>
+                          <p className="text-2xl font-bold" style={{ color: extendedPalette.warning }}>
+                            {assignment.pending}
+                          </p>
                         </div>
                       </div>
 
                       {/* Assignment Details */}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-4 text-sm" style={{ color: palette.text2 }}>
                         <span>
-                          Total Marks: <strong className="text-foreground">{assignment.totalMarks}</strong>
+                          Total Marks: <strong style={{ color: palette.text }}>{assignment.totalMarks}</strong>
                         </span>
                         {assignment.questionsCount !== undefined && (
                           <span>
-                            Questions: <strong className="text-foreground">{assignment.questionsCount}</strong>
+                            Questions: <strong style={{ color: palette.text }}>{assignment.questionsCount}</strong>
                           </span>
                         )}
                         <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            assignment.published
-                              ? 'bg-success/10 text-success'
-                              : 'bg-muted text-muted-foreground'
-                          }`}
+                          className="px-2 py-1 rounded-full text-xs"
+                          style={{
+                            backgroundColor: assignment.published ? extendedPalette.successSoft : palette.cardHover,
+                            color: assignment.published ? extendedPalette.success : palette.text2
+                          }}
                         >
                           {assignment.published ? 'Published' : 'Draft'}
                         </span>
@@ -467,7 +549,12 @@ const Assessments = () => {
                         {assignment.questionsCount !== undefined && (
                           <Button
                             size="sm"
-                            className="glow-primary"
+                            style={{ 
+                              background: palette.accent,
+                              color: palette.card
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+                            onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
                             onClick={() => handleViewSubmissions(assignment._id, assignment)}
                           >
                             View Submissions
@@ -477,10 +564,22 @@ const Assessments = () => {
                           <Button
                             size="sm"
                             variant="outline"
+                            style={{ 
+                              borderColor: palette.border,
+                              color: palette.text
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = palette.cardHover;
+                              e.currentTarget.style.borderColor = palette.accent;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.borderColor = palette.border;
+                            }}
                             onClick={() => handleEditClick(assignment._id)}
                           >
-                          Edit Assignment
-                        </Button>
+                            Edit Assignment
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -492,8 +591,8 @@ const Assessments = () => {
         </div>
       ) : !loading ? (
         <div className="text-center py-12">
-          <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
+          <FileText className="w-16 h-16 mx-auto mb-4" style={{ color: palette.text2 }} />
+          <p style={{ color: palette.text2 }}>
             No assignments found. Create your first assignment!
           </p>
         </div>
@@ -506,10 +605,15 @@ const Assessments = () => {
           setEditingAssignmentId(null);
         }
       }}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent 
+          className="max-w-3xl max-h-[90vh] overflow-y-auto"
+          style={{ backgroundColor: palette.card }}
+        >
           <DialogHeader>
-            <DialogTitle>{editingAssignmentId ? 'Edit Assignment' : 'Create New Assignment'}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle style={{ color: palette.text }}>
+              {editingAssignmentId ? 'Edit Assignment' : 'Create New Assignment'}
+            </DialogTitle>
+            <DialogDescription style={{ color: palette.text2 }}>
               {editingAssignmentId
                 ? 'Update the assignment details and questions.'
                 : 'Create an assignment with 2 or more questions for your students.'}
@@ -519,7 +623,7 @@ const Assessments = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Assignment Title *</Label>
+                <Label htmlFor="title" style={{ color: palette.text }}>Assignment Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -528,11 +632,16 @@ const Assessments = () => {
                   }
                   placeholder="e.g., Midterm Project"
                   required
+                  style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border,
+                    color: palette.text
+                  }}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="courseId">Course *</Label>
+                <Label htmlFor="courseId" style={{ color: palette.text }}>Course *</Label>
                 <Select
                   value={formData.courseId}
                   onValueChange={(value) =>
@@ -541,12 +650,23 @@ const Assessments = () => {
                   required
                   disabled={!!editingAssignmentId}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border,
+                    color: palette.text
+                  }}>
                     <SelectValue placeholder="Select a course" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border
+                  }}>
                     {courses.map((course) => (
-                      <SelectItem key={course._id} value={course._id}>
+                      <SelectItem 
+                        key={course._id} 
+                        value={course._id}
+                        style={{ color: palette.text }}
+                      >
                         {course.title}
                       </SelectItem>
                     ))}
@@ -556,7 +676,7 @@ const Assessments = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" style={{ color: palette.text }}>Description</Label>
               <Textarea
                 id="description"
                 value={formData.description}
@@ -565,11 +685,16 @@ const Assessments = () => {
                 }
                 placeholder="Assignment description..."
                 rows={3}
+                style={{
+                  backgroundColor: palette.card,
+                  borderColor: palette.border,
+                  color: palette.text
+                }}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="videoUrl">Video URL (Optional)</Label>
+              <Label htmlFor="videoUrl" style={{ color: palette.text }}>Video URL (Optional)</Label>
               <Input
                 id="videoUrl"
                 type="url"
@@ -578,15 +703,20 @@ const Assessments = () => {
                   setFormData({ ...formData, videoUrl: e.target.value })
                 }
                 placeholder="https://youtube.com/watch?v=... or video file URL"
+                style={{
+                  backgroundColor: palette.card,
+                  borderColor: palette.border,
+                  color: palette.text
+                }}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs" style={{ color: palette.text2 }}>
                 Supports YouTube, Vimeo, Google Drive, or direct video file URLs
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="dueDate">Due Date *</Label>
+                <Label htmlFor="dueDate" style={{ color: palette.text }}>Due Date *</Label>
                 <Input
                   id="dueDate"
                   type="datetime-local"
@@ -595,11 +725,16 @@ const Assessments = () => {
                     setFormData({ ...formData, dueDate: e.target.value })
                   }
                   required
+                  style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border,
+                    color: palette.text
+                  }}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="module">Module (Optional)</Label>
+                <Label htmlFor="module" style={{ color: palette.text }}>Module (Optional)</Label>
                 <Input
                   id="module"
                   value={formData.module}
@@ -607,31 +742,64 @@ const Assessments = () => {
                     setFormData({ ...formData, module: e.target.value })
                   }
                   placeholder="Module name"
+                  style={{
+                    backgroundColor: palette.card,
+                    borderColor: palette.border,
+                    color: palette.text
+                  }}
                 />
               </div>
             </div>
 
             {/* Questions Section */}
-            <div className="space-y-4 border-t pt-4">
+            <div className="space-y-4 border-t pt-4" style={{ borderColor: palette.border }}>
               <div className="flex items-center justify-between">
-                <Label className="text-lg font-semibold">Questions *</Label>
-                <Button type="button" size="sm" variant="outline" onClick={addQuestion}>
+                <Label className="text-lg font-semibold" style={{ color: palette.text }}>Questions *</Label>
+                <Button 
+                  type="button" 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={addQuestion}
+                  style={{ 
+                    borderColor: palette.border,
+                    color: palette.text
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = palette.cardHover;
+                    e.currentTarget.style.borderColor = palette.accent;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.borderColor = palette.border;
+                  }}
+                >
                   <Plus className="w-4 h-4 mr-1" />
                   Add Question
                 </Button>
               </div>
 
               {questions.map((question, index) => (
-                <div key={index} className="p-4 border rounded-lg space-y-3">
+                <div 
+                  key={index} 
+                  className="p-4 border rounded-lg space-y-3"
+                  style={{ 
+                    backgroundColor: palette.cardHover,
+                    borderColor: palette.border
+                  }}
+                >
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">Question {index + 1}</Label>
+                    <Label className="text-sm font-medium" style={{ color: palette.text }}>
+                      Question {index + 1}
+                    </Label>
                     {questions.length > 2 && (
                       <Button
                         type="button"
                         size="sm"
                         variant="ghost"
                         onClick={() => removeQuestion(index)}
-                        className="text-destructive hover:text-destructive"
+                        style={{ color: extendedPalette.danger }}
+                        onMouseEnter={(e: any) => { e.currentTarget.style.backgroundColor = extendedPalette.dangerSoft; }}
+                        onMouseLeave={(e: any) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -647,32 +815,44 @@ const Assessments = () => {
                       }
                       rows={3}
                       required
+                      style={{
+                        backgroundColor: palette.card,
+                        borderColor: palette.border,
+                        color: palette.text
+                      }}
                     />
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-2">
-                      <Label className="text-xs">Type</Label>
+                      <Label className="text-xs" style={{ color: palette.text }}>Type</Label>
                       <Select
                         value={question.questionType}
                         onValueChange={(value) =>
                           updateQuestion(index, 'questionType', value)
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger style={{
+                          backgroundColor: palette.card,
+                          borderColor: palette.border,
+                          color: palette.text
+                        }}>
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="text">Text</SelectItem>
-                          <SelectItem value="code">Code</SelectItem>
-                          <SelectItem value="file">File Upload</SelectItem>
-                          <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                        <SelectContent style={{
+                          backgroundColor: palette.card,
+                          borderColor: palette.border
+                        }}>
+                          <SelectItem value="text" style={{ color: palette.text }}>Text</SelectItem>
+                          <SelectItem value="code" style={{ color: palette.text }}>Code</SelectItem>
+                          <SelectItem value="file" style={{ color: palette.text }}>File Upload</SelectItem>
+                          <SelectItem value="multiple_choice" style={{ color: palette.text }}>Multiple Choice</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs">Marks</Label>
+                      <Label className="text-xs" style={{ color: palette.text }}>Marks</Label>
                       <Input
                         type="number"
                         min="1"
@@ -681,6 +861,11 @@ const Assessments = () => {
                           updateQuestion(index, 'marks', Number(e.target.value))
                         }
                         required
+                        style={{
+                          backgroundColor: palette.card,
+                          borderColor: palette.border,
+                          color: palette.text
+                        }}
                       />
                     </div>
 
@@ -693,8 +878,9 @@ const Assessments = () => {
                             updateQuestion(index, 'required', e.target.checked)
                           }
                           className="rounded"
+                          style={{ accentColor: palette.accent }}
                         />
-                        <span className="text-xs">Required</span>
+                        <span className="text-xs" style={{ color: palette.text }}>Required</span>
                       </label>
                     </div>
                   </div>
@@ -715,14 +901,15 @@ const Assessments = () => {
                       })
                     }
                     className="rounded"
+                    style={{ accentColor: palette.accent }}
                   />
-                  <span className="text-sm">Allow Late Submission</span>
+                  <span className="text-sm" style={{ color: palette.text }}>Allow Late Submission</span>
                 </label>
               </div>
 
               {formData.allowLateSubmission && (
                 <div className="space-y-2">
-                  <Label htmlFor="latePenalty">Late Penalty (%)</Label>
+                  <Label htmlFor="latePenalty" style={{ color: palette.text }}>Late Penalty (%)</Label>
                   <Input
                     id="latePenalty"
                     type="number"
@@ -735,6 +922,11 @@ const Assessments = () => {
                         latePenalty: Number(e.target.value),
                       })
                     }
+                    style={{
+                      backgroundColor: palette.card,
+                      borderColor: palette.border,
+                      color: palette.text
+                    }}
                   />
                 </div>
               )}
@@ -746,10 +938,32 @@ const Assessments = () => {
                 variant="outline"
                 onClick={() => setIsDialogOpen(false)}
                 disabled={submitting}
+                style={{ 
+                  borderColor: palette.border,
+                  color: palette.text
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = palette.cardHover;
+                  e.currentTarget.style.borderColor = palette.accent;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = palette.border;
+                }}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting} className="glow-primary">
+              <Button 
+                type="submit" 
+                disabled={submitting}
+                className="transition-all duration-300 hover:shadow-lg"
+                style={{ 
+                  background: palette.accent,
+                  color: palette.card
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+                onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
+              >
                 {submitting
                   ? editingAssignmentId
                     ? 'Updating...'

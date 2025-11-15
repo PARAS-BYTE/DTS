@@ -9,6 +9,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+/* 🎨 Centralized Theme Palette */
+export const palette = {
+  bg: "#F7F5FF",
+  card: "#FFFFFF",
+  cardHover: "#F1ECFF",
+
+  text: "#3B2F5D",
+  text2: "#6B5E85",
+
+  accent: "#A78BFA",
+  accentSoft: "#DDD5FF",
+  accentDeep: "#7C5BDA",
+
+  border: "#E5E1F7",
+
+  chartLine: "#A78BFA",
+  chartFill: "rgba(167,139,250,0.18)",
+  chartGrid: "#E5E1F7",
+
+  progressTrack: "#EDE8FF",
+  progressFill: "#A78BFA"
+};
+
 const AdminSignup = () => {
   const [formData, setFormData] = useState({
     username: '',
@@ -88,12 +111,12 @@ const AdminSignup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white overflow-hidden relative flex items-center justify-center p-4">
+    <div className="min-h-screen overflow-hidden relative flex items-center justify-center p-4" style={{ background: palette.bg }}>
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-black/5 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-black/3 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+        <div className="absolute top-1/4 -left-48 w-96 h-96 rounded-full blur-3xl animate-float" style={{ background: palette.accentSoft, opacity: 0.5 }} />
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 rounded-full blur-3xl animate-float" style={{ background: palette.accentSoft, opacity: 0.3, animationDelay: '2s' }} />
+        <div className="absolute inset-0" style={{ background: `linear-gradient(${palette.border}1px,transparent 1px),linear-gradient(90deg,${palette.border}1px,transparent 1px)`, backgroundSize: '64px 64px' }} />
       </div>
 
       <motion.div
@@ -103,41 +126,47 @@ const AdminSignup = () => {
         className="w-full max-w-md relative z-10"
       >
         {/* Back Button */}
-        <Link to="/" className="absolute -top-16 left-0 flex items-center gap-2 text-gray-700 hover:text-black transition-colors">
+        <Link 
+          to="/" 
+          className="absolute -top-16 left-0 flex items-center gap-2 transition-colors" 
+          style={{ color: palette.text2 }}
+          onMouseEnter={(e) => e.currentTarget.style.color = palette.text}
+          onMouseLeave={(e) => e.currentTarget.style.color = palette.text2}
+        >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           <span>Back to Home</span>
         </Link>
 
-        <Card className="shadow-2xl border border-gray-200 bg-white">
+        <Card className="shadow-2xl" style={{ background: palette.card, borderColor: palette.border, borderWidth: '1px' }}>
           <CardHeader className="text-center space-y-4 pb-8">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto w-16 h-16 bg-black/10 rounded-2xl flex items-center justify-center shadow-lg shadow-black/10"
+              className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
+              style={{ background: palette.accentSoft }}
             >
-              <Shield className="w-8 h-8 text-black" />
+              <Shield className="w-8 h-8" style={{ color: palette.accent }} />
             </motion.div>
             <div>
-              <CardTitle className="text-2xl font-bold text-black mb-2">
+              <CardTitle className="text-2xl font-bold" style={{ color: palette.text }}>
                 Admin Registration
               </CardTitle>
-              <CardDescription className="text-gray-700 text-base">
+              <CardDescription style={{ color: palette.text2, fontSize: '1rem' }}>
                 Create administrator account
               </CardDescription>
             </div>
           </CardHeader>
 
           <CardContent className="space-y-6">
-
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full Name Field */}
               <div className="space-y-2">
-                <label className="text-gray-700 text-sm font-medium">Full Name</label>
+                <label className="text-sm font-medium" style={{ color: palette.text }}>Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                  <User className="absolute left-3 top-3 h-4 w-4" style={{ color: palette.text2 }} />
                   <Input
                     name="fullName"
                     type="text"
@@ -145,16 +174,22 @@ const AdminSignup = () => {
                     value={formData.fullName}
                     onChange={handleChange}
                     required
-                    className="pl-10 h-12 text-black bg-white border-gray-300 placeholder:text-gray-500 focus:border-black focus:ring-black/20"
+                    className="pl-10 h-12"
+                    style={{ 
+                      color: palette.text, 
+                      borderColor: palette.border, 
+                      backgroundColor: palette.card,
+                      '--tw-ring-color': palette.accent + '33'
+                    } as React.CSSProperties & { '--tw-ring-color': string }}
                   />
                 </div>
               </div>
 
               {/* Username Field */}
               <div className="space-y-2">
-                <label className="text-gray-700 text-sm font-medium">Username</label>
+                <label className="text-sm font-medium" style={{ color: palette.text }}>Username</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                  <User className="absolute left-3 top-3 h-4 w-4" style={{ color: palette.text2 }} />
                   <Input
                     name="username"
                     type="text"
@@ -162,16 +197,22 @@ const AdminSignup = () => {
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="pl-10 h-12 text-black bg-white border-gray-300 placeholder:text-gray-500 focus:border-black focus:ring-black/20"
+                    className="pl-10 h-12"
+                    style={{ 
+                      color: palette.text, 
+                      borderColor: palette.border, 
+                      backgroundColor: palette.card,
+                      '--tw-ring-color': palette.accent + '33'
+                    } as React.CSSProperties & { '--tw-ring-color': string }}
                   />
                 </div>
               </div>
 
               {/* Email Field */}
               <div className="space-y-2">
-                <label className="text-gray-700 text-sm font-medium">Email Address</label>
+                <label className="text-sm font-medium" style={{ color: palette.text }}>Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4" style={{ color: palette.text2 }} />
                   <Input
                     name="email"
                     type="email"
@@ -179,24 +220,43 @@ const AdminSignup = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="pl-10 h-12 text-black bg-white border-gray-300 placeholder:text-gray-500 focus:border-black focus:ring-black/20"
+                    className="pl-10 h-12"
+                    style={{ 
+                      color: palette.text, 
+                      borderColor: palette.border, 
+                      backgroundColor: palette.card,
+                      '--tw-ring-color': palette.accent + '33'
+                    } as React.CSSProperties & { '--tw-ring-color': string }}
                   />
                 </div>
               </div>
 
               {/* Department Field */}
               <div className="space-y-2">
-                <label className="text-gray-700 text-sm font-medium">Department</label>
+                <label className="text-sm font-medium" style={{ color: palette.text }}>Department</label>
                 <div className="relative">
-                  <Building className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                  <Building className="absolute left-3 top-3 h-4 w-4" style={{ color: palette.text2 }} />
                   <Select 
                     value={formData.department} 
                     onValueChange={(value) => handleSelectChange('department', value)}
                   >
-                    <SelectTrigger className="pl-10 h-12 text-white bg-white/5 border-white/20 focus:border-blue-400">
+                    <SelectTrigger 
+                      className="pl-10 h-12"
+                      style={{ 
+                        color: palette.text, 
+                        borderColor: palette.border, 
+                        backgroundColor: palette.card,
+                      }}
+                    >
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-white/20 text-white">
+                    <SelectContent 
+                      style={{ 
+                        backgroundColor: palette.card, 
+                        borderColor: palette.border,
+                        color: palette.text
+                      }}
+                    >
                       <SelectItem value="Computer Science">Computer Science</SelectItem>
                       <SelectItem value="Mathematics">Mathematics</SelectItem>
                       <SelectItem value="Engineering">Engineering</SelectItem>
@@ -209,15 +269,28 @@ const AdminSignup = () => {
 
               {/* Role Field */}
               <div className="space-y-2">
-                <label className="text-gray-700 text-sm font-medium">Role</label>
+                <label className="text-sm font-medium" style={{ color: palette.text }}>Role</label>
                 <Select 
                   value={formData.role} 
                   onValueChange={(value) => handleSelectChange('role', value)}
                 >
-                  <SelectTrigger className="h-12 text-white bg-white/5 border-white/20 focus:border-blue-400">
+                  <SelectTrigger 
+                    className="h-12"
+                    style={{ 
+                      color: palette.text, 
+                      borderColor: palette.border, 
+                      backgroundColor: palette.card,
+                    }}
+                  >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-white/20 text-white">
+                  <SelectContent 
+                    style={{ 
+                      backgroundColor: palette.card, 
+                      borderColor: palette.border,
+                      color: palette.text
+                    }}
+                  >
                     <SelectItem value="admin">Administrator</SelectItem>
                     <SelectItem value="super_admin">Super Administrator</SelectItem>
                   </SelectContent>
@@ -226,9 +299,9 @@ const AdminSignup = () => {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <label className="text-gray-700 text-sm font-medium">Password</label>
+                <label className="text-sm font-medium" style={{ color: palette.text }}>Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4" style={{ color: palette.text2 }} />
                   <Input
                     name="password"
                     type={showPassword ? "text" : "password"}
@@ -237,17 +310,32 @@ const AdminSignup = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="pl-10 pr-10 h-12 text-black bg-white border-gray-300 placeholder:text-gray-500 focus:border-black focus:ring-black/20"
+                    className="pl-10 pr-10 h-12"
+                    style={{ 
+                      color: palette.text, 
+                      borderColor: palette.border, 
+                      backgroundColor: palette.card,
+                      '--tw-ring-color': palette.accent + '33'
+                    } as React.CSSProperties & { '--tw-ring-color': string }}
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2"
+                    style={{ backgroundColor: 'transparent' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = palette.cardHover}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-blue-300 hover:text-white transition-colors"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" style={{ color: palette.text2 }} />
+                    ) : (
+                      <Eye className="h-4 w-4" style={{ color: palette.text2 }} />
+                    )}
+                  </Button>
                 </div>
-                <p className="text-gray-600 text-xs">
+                <p className="text-xs" style={{ color: palette.text2 }}>
                   Must be at least 8 characters long
                 </p>
               </div>
@@ -257,7 +345,12 @@ const AdminSignup = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg"
+                  className="p-3 text-sm rounded-lg border"
+                  style={{ 
+                    color: '#059669', 
+                    backgroundColor: '#ECFDF5', 
+                    borderColor: '#A7F3D0' 
+                  }}
                 >
                   {success}
                 </motion.div>
@@ -268,7 +361,12 @@ const AdminSignup = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg"
+                  className="p-3 text-sm rounded-lg border"
+                  style={{ 
+                    color: '#DC2626', 
+                    backgroundColor: '#FEF2F2', 
+                    borderColor: '#FECACA' 
+                  }}
                 >
                   {error}
                 </motion.div>
@@ -278,7 +376,14 @@ const AdminSignup = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-black hover:bg-gray-800 text-white font-semibold text-base shadow-lg shadow-black/20 hover:shadow-black/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-12 font-semibold text-base py-3 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                style={{ 
+                  background: palette.accent, 
+                  color: palette.card,
+                  boxShadow: `0 10px 15px -3px ${palette.accent}33, 0 4px 6px -2px ${palette.accent}33`
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = palette.accentDeep}
+                onMouseLeave={(e) => e.currentTarget.style.background = palette.accent}
               >
                 {loading ? (
                   <div className="flex items-center gap-2">
@@ -294,10 +399,12 @@ const AdminSignup = () => {
             {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/20" />
+                <div className="w-full border-t" style={{ borderColor: palette.border }} />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-600">Already have an account?</span>
+                <span className="px-2" style={{ background: palette.card, color: palette.text2 }}>
+                  Already have an account?
+                </span>
               </div>
             </div>
 
@@ -305,7 +412,10 @@ const AdminSignup = () => {
             <div className="text-center">
               <Link
                 to="/admin/login"
-                className="text-gray-700 hover:text-black font-medium text-sm transition-colors inline-flex items-center gap-1"
+                className="font-medium text-sm transition-colors inline-flex items-center gap-1"
+                style={{ color: palette.text2 }}
+                onMouseEnter={(e) => e.currentTarget.style.color = palette.text}
+                onMouseLeave={(e) => e.currentTarget.style.color = palette.text2}
               >
                 Sign in to admin portal
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -323,23 +433,50 @@ const AdminSignup = () => {
           transition={{ delay: 0.5 }}
           className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center"
         >
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-8 h-8 bg-black/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Shield className="w-4 h-4 text-black" />
+          <div 
+            className="rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border"
+            style={{ 
+              background: palette.card, 
+              borderColor: palette.border 
+            }}
+          >
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-2"
+              style={{ background: palette.accentSoft }}
+            >
+              <Shield className="w-4 h-4" style={{ color: palette.accent }} />
             </div>
-            <p className="text-sm text-gray-700 font-medium">Role-Based Access</p>
+            <p className="text-sm font-medium" style={{ color: palette.text }}>Role-Based Access</p>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-8 h-8 bg-black/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Lock className="w-4 h-4 text-black" />
+          <div 
+            className="rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border"
+            style={{ 
+              background: palette.card, 
+              borderColor: palette.border 
+            }}
+          >
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-2"
+              style={{ background: palette.accentSoft }}
+            >
+              <Lock className="w-4 h-4" style={{ color: palette.accent }} />
             </div>
-            <p className="text-sm text-gray-700 font-medium">Secure Authentication</p>
+            <p className="text-sm font-medium" style={{ color: palette.text }}>Secure Authentication</p>
           </div>
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-8 h-8 bg-black/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <BookOpen className="w-4 h-4 text-black" />
+          <div 
+            className="rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border"
+            style={{ 
+              background: palette.card, 
+              borderColor: palette.border 
+            }}
+          >
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-2"
+              style={{ background: palette.accentSoft }}
+            >
+              <BookOpen className="w-4 h-4" style={{ color: palette.accent }} />
             </div>
-            <p className="text-sm text-gray-700 font-medium">Course Management</p>
+            <p className="text-sm font-medium" style={{ color: palette.text }}>Course Management</p>
           </div>
         </motion.div>
 
@@ -352,7 +489,10 @@ const AdminSignup = () => {
         >
           <Link
             to="/"
-            className="text-gray-700 hover:text-black text-sm transition-colors inline-flex items-center gap-1"
+            className="text-sm transition-colors inline-flex items-center gap-1"
+            style={{ color: palette.text2 }}
+            onMouseEnter={(e) => e.currentTarget.style.color = palette.text}
+            onMouseLeave={(e) => e.currentTarget.style.color = palette.text2}
           >
             ← Back to main site
           </Link>

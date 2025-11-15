@@ -97,12 +97,12 @@ const NovaCourseGenerator = () => {
 
   return (
     <div
-      className="min-h-screen overflow-x-hidden pb-20 p-4 sm:p-8"
+      className="min-h-screen overflow-x-hidden"
       style={{ backgroundColor: palette.bg }}
     >
       {/* ─── Header ───────────────────────────── */}
       <div
-        className="py-10 sm:py-16 space-y-4"
+        className=" sm:py-8 px-5 space-y-4"
         // Removed motion.div wrapper from header
       >
         <div className="mb-6 max-w-7xl mx-auto">

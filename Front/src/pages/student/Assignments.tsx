@@ -350,7 +350,7 @@ const Assignments = () => {
     <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8" style={{ backgroundColor: extendedPalette.bg, minHeight: '100vh' }}>
       <div>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ color: extendedPalette.text }}>
-            My Assignments 📝
+            My Assignments 
         </h1>
         <p className="text-xs sm:text-sm md:text-lg" style={{ color: extendedPalette.text2 }}>
           View and submit your assigned tasks.

@@ -107,7 +107,7 @@ const CreateCourseFromPlaylist = () => {
           </label>
           <textarea
             name="description"
-            rows="3"
+            rows={3}
             placeholder="Briefly describe the course..."
             value={formData.description}
             onChange={handleChange}

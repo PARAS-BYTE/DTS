@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Shield, UserPlus } from 'lucide-react';
 import { palette } from '@/theme/palette';
 
 const AdminLogin = () => {
@@ -207,6 +207,45 @@ const AdminLogin = () => {
                 )}
               </Button>
             </form>
+
+            {/* Signup Button Section */}
+            <div className="text-center space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t" style={{ borderColor: palette.border }} />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="px-2" style={{ background: palette.card, color: palette.text2 }}>
+                    New Admin?
+                  </span>
+                </div>
+              </div>
+
+              <Link to="/admin/signup">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-105 border-2"
+                  style={{ 
+                    color: palette.accent,
+                    borderColor: palette.accent,
+                    backgroundColor: 'transparent',
+                    boxShadow: `0 4px 6px -1px ${palette.accent}33`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = palette.accent + '11';
+                    e.currentTarget.style.borderColor = palette.accentDeep;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.borderColor = palette.accent;
+                  }}
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Create Admin Account
+                </Button>
+              </Link>
+            </div>
 
             <div className="text-center">
               <p className="text-xs" style={{ color: palette.text2 }}>

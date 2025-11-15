@@ -101,7 +101,10 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8" style={{ background: palette.bg }}>
+    <div
+      className="px-4 sm:px-6 md:px-8 pt-2 sm:pt-4 md:pt-6 pb-6 space-y-6 sm:space-y-8"
+      style={{ background: palette.bg }}
+    >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-bold mb-2" style={{ color: palette.text }}>
