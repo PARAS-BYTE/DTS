@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { User, Bell, Save } from 'lucide-react';
+import { User, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminSettings = () => {
@@ -17,11 +16,6 @@ const AdminSettings = () => {
     fullName: '',
     email: '',
     department: '',
-  });
-  const [notifications, setNotifications] = useState({
-    newSubmissions: true,
-    studentMessages: true,
-    courseUpdates: false,
   });
 
   // Get Admin Token
@@ -102,115 +96,67 @@ const AdminSettings = () => {
         <p className="text-gray-700 text-lg">Manage your instructor account and preferences</p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Profile Settings */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Card className="bg-white border border-gray-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-black">
-                <User className="w-5 h-5" />
-                Profile Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      {/* Profile Settings - Full Width */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-3xl"
+      >
+        <Card className="bg-white border border-gray-200 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-black">
+              <User className="w-5 h-5" />
+              Profile Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="instructor-name" className="text-gray-700">Full Name</Label>
+                <Label htmlFor="instructor-name" className="text-gray-700 font-medium">Full Name</Label>
                 <Input
                   id="instructor-name"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20"
+                  className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20 h-11"
+                  placeholder="Enter your full name"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="instructor-email" className="text-gray-700">Email</Label>
+                <Label htmlFor="instructor-email" className="text-gray-700 font-medium">Email</Label>
                 <Input
                   id="instructor-email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20"
+                  className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20 h-11"
+                  placeholder="Enter your email"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="department" className="text-gray-700">Department</Label>
-                <Input
-                  id="department"
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20"
-                />
-              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="department" className="text-gray-700 font-medium">Department</Label>
+              <Input
+                id="department"
+                value={formData.department}
+                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                className="bg-white border-gray-300 text-black focus:border-black focus:ring-black/20 h-11"
+                placeholder="Enter your department"
+              />
+            </div>
+            <div className="pt-4 border-t border-gray-200">
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30"
+                className="bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30 px-8 h-11"
               >
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : 'Save Changes'}
               </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Notifications */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          <Card className="bg-white border border-gray-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-black">
-                <Bell className="w-5 h-5" />
-                Notification Preferences
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-black">New Submissions</p>
-                  <p className="text-sm text-gray-600">Get notified of new student submissions</p>
-                </div>
-                <Switch
-                  checked={notifications.newSubmissions}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, newSubmissions: checked })
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-black">Student Messages</p>
-                  <p className="text-sm text-gray-600">Alerts for new messages from students</p>
-                </div>
-                <Switch
-                  checked={notifications.studentMessages}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, studentMessages: checked })
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-black">Course Updates</p>
-                  <p className="text-sm text-gray-600">Updates about your courses</p>
-                </div>
-                <Switch
-                  checked={notifications.courseUpdates}
-                  onCheckedChange={(checked) =>
-                    setNotifications({ ...notifications, courseUpdates: checked })
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };

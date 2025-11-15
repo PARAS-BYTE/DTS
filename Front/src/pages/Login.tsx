@@ -189,32 +189,6 @@ const Login = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Quick Stats */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 text-center"
-        >
-          <div className="grid grid-cols-3 gap-6 mb-4">
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-              <div className="text-2xl font-bold text-black">10K+</div>
-              <div className="text-sm text-gray-600">Active Learners</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-              <div className="text-2xl font-bold text-black">500+</div>
-              <div className="text-sm text-gray-600">Courses</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-              <div className="text-2xl font-bold text-black">98%</div>
-              <div className="text-sm text-gray-600">Success Rate</div>
-            </div>
-          </div>
-          <p className="text-sm text-gray-700">
-            Join thousands of learners achieving their goals with Nova Learn
-          </p>
-        </motion.div>
       </motion.div>
     </div>
   );

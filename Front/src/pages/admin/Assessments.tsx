@@ -51,6 +51,7 @@ const Assessments = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingAssignmentId, setEditingAssignmentId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -166,6 +167,7 @@ const Assessments = () => {
 
   // ─── Open Create Dialog ────────────────────────────────
   const handleCreateClick = () => {
+    setEditingAssignmentId(null);
     setFormData({
       title: '',
       description: '',
@@ -181,6 +183,54 @@ const Assessments = () => {
       { questionText: '', questionType: 'text', marks: 1, required: true },
     ]);
     setIsDialogOpen(true);
+  };
+
+  // ─── Open Edit Dialog ────────────────────────────────
+  const handleEditClick = async (assignmentId: string) => {
+    try {
+      const token = getAdminToken();
+      const { data } = await axios.get(
+        `http://localhost:5000/api/assignments/${assignmentId}`,
+        {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      if (data.success && data.assignment) {
+        const assignment = data.assignment;
+        setEditingAssignmentId(assignmentId);
+        setFormData({
+          title: assignment.title || '',
+          description: assignment.description || '',
+          courseId: assignment.courseId || '',
+          module: assignment.module || '',
+          dueDate: assignment.dueDate
+            ? new Date(assignment.dueDate).toISOString().slice(0, 16)
+            : '',
+          allowLateSubmission: assignment.allowLateSubmission || false,
+          latePenalty: assignment.latePenalty || 0,
+          published: assignment.published !== false,
+        });
+        setQuestions(
+          assignment.questions && assignment.questions.length > 0
+            ? assignment.questions.map((q: any) => ({
+                questionText: q.questionText || '',
+                questionType: q.questionType || 'text',
+                marks: q.marks || 1,
+                required: q.required !== false,
+              }))
+            : [
+                { questionText: '', questionType: 'text', marks: 1, required: true },
+                { questionText: '', questionType: 'text', marks: 1, required: true },
+              ]
+        );
+        setIsDialogOpen(true);
+      }
+    } catch (err: any) {
+      console.error('Fetch Assignment Error:', err);
+      toast.error(err.response?.data?.message || 'Failed to load assignment');
+    }
   };
 
   // ─── Add Question ────────────────────────────────
@@ -241,23 +291,43 @@ const Assessments = () => {
         })),
       };
 
-      const { data } = await axios.post(
-        'http://localhost:5000/api/assignments',
-        payload,
-        {
-          withCredentials: true,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      );
+      if (editingAssignmentId) {
+        // Update existing assignment
+        const { data } = await axios.put(
+          `http://localhost:5000/api/assignments/${editingAssignmentId}`,
+          payload,
+          {
+            withCredentials: true,
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
 
-      if (data.success) {
-        toast.success('Assignment created successfully');
-        setIsDialogOpen(false);
-        fetchAssignments();
+        if (data.success) {
+          toast.success('Assignment updated successfully');
+          setIsDialogOpen(false);
+          setEditingAssignmentId(null);
+          fetchAssignments();
+        }
+      } else {
+        // Create new assignment
+        const { data } = await axios.post(
+          'http://localhost:5000/api/assignments',
+          payload,
+          {
+            withCredentials: true,
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
+
+        if (data.success) {
+          toast.success('Assignment created successfully');
+          setIsDialogOpen(false);
+          fetchAssignments();
+        }
       }
     } catch (err: any) {
-      console.error('Create Assignment Error:', err);
-      toast.error(err.response?.data?.message || 'Failed to create assignment');
+      console.error(editingAssignmentId ? 'Update Assignment Error:' : 'Create Assignment Error:', err);
+      toast.error(err.response?.data?.message || `Failed to ${editingAssignmentId ? 'update' : 'create'} assignment`);
     } finally {
       setSubmitting(false);
     }
@@ -399,9 +469,15 @@ const Assessments = () => {
                             View Submissions
                           </Button>
                         )}
-                        <Button size="sm" variant="outline">
-                          Edit Assignment
-                        </Button>
+                        {assignment.questionsCount !== undefined && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditClick(assignment._id)}
+                          >
+                            Edit Assignment
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -419,13 +495,20 @@ const Assessments = () => {
         </div>
       ) : null}
 
-      {/* Create Assignment Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* Create/Edit Assignment Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) {
+          setEditingAssignmentId(null);
+        }
+      }}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Assignment</DialogTitle>
+            <DialogTitle>{editingAssignmentId ? 'Edit Assignment' : 'Create New Assignment'}</DialogTitle>
             <DialogDescription>
-              Create an assignment with 2 or more questions for your students.
+              {editingAssignmentId
+                ? 'Update the assignment details and questions.'
+                : 'Create an assignment with 2 or more questions for your students.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -452,6 +535,7 @@ const Assessments = () => {
                     setFormData({ ...formData, courseId: value })
                   }
                   required
+                  disabled={!!editingAssignmentId}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a course" />
@@ -646,7 +730,13 @@ const Assessments = () => {
                 Cancel
               </Button>
               <Button type="submit" disabled={submitting} className="glow-primary">
-                {submitting ? 'Creating...' : 'Create Assignment'}
+                {submitting
+                  ? editingAssignmentId
+                    ? 'Updating...'
+                    : 'Creating...'
+                  : editingAssignmentId
+                  ? 'Update Assignment'
+                  : 'Create Assignment'}
               </Button>
             </DialogFooter>
           </form>

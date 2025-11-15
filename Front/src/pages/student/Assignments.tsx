@@ -67,16 +67,36 @@ const Assignments = () => {
   const fetchAssignments = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      
+      // Add Authorization header if token exists
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const { data } = await axios.get('http://localhost:5000/api/assignments/student', {
         withCredentials: true,
+        headers,
       });
 
       if (data.success) {
-        setAssignments(data.assignments);
+        setAssignments(data.assignments || []);
+      } else {
+        console.error('API returned success: false', data);
+        setAssignments([]);
       }
     } catch (err: any) {
       console.error('Fetch Assignments Error:', err);
-      toast.error('Failed to load assignments');
+      const errorMessage = err.response?.data?.message || 'Failed to load assignments';
+      toast.error(errorMessage);
+      setAssignments([]);
+      
+      // Log more details for debugging
+      if (err.response) {
+        console.error('Error response:', err.response.data);
+        console.error('Error status:', err.response.status);
+      }
     } finally {
       setLoading(false);
     }
@@ -308,7 +328,10 @@ const Assignments = () => {
       ) : !loading ? (
         <div className="text-center py-12">
           <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No assignments found.</p>
+          <p className="text-muted-foreground mb-2">No assignments found.</p>
+          <p className="text-sm text-muted-foreground">
+            Make sure you are enrolled in courses that have published assignments.
+          </p>
         </div>
       ) : null}
 

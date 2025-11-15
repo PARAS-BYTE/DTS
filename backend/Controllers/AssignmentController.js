@@ -97,6 +97,145 @@ export const createAssignment = asyncHandler(async (req, res) => {
 });
 
 //
+// ─── UPDATE ASSIGNMENT (ADMIN) ─────────────────────────────────────────
+// @route   PUT /api/assignments/:id
+// @access  Private (Admin)
+//
+export const updateAssignment = asyncHandler(async (req, res) => {
+  try {
+    if (!req.admin) {
+      return res.status(401).json({ message: "Not authorized as admin" });
+    }
+
+    const assignmentId = req.params.id;
+    const {
+      title,
+      description,
+      module,
+      questions,
+      dueDate,
+      allowLateSubmission,
+      latePenalty,
+      published,
+    } = req.body;
+
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    // Verify admin is the instructor
+    const course = await Course.findById(assignment.course);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    if (course.instructor.toString() !== req.admin._id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized to update this assignment",
+      });
+    }
+
+    // Update assignment fields
+    if (title !== undefined) assignment.title = title;
+    if (description !== undefined) assignment.description = description;
+    if (module !== undefined) assignment.module = module;
+    if (dueDate !== undefined) assignment.dueDate = new Date(dueDate);
+    if (allowLateSubmission !== undefined) assignment.allowLateSubmission = allowLateSubmission;
+    if (latePenalty !== undefined) assignment.latePenalty = latePenalty;
+    if (published !== undefined) assignment.published = published;
+
+    // Update questions if provided
+    if (questions && Array.isArray(questions) && questions.length >= 2) {
+      assignment.questions = questions.map((q, index) => ({
+        questionText: q.questionText,
+        questionType: q.questionType || "text",
+        marks: q.marks || 1,
+        required: q.required !== false,
+        order: index,
+      }));
+      // Recalculate total marks
+      assignment.totalMarks = assignment.questions.reduce((sum, q) => sum + (q.marks || 0), 0);
+    }
+
+    await assignment.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Assignment updated successfully",
+      assignment,
+    });
+  } catch (error) {
+    console.error("Update Assignment Error:", error.message);
+    res.status(500).json({
+      message: "Server error while updating assignment",
+      error: error.message,
+    });
+  }
+});
+
+//
+// ─── GET SINGLE ASSIGNMENT BY ID (ADMIN) ─────────────────────────────
+// @route   GET /api/assignments/:id
+// @access  Private (Admin)
+//
+export const getAssignmentById = asyncHandler(async (req, res) => {
+  try {
+    if (!req.admin) {
+      return res.status(401).json({ message: "Not authorized as admin" });
+    }
+
+    const assignmentId = req.params.id;
+    const assignment = await Assignment.findById(assignmentId)
+      .populate("course", "title")
+      .select("title description course module questions dueDate allowLateSubmission latePenalty published");
+
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    // Verify admin is the instructor
+    const course = await Course.findById(assignment.course);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    if (course.instructor.toString() !== req.admin._id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized to view this assignment",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      assignment: {
+        _id: assignment._id,
+        title: assignment.title,
+        description: assignment.description,
+        courseId: assignment.course._id,
+        module: assignment.module,
+        questions: assignment.questions.map((q) => ({
+          _id: q._id,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          marks: q.marks,
+          required: q.required,
+        })),
+        dueDate: assignment.dueDate,
+        allowLateSubmission: assignment.allowLateSubmission,
+        latePenalty: assignment.latePenalty,
+        published: assignment.published,
+      },
+    });
+  } catch (error) {
+    console.error("Get Assignment By ID Error:", error.message);
+    res.status(500).json({
+      message: "Server error while fetching assignment",
+    });
+  }
+});
+
+//
 // ─── GET ASSIGNMENTS FOR ADMIN COURSES ─────────────────────────────
 // @route   GET /api/assignments/admin
 // @access  Private (Admin)
@@ -194,9 +333,19 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
     }
 
     // Get enrolled course IDs
-    const enrolledCourseIds = user.enrolledCourses.map(
-      (ec) => ec.courseId
-    );
+    const enrolledCourseIds = user.enrolledCourses
+      .map((ec) => ec.courseId)
+      .filter((id) => id != null); // Filter out null/undefined values
+
+    console.log(`📚 User ${user._id} enrolled in ${enrolledCourseIds.length} courses`);
+
+    if (enrolledCourseIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        assignments: [],
+        message: "No enrolled courses found",
+      });
+    }
 
     // Get assignments for enrolled courses
     const assignments = await Assignment.find({
@@ -208,6 +357,8 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
         "title description course dueDate totalMarks questions allowLateSubmission latePenalty submissions createdAt"
       )
       .sort({ dueDate: 1 });
+
+    console.log(`📝 Found ${assignments.length} published assignments for user ${user._id}`);
 
     // Format assignments with student submission status
     const formattedAssignments = assignments.map((assignment) => {

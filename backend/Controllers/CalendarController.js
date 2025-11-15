@@ -503,25 +503,25 @@ export const createCustomTask = asyncHandler(async (req, res) => {
   }
   
   // Check if task already exists for this date
-  const existingTask = calendar.tasks.find(t => {
+  const existingTaskIndex = calendar.tasks.findIndex(t => {
     const tDate = new Date(t.date);
     tDate.setHours(0, 0, 0, 0);
     return tDate.getTime() === taskDate.getTime();
   });
   
-  if (existingTask && !existingTask.aiGenerated) {
-    return res.status(400).json({ 
-      message: "A custom task already exists for this date" 
-    });
-  }
+  const existingTask = existingTaskIndex !== -1 ? calendar.tasks[existingTaskIndex] : null;
   
   // Create new custom task
   const newTask = {
-    taskId: new mongoose.Types.ObjectId().toString(),
+    taskId: existingTask && !existingTask.aiGenerated 
+      ? existingTask.taskId // Keep existing taskId if replacing custom task
+      : new mongoose.Types.ObjectId().toString(), // New taskId for new tasks
     title: title.trim(),
     description: description.trim(),
     date: taskDate,
-    status: "pending",
+    status: existingTask && !existingTask.aiGenerated 
+      ? existingTask.status // Preserve status if replacing custom task
+      : "pending",
     type: calendar.validateTaskType(type || "study"),
     category: category || "General",
     priority: calendar.validatePriority(priority || "medium"),
@@ -531,27 +531,29 @@ export const createCustomTask = asyncHandler(async (req, res) => {
     content: {
       learningObjectives: [],
       successCriteria: "Complete the task as described"
-    }
+    },
+    completedAt: existingTask && !existingTask.aiGenerated 
+      ? existingTask.completedAt // Preserve completion time if exists
+      : undefined
   };
   
-  // If there's an AI-generated task for this date, replace it
-  if (existingTask && existingTask.aiGenerated) {
-    const index = calendar.tasks.findIndex(t => {
-      const tDate = new Date(t.date);
-      tDate.setHours(0, 0, 0, 0);
-      return tDate.getTime() === taskDate.getTime();
-    });
-    if (index !== -1) {
-      calendar.tasks[index] = newTask;
-    }
+  // Replace existing task (whether AI-generated or custom) or add new one
+  if (existingTaskIndex !== -1) {
+    calendar.tasks[existingTaskIndex] = newTask;
   } else {
     calendar.tasks.push(newTask);
   }
   
   await calendar.save();
   
+  const message = existingTaskIndex !== -1 
+    ? existingTask && !existingTask.aiGenerated
+      ? "Custom task updated successfully!"
+      : "Custom task created and replaced AI task!"
+    : "Custom task created successfully!";
+  
   res.status(201).json({
-    message: "Custom task created successfully!",
+    message: message,
     task: newTask
   });
 });

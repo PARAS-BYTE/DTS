@@ -184,14 +184,6 @@ const AdminLogin = () => {
               </Button>
             </form>
 
-            <div className="text-center pt-4 border-t border-gray-200">
-              <p className="text-gray-700 text-sm">
-                <Link to="/login" className="text-gray-700 hover:text-black transition-colors">
-                  ← Back to Student Portal
-                </Link>
-              </p>
-            </div>
-
             <div className="text-center">
               <p className="text-gray-600 text-xs">
                 Secure access • Activity monitored • Unauthorized access prohibited

@@ -46,11 +46,6 @@ const Landing = () => {
             transition={{ duration: 0.8 }}
             className="mb-8"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/5 border border-black/20 mb-8 shadow-lg shadow-black/10">
-              <Zap className="w-4 h-4 text-black" />
-              <span className="text-sm font-medium text-black">Powered by Advanced AI</span>
-            </div>
-            
             <h1 className="text-6xl md:text-8xl font-bold mb-6 leading-tight text-black">
               Your Smartest{' '}
               <span className="bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">

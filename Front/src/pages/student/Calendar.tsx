@@ -182,11 +182,12 @@ const TaskItem = ({
   };
 
   const typeColors = {
-    study: "text-blue-400",
-    quiz: "text-purple-400", 
-    reading: "text-green-400",
-    practice: "text-yellow-400",
-    assignment: "text-orange-400"
+    study: "text-blue-600",
+    quiz: "text-purple-600", 
+    reading: "text-green-600",
+    practice: "text-yellow-600",
+    assignment: "text-orange-600",
+    review: "text-pink-600"
   };
 
   const TypeIcon = typeIcons[task.type] || BookOpen;
@@ -253,11 +254,11 @@ const TaskItem = ({
             {task.title}
           </h4>
           {task.aiGenerated ? (
-            <Badge variant="outline" className="text-xs bg-purple-500/20 text-purple-400 border-purple-500/20">
+            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-600 border-purple-200">
               AI
             </Badge>
           ) : (
-            <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-400 border-blue-500/20">
+            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
               Custom
             </Badge>
           )}
@@ -267,7 +268,7 @@ const TaskItem = ({
             </Badge>
           )}
           {isTaskAvailable() && task.status !== "completed" && (
-            <Badge variant="outline" className="text-xs bg-black/5 text-black border-gray-200">
+            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
               Available
             </Badge>
           )}
@@ -707,7 +708,7 @@ const Calendar = () => {
         {/* Create Task Button */}
         <Button
           onClick={() => setIsCreateDialogOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          className="bg-black hover:bg-gray-800 text-white shadow-lg shadow-black/20 hover:shadow-black/30"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Custom Task
@@ -931,63 +932,65 @@ const Calendar = () => {
 
       {/* Create Task Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[#121214] border-gray-800 text-gray-200">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-gray-200 text-black">
           <DialogHeader>
-            <DialogTitle className="text-indigo-300">Create Custom Task</DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogTitle className="text-black text-xl font-semibold">Create Custom Task</DialogTitle>
+            <DialogDescription className="text-gray-600">
               Create your own task and earn XP when you complete it!
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-gray-300">Task Title *</Label>
+              <Label htmlFor="title" className="text-black font-medium">Task Title *</Label>
               <Input
                 id="title"
                 value={taskForm.title}
                 onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
                 placeholder="e.g., Review JavaScript fundamentals"
-                className="bg-[#1f1f22] border-gray-700 text-white"
+                className="bg-white border-gray-200 text-black focus:border-black"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-gray-300">Description *</Label>
+              <Label htmlFor="description" className="text-black font-medium">Description *</Label>
               <Textarea
                 id="description"
                 value={taskForm.description}
                 onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
                 placeholder="Describe what you want to accomplish..."
                 rows={4}
-                className="bg-[#1f1f22] border-gray-700 text-white"
+                className="bg-white border-gray-200 text-black focus:border-black"
                 required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="date" className="text-gray-300">Date *</Label>
-                <Calendar
-                  mode="single"
-                  selected={taskForm.date}
-                  onSelect={(date) => date && setTaskForm({ ...taskForm, date })}
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                  className="bg-[#1f1f22] border-gray-700 rounded-md"
-                />
+                <Label htmlFor="date" className="text-black font-medium">Date *</Label>
+                <div className="border border-gray-200 rounded-md p-2 bg-white">
+                  <Calendar
+                    mode="single"
+                    selected={taskForm.date}
+                    onSelect={(date) => date && setTaskForm({ ...taskForm, date })}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    className="bg-white"
+                  />
+                </div>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="type" className="text-gray-300">Task Type</Label>
+                  <Label htmlFor="type" className="text-black font-medium">Task Type</Label>
                   <Select
                     value={taskForm.type}
                     onValueChange={(value) => setTaskForm({ ...taskForm, type: value })}
                   >
-                    <SelectTrigger className="bg-[#1f1f22] border-gray-700 text-white">
+                    <SelectTrigger className="bg-white border-gray-200 text-black focus:border-black">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1f1f22] border-gray-700">
+                    <SelectContent className="bg-white border-gray-200">
                       <SelectItem value="study">Study</SelectItem>
                       <SelectItem value="quiz">Quiz</SelectItem>
                       <SelectItem value="reading">Reading</SelectItem>
@@ -999,15 +1002,15 @@ const Calendar = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="difficulty" className="text-gray-300">Difficulty</Label>
+                  <Label htmlFor="difficulty" className="text-black font-medium">Difficulty</Label>
                   <Select
                     value={taskForm.difficulty}
                     onValueChange={(value) => setTaskForm({ ...taskForm, difficulty: value })}
                   >
-                    <SelectTrigger className="bg-[#1f1f22] border-gray-700 text-white">
+                    <SelectTrigger className="bg-white border-gray-200 text-black focus:border-black">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1f1f22] border-gray-700">
+                    <SelectContent className="bg-white border-gray-200">
                       <SelectItem value="beginner">Beginner</SelectItem>
                       <SelectItem value="intermediate">Intermediate</SelectItem>
                       <SelectItem value="advanced">Advanced</SelectItem>
@@ -1016,15 +1019,15 @@ const Calendar = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="priority" className="text-gray-300">Priority</Label>
+                  <Label htmlFor="priority" className="text-black font-medium">Priority</Label>
                   <Select
                     value={taskForm.priority}
                     onValueChange={(value) => setTaskForm({ ...taskForm, priority: value })}
                   >
-                    <SelectTrigger className="bg-[#1f1f22] border-gray-700 text-white">
+                    <SelectTrigger className="bg-white border-gray-200 text-black focus:border-black">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1f1f22] border-gray-700">
+                    <SelectContent className="bg-white border-gray-200">
                       <SelectItem value="low">Low</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="high">High</SelectItem>
@@ -1033,44 +1036,44 @@ const Calendar = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="duration" className="text-gray-300">Duration (minutes)</Label>
+                  <Label htmlFor="duration" className="text-black font-medium">Duration (minutes)</Label>
                   <Input
                     id="duration"
                     type="number"
                     min="1"
                     value={taskForm.estimatedDuration}
                     onChange={(e) => setTaskForm({ ...taskForm, estimatedDuration: parseInt(e.target.value) || 30 })}
-                    className="bg-[#1f1f22] border-gray-700 text-white"
+                    className="bg-white border-gray-200 text-black focus:border-black"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-gray-300">Category</Label>
+                  <Label htmlFor="category" className="text-black font-medium">Category</Label>
                   <Input
                     id="category"
                     value={taskForm.category}
                     onChange={(e) => setTaskForm({ ...taskForm, category: e.target.value })}
                     placeholder="e.g., Programming, Math"
-                    className="bg-[#1f1f22] border-gray-700 text-white"
+                    className="bg-white border-gray-200 text-black focus:border-black"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
               variant="outline"
               onClick={() => setIsCreateDialogOpen(false)}
               disabled={creating}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+              className="border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-black"
             >
               Cancel
             </Button>
             <Button
               onClick={handleCreateTask}
               disabled={creating}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="bg-black hover:bg-gray-800 text-white"
             >
               {creating ? "Creating..." : "Create Task"}
             </Button>
