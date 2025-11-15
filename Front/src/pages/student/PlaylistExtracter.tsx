@@ -29,14 +29,19 @@ const CreateCourseFromPlaylist = () => {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/courses/ytcr",
-        formData
+        formData,
+        { withCredentials: true }
       );
       setResult(res.data);
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.error || "Failed to create course from playlist."
-      );
+      if (err.response?.status === 401) {
+        setError("Please log in again to import a playlist course.");
+      } else {
+        setError(
+          err.response?.data?.error || "Failed to create course from playlist."
+        );
+      }
     } finally {
       setLoading(false);
     }

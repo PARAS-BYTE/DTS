@@ -190,46 +190,54 @@ export const getCourseDetails = asyncHandler(async (req, res) => {
 //
 export const createCourse = asyncHandler(async (req, res) => {
     try {
-        // req.admin is set by protectAdmin middleware
-        if (!req.admin) {
-            return res.status(401).json({ message: "Not authorized as admin" });
-        }
+        // Extract JWT
+        let token = req.cookies?.jwt ||
+            (req.headers.authorization?.startsWith("Bearer ")
+                ? req.headers.authorization.split(" ")[1]
+                : null);
 
-        const { 
-            title, 
-            description, 
-            category, 
-            level, 
-            duration, 
+        if (!token) return res.status(401).json({ message: "Not authorized, no token" });
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // SAFE DEFAULTS
+        const {
+            title,
+            description,
+            category = "Other",
+            level = "Beginner",
+            duration = 0,
+            thumbnail = "",
+            price = 0,
+            link = "",
+            instructorName = user.name || user.username,
+            language = "English",
+            requirements = [],
+            whatYouWillLearn = [],
+            modules = []
+        } = req.body;
+
+        if (!title || !description)
+            return res.status(400).json({ message: "Title and description are required" });
+
+        const course = await Course.create({
+            title,
+            description,
+            category,
+            level,
+            duration,
             thumbnail,
             price,
             link,
             instructorName,
             language,
             requirements,
-            whatYouWillLearn
-        } = req.body;
-
-        if (!title || !description) {
-            return res.status(400).json({ message: "Title and description are required" });
-        }
-
-        // Use admin as instructor
-        const course = await Course.create({
-            title,
-            description,
-            category: category || "Other",
-            level: level || "Beginner",
-            duration: duration || 0,
-            thumbnail: thumbnail || "",
-            price: price || 0,
-            link: link || "",
-            instructorName: instructorName || req.admin.fullName || req.admin.username,
-            language: language || "English",
-            requirements: requirements || [],
-            whatYouWillLearn: whatYouWillLearn || [],
-            instructor: req.admin._id, // Store admin ID as instructor
-            published: true, // Auto-publish courses created by admin
+            whatYouWillLearn,
+            modules,
+            instructor: user._id,
+            published: false
         });
 
         res.status(201).json({
@@ -237,11 +245,69 @@ export const createCourse = asyncHandler(async (req, res) => {
             message: "Course created successfully",
             course
         });
+
     } catch (error) {
-        console.error("Create Course Error:", error.message);
-        res.status(500).json({ message: "Server error while creating course", error: error.message });
+        console.error("Create User Course Error:", error);
+        res.status(500).json({
+            message: "Server error while creating course",
+            error: error.message
+        });
     }
 });
+// export const createCourse = asyncHandler(async (req, res) => {
+//     try {
+//         // req.admin is set by protectAdmin middleware
+//         if (!req.admin) {
+//             return res.status(401).json({ message: "Not authorized as admin" });
+//         }
+
+//         const { 
+//             title, 
+//             description, 
+//             category, 
+//             level, 
+//             duration, 
+//             thumbnail,
+//             price,
+//             link,
+//             instructorName,
+//             language,
+//             requirements,
+//             whatYouWillLearn
+//         } = req.body;
+
+//         if (!title || !description) {
+//             return res.status(400).json({ message: "Title and description are required" });
+//         }
+
+//         // Use admin as instructor
+//         const course = await Course.create({
+//             title,
+//             description,
+//             category: category || "Other",
+//             level: level || "Beginner",
+//             duration: duration || 0,
+//             thumbnail: thumbnail || "",
+//             price: price || 0,
+//             link: link || "",
+//             instructorName: instructorName || req.admin.fullName || req.admin.username,
+//             language: language || "English",
+//             requirements: requirements || [],
+//             whatYouWillLearn: whatYouWillLearn || [],
+//             instructor: req.admin._id, // Store admin ID as instructor
+//             published: true, // Auto-publish courses created by admin
+//         });
+
+//         res.status(201).json({
+//             success: true,
+//             message: "Course created successfully",
+//             course
+//         });
+//     } catch (error) {
+//         console.error("Create Course Error:", error.message);
+//         res.status(500).json({ message: "Server error while creating course", error: error.message });
+//     }
+// });
 //
 // ─── UPDATE COURSE ────────────────────────────────────────────────
 // @route   PUT /api/courses/:id
@@ -892,6 +958,28 @@ export const autoCreateCourse = async (req, res) => {
         const { topic, category = "General", level = "Beginner" } = req.body;
         if (!topic) return res.status(400).json({ error: "Topic is required" });
 
+        // Try to identify the logged-in student (optional for backward compatibility)
+        let user = null;
+        let token;
+
+        if (req.cookies && req.cookies.jwt) {
+            token = req.cookies.jwt;
+        } else if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith("Bearer ")
+        ) {
+            token = req.headers.authorization.split(" ")[1];
+        }
+
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                user = await User.findById(decoded.userId);
+            } catch (authError) {
+                console.warn("Auto course generation auth failed:", authError.message);
+            }
+        }
+
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
@@ -992,9 +1080,35 @@ Output only JSON, nothing else.
             modules: parsed.modules,
             tags: parsed.tags || [topic],
             published: false,
+            instructor: user?._id,
+            instructorName: user?.name || user?.username || "AI Course Builder",
+            enrolledStudents: user
+                ? [
+                    {
+                        studentId: user._id,
+                    },
+                ]
+                : [],
         });
 
         await newCourse.save();
+
+        // Automatically enroll the creator so the course appears under "My Learning"
+        if (user) {
+            const alreadyEnrolled = user.enrolledCourses.some(
+                (ec) => ec.courseId && ec.courseId.toString() === newCourse._id.toString()
+            );
+
+            if (!alreadyEnrolled) {
+                user.enrolledCourses.push({
+                    courseId: newCourse._id,
+                    title: newCourse.title,
+                    progress: 0,
+                    completed: false,
+                });
+                await user.save();
+            }
+        }
 
         res.status(201).json({
             message: "✅ Course generated successfully using Gemini 2.5 Flash",
@@ -1010,6 +1124,26 @@ export const getPlaylistVideos = async (req, res) => {
     try {
         const { playlistUrl, title, description, category = "Other", level = "Beginner" } = req.body;
         const apiKey = process.env.YOUTUBE_API_KEY;
+        let token;
+        let user = null;
+
+        if (req.cookies && req.cookies.jwt) {
+            token = req.cookies.jwt;
+        } else if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith("Bearer ")
+        ) {
+            token = req.headers.authorization.split(" ")[1];
+        }
+
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                user = await User.findById(decoded.userId);
+            } catch (authError) {
+                console.warn("Playlist course generation auth failed:", authError.message);
+            }
+        }
 
         if (!playlistUrl)
             return res.status(400).json({ error: "Playlist URL is required" });
@@ -1088,9 +1222,34 @@ export const getPlaylistVideos = async (req, res) => {
             modules,
             tags: ["YouTube", "AutoGenerated", category],
             published: false,
+            instructor: user?._id,
+            instructorName: user?.name || user?.username || "Playlist Importer",
+            enrolledStudents: user
+                ? [
+                    {
+                        studentId: user._id,
+                    },
+                ]
+                : [],
         });
 
         await newCourse.save();
+
+        if (user) {
+            const alreadyEnrolled = user.enrolledCourses.some(
+                (ec) => ec.courseId && ec.courseId.toString() === newCourse._id.toString()
+            );
+
+            if (!alreadyEnrolled) {
+                user.enrolledCourses.push({
+                    courseId: newCourse._id,
+                    title: newCourse.title,
+                    progress: 0,
+                    completed: false,
+                });
+                await user.save();
+            }
+        }
         
         res.status(201).json({
             message: "✅ Course created successfully from playlist",

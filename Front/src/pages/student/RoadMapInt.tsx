@@ -25,13 +25,10 @@ export default function RoadMapInt() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token") || document.cookie.replace("jwt=", "");
-
       await axios.post(
         "http://localhost:5000/api/roadmap/createwithai",
         { topic, level },
         {
-          headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         }
       );
