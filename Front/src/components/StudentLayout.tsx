@@ -16,7 +16,9 @@ import {
   Blocks,
   Menu,
   X,
-  LucideBatteryWarning
+  LucideBatteryWarning,
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 // import { palette } from "../../theme/palette";
 import { palette } from '../theme/palette';
@@ -39,6 +41,8 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
     { name: 'Settings', href: '/student/settings', icon: Settings },
     { name: 'History', href: '/student/hist', icon: History },
     { name: 'My Learning', href: '/student/learning', icon: LucideBatteryWarning },
+    { name: 'Notes', href: '/student/notion', icon: FileText },
+    { name: 'Forum', href: '/student/forum', icon: MessageSquare },
     { name: 'ChatBot', href: '/student/chatbot', icon: Bot },
     { name: 'Store', href: '/student/store', icon: StoreIcon }
   ];

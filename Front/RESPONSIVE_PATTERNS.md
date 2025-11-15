@@ -98,3 +98,4 @@ This document outlines the responsive design patterns used throughout the applic
 - Other admin pages
 
 
+

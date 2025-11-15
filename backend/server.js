@@ -23,6 +23,9 @@ import assignmentRouter from './routes/AssignmentRouter.js';
 import BattleRouter from './routes/BattleRoutes.js';
 import StoreRouter from './routes/storeRoutes.js';
 import RoadMapRouter from './routes/RoadMapRoutes.js';
+import lessonNotesRoutes from './routes/lessonNotesRoutes.js';
+import personalNotesRoutes from './routes/personalNotesRoutes.js';
+import questionRoutes from './routes/questionRoutes.js';
 // import aiRoutes from './routes/AiRoutes.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -54,6 +57,9 @@ app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/assignments', assignmentRouter);
 app.use("/api/store",StoreRouter)
 app.use("/api/roadmap",RoadMapRouter)
+app.use('/api/notes', lessonNotesRoutes);
+app.use('/api/personal-notes', personalNotesRoutes);
+app.use('/api/questions', questionRoutes);
 
 app.post("/trans", async (req, res) => {
   res.send({})

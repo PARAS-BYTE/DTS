@@ -128,7 +128,6 @@ const AssignmentSubmissions = () => {
                 : `You have ${diff} new submissions for "${data.assignment?.title || 'Assignment'}".`,
               icon: iconUrl(),
               badge: iconUrl(),
-              renotify: true,
             });
           }
           // Store the latest count

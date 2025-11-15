@@ -49,6 +49,8 @@ import BattleShow from "./pages/student/BattleShow";
 import CreateRoadmap from "./pages/student/RoadMap";
 import RoadMapDisplay from "./pages/student/RoadMapDisplay";
 import RoadMapInt from "./pages/student/RoadMapInt";
+import Notion from "./pages/student/Notion";
+import Forum from "./pages/student/Forum";
 
 // ✅ Create a context for the stopwatch
 interface StopwatchContextType {
@@ -365,6 +367,22 @@ const App = () => (
               element={
                 <StudentLayout>
                   <Settings />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/notion"
+              element={
+                <StudentLayout>
+                  <Notion />
+                </StudentLayout>
+              }
+            />
+            <Route
+              path="/student/forum"
+              element={
+                <StudentLayout>
+                  <Forum />
                 </StudentLayout>
               }
             />
