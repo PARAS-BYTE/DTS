@@ -11,6 +11,9 @@ import {
   Search,
   CheckCircle2,
   Play,
+  FileText,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VideoPlayer from "@/components/VideoPlayer";
@@ -25,22 +28,49 @@ const MyLearning = () => {
   const [activeLesson, setActiveLesson] = useState<any | null>(null);
   const [transcript, setTranscript] = useState<string>("");
   const [courseLoading, setCourseLoading] = useState(false);
+  const [lessonNotes, setLessonNotes] = useState<{ [key: string]: any }>({});
+  const [expandedCourseId, setExpandedCourseId] = useState<string | null>(null);
   const navigate = useNavigate();
     // ─── Fetch Enrolled Courses ───────────────────────────────
   const fetchMyCourses = async () => {
     try {
       setLoading(true);
-      console.log("📡 Fetching Enrolled Courses...");
+      console.log("Fetching Enrolled Courses...");
 
       const { data } = await axios.get(
         "http://localhost:5000/api/courses/my",
         { withCredentials: true }
       );
 
-      console.log("✅ Received:", data);
+      console.log("Received:", data);
       setCourses(data);
+      
+      // Fetch lesson notes for all courses
+      const notesMap: { [key: string]: any } = {};
+      for (const course of data) {
+        if (course.modules) {
+          for (const module of course.modules) {
+            if (module.lessons) {
+              for (const lesson of module.lessons) {
+                try {
+                  const noteRes = await axios.get(
+                    `http://localhost:5000/api/notes/${lesson._id}`,
+                    { withCredentials: true }
+                  );
+                  if (noteRes.data?.note?.note) {
+                    notesMap[lesson._id] = noteRes.data.note.note;
+                  }
+                } catch (err) {
+                  // Note doesn't exist, skip
+                }
+              }
+            }
+          }
+        }
+      }
+      setLessonNotes(notesMap);
     } catch (err: any) {
-      console.error("❌ My Courses Fetch Error:", err);
+      console.error("My Courses Fetch Error:", err);
       setError("Failed to load your courses.");
     } finally {
       setLoading(false);
@@ -108,9 +138,18 @@ const MyLearning = () => {
     }
   };
 
-    useEffect(() => {
-        fetchMyCourses();
-    }, []);
+  useEffect(() => {
+    fetchMyCourses();
+  }, []);
+
+  // Refresh courses when window gains focus (user comes back to tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchMyCourses();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
     // ─── Filter Search ────────────────────────────────────────
     const filteredCourses = courses.filter((course) =>
@@ -194,7 +233,67 @@ const MyLearning = () => {
                             </span>
                           </div>
                           <Progress value={course.progress || 0} className="h-2" style={{ background: palette.progressTrack }} />
+                          {course.progress === 100 && (
+                            <div className="flex items-center gap-1 text-xs" style={{ color: '#10B981' }}>
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Course Completed!</span>
+                            </div>
+                          )}
                         </div>
+
+                        {/* Lesson Notes Preview */}
+                        {course.modules && course.modules.length > 0 && (
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => setExpandedCourseId(expandedCourseId === course._id ? null : course._id)}
+                              className="flex items-center justify-between w-full text-xs sm:text-sm font-medium"
+                              style={{ color: palette.text }}
+                            >
+                              <span className="flex items-center gap-2">
+                                <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+                                Lesson Notes
+                              </span>
+                              {expandedCourseId === course._id ? (
+                                <ChevronDown className="w-4 h-4" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4" />
+                              )}
+                            </button>
+                            {expandedCourseId === course._id && (
+                              <div className="space-y-2 pl-4 border-l-2" style={{ borderColor: palette.border }}>
+                                {course.modules.map((mod: any) =>
+                                  mod.lessons?.map((lesson: any) => {
+                                    const note = lessonNotes[lesson._id];
+                                    if (!note) return null;
+                                    return (
+                                      <div
+                                        key={lesson._id}
+                                        className="p-2 rounded text-xs"
+                                        style={{ background: palette.cardHover }}
+                                      >
+                                        <div className="font-medium mb-1" style={{ color: palette.text }}>
+                                          {lesson.title}
+                                        </div>
+                                        <div className="line-clamp-2" style={{ color: palette.text2 }}>
+                                          {note.substring(0, 100)}...
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                                )}
+                                {Object.keys(lessonNotes).filter(id => 
+                                  course.modules.some((mod: any) => 
+                                    mod.lessons?.some((l: any) => l._id === id)
+                                  )
+                                ).length === 0 && (
+                                  <p className="text-xs" style={{ color: palette.text2 }}>
+                                    No notes yet for this course
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Buttons */}
                         <div className="flex flex-col sm:flex-row gap-2">

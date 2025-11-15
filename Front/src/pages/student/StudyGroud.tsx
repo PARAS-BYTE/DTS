@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import VideoPlayer from '@/components/VideoPlayer';
+import LessonNotes from '@/components/LessonNotes';
 
 const StudyGround = () => {
   const { state: courseId } = useLocation();
@@ -327,18 +328,27 @@ const StudyGround = () => {
 
           {/* Transcript Section */}
           {activeVideo && (
-            <Card className="shadow-sm" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg font-semibold" style={{ color: palette.text }}>
-                  Transcript
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm leading-relaxed max-h-[300px] overflow-y-auto whitespace-pre-line scrollbar-thin" style={{ color: palette.text2 }}>
-                  {transcript}
-                </div>
-              </CardContent>
-            </Card>
+            <>
+              <Card className="shadow-sm" style={{ background: palette.card, border: `1px solid ${palette.border}` }}>
+                <CardHeader>
+                  <CardTitle className="text-base sm:text-lg font-semibold" style={{ color: palette.text }}>
+                    Transcript
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm leading-relaxed max-h-[300px] overflow-y-auto whitespace-pre-line scrollbar-thin" style={{ color: palette.text2 }}>
+                    {transcript}
+                  </div>
+                </CardContent>
+              </Card>
+              <LessonNotes 
+                lessonId={activeVideo?._id} 
+                courseId={course?._id} 
+                moduleId={course?.modules?.find((mod: any) => 
+                  mod.lessons?.some((l: any) => l._id?.toString() === activeVideo?._id?.toString())
+                )?._id} 
+              />
+            </>
           )}
         </div>
 
@@ -435,7 +445,7 @@ const StudyGround = () => {
         <div className="text-center mt-8 sm:mt-10 p-4 sm:p-6 rounded-xl" style={{ background: '#10B9811A', border: `1px solid #10B981` }}>
           <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2" style={{ color: '#10B981' }} />
           <p className="font-semibold text-base sm:text-lg" style={{ color: '#10B981' }}>
-            🎉 Congratulations! You've completed this course!
+            Congratulations! You've completed this course!
           </p>
         </div>
       )}
