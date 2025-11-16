@@ -16,6 +16,8 @@ import {
   RefreshCw,
   Settings,
   Plus,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Card,
@@ -110,10 +112,9 @@ const typeColors = {
   review: "text-pink-600"
 };
 
-// Shape Cell Component
+// Fixed ShapeCell Component with visible numbers
 const ShapeCell = ({
   day,
-  color,
   isToday,
   isCompleted,
   isFuture,
@@ -121,7 +122,6 @@ const ShapeCell = ({
   onClick
 }: {
   day: number;
-  color: string;
   isToday: boolean;
   isCompleted: boolean;
   isFuture: boolean;
@@ -129,54 +129,85 @@ const ShapeCell = ({
   onClick?: () => void;
 }) => {
   
-  // *** READABILITY FIX: Ensure text is white on dark completed cells ***
-  const textColor = isToday || isCompleted ? palette.card : palette.text;
-  
+  // FIX: Simple, guaranteed visible colors
+  const getStyles = () => {
+    if (isCompleted) {
+      return {
+        backgroundColor: palette.accentDeep, // Dark background
+        textColor: '#FFFFFF', // Pure white text
+        borderColor: palette.accent
+      };
+    }
+    if (isToday) {
+      return {
+        backgroundColor: palette.accent, // Bright background
+        textColor: '#FFFFFF', // White text
+        borderColor: palette.accentDeep
+      };
+    }
+    if (hasTask) {
+      return {
+        backgroundColor: palette.text, // Dark background
+        textColor: '#FFFFFF', // White text
+        borderColor: palette.border
+      };
+    }
+    // Empty cell
+    return {
+      backgroundColor: palette.card, // Light background
+      textColor: palette.text, // Dark text
+      borderColor: palette.border
+    };
+  };
+
+  const styles = getStyles();
   const hoverScale = hasTask && !isFuture ? 1.05 : 1;
   const cursorStyle = isFuture ? "cursor-not-allowed opacity-60" : hasTask ? "cursor-pointer hover:scale-105 hover:shadow-md" : "cursor-default";
-  
-  // Mapping provided colors to palette
-  // Use accentDeep for completed days for better contrast (it's darker than accent)
-  const cellColor = isCompleted ? palette.accentDeep : hasTask ? palette.text : palette.card;
 
   return (
     <motion.div
-      // REVERTED to original fixed size for small calendar look
       whileHover={{ scale: hoverScale }}
       onClick={hasTask && !isFuture ? onClick : undefined}
-      className={`relative w-12 h-12 flex items-center justify-center rounded-lg text-sm font-semibold transition-all border-2 ${cursorStyle}`}
+      className={`relative w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all border ${cursorStyle}`}
       style={{
-        backgroundColor: cellColor,
-        borderColor: isToday ? palette.accentDeep : isCompleted ? palette.accent : palette.border,
-        boxShadow: isToday ? `0 4px 10px ${palette.text}40` : isCompleted ? `0 4px 10px ${palette.accent}40` : 'none'
+        backgroundColor: styles.backgroundColor,
+        borderColor: styles.borderColor,
+        boxShadow: isToday ? `0 2px 8px ${palette.text}40` : isCompleted ? `0 2px 8px ${palette.accent}40` : 'none'
       }}
     >
-      <span style={{ color: textColor }}>
+      {/* FIX: Guaranteed visible text */}
+      <span 
+        style={{ 
+          color: styles.textColor,
+          fontSize: '0.875rem',
+          fontWeight: isToday ? 'bold' : 'normal',
+        }}
+      >
         {day}
       </span>
 
       {/* Completion checkmark */}
       {isCompleted && (
         <div
-          className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2"
+          className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border"
           style={{ backgroundColor: palette.accent, borderColor: palette.card }}
         >
-          <CheckCircle2 className="w-3 h-3" style={{ color: palette.card }} />
+          <CheckCircle2 className="w-2 h-2" style={{ color: palette.card }} />
         </div>
       )}
 
       {/* Today's indicator */}
       {isToday && !isCompleted && (
         <div
-          className="absolute -top-1 -right-1 w-2 h-2 rounded-full border-2 animate-pulse"
-          style={{ backgroundColor: palette.accent, borderColor: palette.card }}
+          className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full border animate-pulse"
+          style={{ backgroundColor: palette.accentDeep, borderColor: palette.card }}
         />
       )}
 
-      {/* Task indicator dot */}
+      {/* Task indicator dot - only show if not completed and not today */}
       {hasTask && !isCompleted && !isToday && (
         <div
-          className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full"
+          className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 rounded-full"
           style={{ backgroundColor: palette.accent }}
         />
       )}
@@ -431,6 +462,7 @@ const Calendar = () => {
   const [regenerating, setRegenerating] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [taskForm, setTaskForm] = useState({
     title: "",
     description: "",
@@ -483,7 +515,7 @@ const Calendar = () => {
         ...task.content,
         questions,
       },
-    } as Task; // Added type assertion for safety
+    } as Task;
   };
 
   const fetchCalendarData = async () => {
@@ -492,14 +524,9 @@ const Calendar = () => {
       const res = await axios.get("http://localhost:5000/api/calendar", {
         withCredentials: true,
       });
-      console.log("📅 Calendar data received:", res.data);
-      console.log("📅 Today's tasks:", res.data.todayTasks);
-      console.log("📅 All tasks:", res.data.tasks);
-
-      // Ensure todayTasks is always an array
+      
       const todayTasks = Array.isArray(res.data.todayTasks) ? res.data.todayTasks : [];
 
-      // If no todayTasks but tasks exist, try to find today's task manually
       if (todayTasks.length === 0 && res.data.tasks && res.data.tasks.length > 0) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -509,7 +536,6 @@ const Calendar = () => {
           return taskDate.getTime() === today.getTime();
         });
         if (todayTask) {
-          console.log("✅ Found today's task in tasks array:", todayTask.title);
           res.data.todayTasks = [todayTask];
         }
       }
@@ -522,10 +548,7 @@ const Calendar = () => {
           : [],
       });
 
-      // Show message if no task for today
       if (!res.data.todayTasks || res.data.todayTasks.length === 0) {
-        console.warn("⚠️ No task found for today");
-        // Auto-generate if no task
         setTimeout(async () => {
           try {
             await axios.post(
@@ -541,7 +564,6 @@ const Calendar = () => {
       }
     } catch (err: any) {
       console.error("❌ Calendar fetch error:", err);
-      console.error("Error details:", err.response?.data);
       toast.error(err.response?.data?.message || "Failed to load calendar data");
     } finally {
       setLoading(false);
@@ -599,7 +621,7 @@ const Calendar = () => {
         "http://localhost:5000/api/calendar/create-task",
         {
           ...taskForm,
-          date: taskForm.date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+          date: taskForm.date.toISOString().split('T')[0],
         },
         { withCredentials: true }
       );
@@ -625,20 +647,25 @@ const Calendar = () => {
     }
   };
 
-  const getColorForDay = (date: Date) => {
-    const tasks = calendarData.tasks || [];
-    const dayTasks = tasks.filter((t: Task) => {
-      const taskDate = new Date(t.date);
-      taskDate.setHours(0, 0, 0, 0);
-      return taskDate.getTime() === date.getTime();
+  // Calendar navigation functions
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentMonth(prev => {
+      const newMonth = new Date(prev);
+      if (direction === 'prev') {
+        newMonth.setMonth(prev.getMonth() - 1);
+      } else {
+        newMonth.setMonth(prev.getMonth() + 1);
+      }
+      return newMonth;
     });
+  };
 
-    const completed = dayTasks.some((t: Task) => t.status === "completed");
-    const hasTask = dayTasks.length > 0;
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
 
-    if (completed) return "bg-green-500"; // Theme color applied in ShapeCell
-    if (hasTask) return "bg-black"; // Theme color applied in ShapeCell
-    return "bg-gray-100"; // Theme color applied in ShapeCell
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
   const isToday = (date: Date) => {
@@ -664,7 +691,17 @@ const Calendar = () => {
     return date > today;
   };
 
-  const getTaskForDate = (date: Date): Task | null => {
+  const hasTaskForDate = (date: Date): boolean => {
+    const tasks = calendarData.tasks || [];
+    return tasks.some((t: Task) => {
+      const taskDate = new Date(t.date);
+      taskDate.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
+      return taskDate.getTime() === date.getTime();
+    });
+  };
+
+  const handleDayClick = (date: Date) => {
     const tasks = calendarData.tasks || [];
     const task = tasks.find((t: Task) => {
       const taskDate = new Date(t.date);
@@ -672,25 +709,43 @@ const Calendar = () => {
       date.setHours(0, 0, 0, 0);
       return taskDate.getTime() === date.getTime();
     });
-    return task || null;
-  };
-
-  const hasTaskForDate = (date: Date): boolean => {
-    return getTaskForDate(date) !== null;
-  };
-
-  const handleDayClick = (date: Date) => {
-    const task = getTaskForDate(date);
+    
     if (task && task.status !== "completed") {
       navigate(`/task/${task.taskId}`);
     }
   };
 
-  const totalDays = new Date(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    0
-  ).getDate();
+  // Generate calendar grid
+  const generateCalendarGrid = () => {
+    const totalDays = getDaysInMonth(currentMonth);
+    const firstDay = getFirstDayOfMonth(currentMonth);
+    const days = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} className="w-8 h-8 sm:w-10 sm:h-10" />);
+    }
+
+    // Add cells for each day of the month
+    for (let day = 1; day <= totalDays; day++) {
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      const hasTask = hasTaskForDate(date);
+
+      days.push(
+        <ShapeCell
+          key={day}
+          day={day}
+          isToday={isToday(date)}
+          isCompleted={isCompleted(date)}
+          isFuture={isFuture(date)}
+          hasTask={hasTask}
+          onClick={() => handleDayClick(date)}
+        />
+      );
+    }
+
+    return days;
+  };
 
   if (loading) {
     return (
@@ -717,150 +772,154 @@ const Calendar = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-             {/* Create Task Button (Moved for better mobile layout) */}
-            <Button
-              onClick={() => setIsCreateDialogOpen(true)}
-              className="w-full sm:w-auto shadow-lg text-sm"
-              style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33` }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Custom Task
-            </Button>
+          <Button
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="w-full sm:w-auto shadow-lg text-sm"
+            style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33` }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Custom Task
+          </Button>
         </div>
       </div>
       
-      {/* Streak & Stats Row (Combined and made fully responsive) */}
+      {/* Streak & Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
-                <Flame className="w-4 h-4 text-orange-500" /> Current Streak
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
-                {calendarData.streak.currentStreak} days
-              </div>
-              <div className="text-xs" style={{ color: palette.text2 }}>
-                Best: {calendarData.streak.longestStreak} days
-              </div>
-            </CardContent>
-          </Card>
+        <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
+              <Flame className="w-4 h-4 text-orange-500" /> Current Streak
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
+              {calendarData.streak.currentStreak} days
+            </div>
+            <div className="text-xs" style={{ color: palette.text2 }}>
+              Best: {calendarData.streak.longestStreak} days
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
-                <CheckCircle2 className="w-4 h-4" style={{ color: palette.accentDeep }} /> Completed
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
-                {calendarData.statistics.totalTasksCompleted}
-              </div>
-              <div className="text-xs" style={{ color: palette.text2 }}>
-                Total tasks
-              </div>
-            </CardContent>
-          </Card>
+        <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
+              <CheckCircle2 className="w-4 h-4" style={{ color: palette.accentDeep }} /> Completed
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
+              {calendarData.statistics.totalTasksCompleted}
+            </div>
+            <div className="text-xs" style={{ color: palette.text2 }}>
+              Total tasks
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* New: Completion Rate (Moved from Stats Card) */}
-          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
-                <TrendingUp className="w-4 h-4" /> Completion Rate
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.accentDeep }}>
-                {calendarData.statistics.completionRate}%
-              </div>
-              <div className="text-xs" style={{ color: palette.text2 }}>
-                Overall
-              </div>
-            </CardContent>
-          </Card>
+        <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
+              <TrendingUp className="w-4 h-4" /> Completion Rate
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.accentDeep }}>
+              {calendarData.statistics.completionRate}%
+            </div>
+            <div className="text-xs" style={{ color: palette.text2 }}>
+              Overall
+            </div>
+          </CardContent>
+        </Card>
 
-           {/* New: Total Study Time (Moved from Stats Card) */}
-          <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
-                <Zap className="w-4 h-4" /> Total Study Time
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
-                {Math.round(calendarData.statistics.totalStudyTime / 60)}h
-              </div>
-              <div className="text-xs" style={{ color: palette.text2 }}>
-                Lifetime
-              </div>
-            </CardContent>
-          </Card>
+        <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-xs sm:text-sm" style={{ color: palette.text }}>
+              <Zap className="w-4 h-4" /> Total Study Time
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-xl sm:text-2xl font-bold" style={{ color: palette.text }}>
+              {Math.round(calendarData.statistics.totalStudyTime / 60)}h
+            </div>
+            <div className="text-xs" style={{ color: palette.text2 }}>
+              Lifetime
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        {/* Calendar Section (2/3 width on desktop) */}
+        {/* Calendar Section */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-lg flex items-center gap-2" style={{ color: palette.text }}>
                 <CalendarDays className="w-5 h-5" />{" "}
-                {new Date().toLocaleString("default", {
+                {currentMonth.toLocaleString("default", {
                   month: "long",
                   year: "numeric",
                 })}
               </CardTitle>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateMonth('prev')}
+                  style={{ borderColor: palette.border, color: palette.text, backgroundColor: palette.card }}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentMonth(new Date())}
+                  style={{ borderColor: palette.border, color: palette.text, backgroundColor: palette.card }}
+                >
+                  Today
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateMonth('next')}
+                  style={{ borderColor: palette.border, color: palette.text, backgroundColor: palette.card }}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {/* Week Headers */}
-              <div className="grid grid-cols-7 text-center mb-4 text-sm font-medium mx-auto" style={{ color: palette.text2, maxWidth: '360px' }}>
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d}>{d}</div>
+              <div className="grid grid-cols-7 text-center mb-4 text-sm font-medium" style={{ color: palette.text2 }}>
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                  <div key={day} className="py-2">{day}</div>
                 ))}
               </div>
 
-              {/* Calendar Grid - REVERTED for fixed size design */}
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 mx-auto justify-center" style={{ maxWidth: '360px' }}>
-                {/* Placeholder for initial offset */}
-                {Array.from({ length: new Date(today.getFullYear(), today.getMonth(), 1).getDay() }, (_, i) => (
-                    <div key={`empty-${i}`} className="w-12 h-12"></div>
-                ))}
-                
-                {Array.from({ length: totalDays }, (_, i) => {
-                  const day = i + 1;
-                  const date = new Date(today.getFullYear(), today.getMonth(), day);
-                  const color = getColorForDay(date);
-                  const hasTask = hasTaskForDate(date);
-
-                  return (
-                    <ShapeCell
-                      key={day}
-                      day={day}
-                      color={color}
-                      isToday={isToday(date)}
-                      isCompleted={isCompleted(date)}
-                      isFuture={isFuture(date)}
-                      hasTask={hasTask}
-                      onClick={() => handleDayClick(date)}
-                    />
-                  );
-                })}
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 justify-items-center">
+                {generateCalendarGrid()}
               </div>
 
-              {/* Legend */}
+              {/* Updated Legend */}
               <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-6 text-xs">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded" style={{ backgroundColor: palette.accent }}></div>
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: palette.accentDeep }}></div>
                   <span style={{ color: palette.text2 }}>Completed</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded" style={{ backgroundColor: palette.text }}></div>
-                  <span style={{ color: palette.text2 }}>Pending</span>
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: palette.accent }}></div>
+                  <span style={{ color: palette.text2 }}>Today</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded border" style={{ backgroundColor: palette.bg, borderColor: palette.border }}></div>
+                  <div className="w-3 h-3 rounded" style={{ backgroundColor: palette.text }}></div>
+                  <span style={{ color: palette.text2 }}>Pending Task</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded border" style={{ backgroundColor: palette.card, borderColor: palette.border }}></div>
                   <span style={{ color: palette.text2 }}>No Task</span>
                 </div>
               </div>
@@ -868,7 +927,7 @@ const Calendar = () => {
           </Card>
         </div>
 
-        {/* Tasks Sidebar (1/3 width on desktop, full width on mobile) */}
+        {/* Tasks Sidebar */}
         <div className="space-y-6">
           {/* Today's Task */}
           <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
@@ -891,28 +950,10 @@ const Calendar = () => {
                   </p>
                   <Button
                     size="sm"
-                    onClick={async () => {
-                      try {
-                        setRegenerating(true);
-                        await axios.post(
-                          "http://localhost:5000/api/calendar/regenerate-today",
-                          {},
-                          { withCredentials: true }
-                        );
-                        await fetchCalendarData();
-                        toast.success("Task generated successfully!");
-                      } catch (err: any) {
-                        console.error("Error generating task:", err);
-                        toast.error(err.response?.data?.message || "Failed to generate task");
-                      } finally {
-                        setRegenerating(false);
-                      }
-                    }}
+                    onClick={handleRegenerateTask}
                     disabled={regenerating}
                     className="w-full shadow-lg"
                     style={{ backgroundColor: palette.accentDeep, color: palette.card, boxShadow: `0 4px 6px -1px ${palette.accentDeep}33` }}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = palette.accent}
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = palette.accentDeep}
                   >
                     {regenerating ? (
                       <>
@@ -959,7 +1000,7 @@ const Calendar = () => {
           {/* Study Preferences */}
           <StudyPreferencesCard preferences={calendarData.studyPreferences} />
           
-          {/* Statistics (Removed total study time and tasks completed, as they were moved up) */}
+          {/* Statistics */}
           <Card className="shadow-sm" style={{ backgroundColor: palette.card, border: `1px solid ${palette.border}` }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm" style={{ color: palette.text }}>

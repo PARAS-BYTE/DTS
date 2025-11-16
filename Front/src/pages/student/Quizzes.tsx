@@ -19,6 +19,7 @@ import {
   Trophy,
   Loader2,
   Search,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Dialog,
@@ -72,6 +73,9 @@ const Quizzes = () => {
   // ─── Handle Navigation ───────────────────────────────
   const handleNavigate = (id) => navigate("/student/takequiz", { state: id });
 
+  // ─── Handle Back Navigation ───────────────────────────────
+  const handleBack = () => navigate(-1);
+
   // ─── Search Filter ───────────────────────────────
   useEffect(() => {
     const results = quizzes.filter((quiz) =>
@@ -124,21 +128,44 @@ const Quizzes = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-[80vh]" style={{ color: palette.text2 }}>
+      <div className="flex justify-center items-center min-h-screen" style={{ background: palette.bg, color: palette.text2 }}>
         Loading quizzes...
       </div>
     );
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-10" style={{ background: palette.bg }}>
-      {/* ─── Header ─────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${palette.text}, ${palette.text2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          Quizzes & Assessments
-        </h1>
-        <p className="text-sm sm:text-base md:text-lg" style={{ color: palette.text2 }}>
-          Test your skills and boost your XP
-        </p>
+    <div className="min-h-screen p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-10" style={{ background: palette.bg }}>
+      {/* ─── Header with Back Button ─────────────────────────────── */}
+      <div className="flex items-center gap-4 mb-4">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleBack}
+          className="flex-shrink-0"
+          style={{ 
+            borderColor: palette.border, 
+            color: palette.text,
+            background: palette.card 
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = palette.accentSoft;
+            e.currentTarget.style.borderColor = palette.accent;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = palette.card;
+            e.currentTarget.style.borderColor = palette.border;
+          }}
+        >
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" style={{ background: `linear-gradient(to right, ${palette.text}, ${palette.text2})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            Quizzes & Assessments
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg" style={{ color: palette.text2 }}>
+            Test your skills and boost your XP
+          </p>
+        </div>
       </div>
 
       {/* ─── Search ─────────────────────────────── */}
@@ -386,19 +413,36 @@ const Quizzes = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center items-center gap-4 mt-6 sm:mt-8">
-          {hasPrev && (
-            <Button variant="outline" onClick={() => setPage(page - 1)} style={{ borderColor: palette.border, color: palette.text }}>
-              Previous
-            </Button>
-          )}
-          {hasNext && (
-            <Button variant="outline" onClick={() => setPage(page + 1)} style={{ borderColor: palette.border, color: palette.text }}>
-              Next
-            </Button>
-          )}
-        </div>
+        {filtered.length > QUIZZES_PER_PAGE && (
+          <div className="flex justify-center items-center gap-4 mt-6 sm:mt-8">
+            {hasPrev && (
+              <Button variant="outline" onClick={() => setPage(page - 1)} style={{ borderColor: palette.border, color: palette.text }}>
+                Previous
+              </Button>
+            )}
+            {hasNext && (
+              <Button variant="outline" onClick={() => setPage(page + 1)} style={{ borderColor: palette.border, color: palette.text }}>
+                Next
+              </Button>
+            )}
+          </div>
+        )}
       </motion.div>
+
+      {/* ─── Empty State ───────────────────────────── */}
+      {!loading && filtered.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center justify-center py-16 text-center"
+        >
+          <FileQuestion className="w-16 h-16 mb-4" style={{ color: palette.text2 }} />
+          <h3 className="text-xl font-semibold mb-2" style={{ color: palette.text }}>No quizzes found</h3>
+          <p style={{ color: palette.text2 }}>
+            {searchQuery ? "Try adjusting your search terms" : "No quizzes available at the moment"}
+          </p>
+        </motion.div>
+      )}
     </div>
   );
 };

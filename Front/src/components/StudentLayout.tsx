@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { cn } from '@/lib/utils';
@@ -18,10 +18,12 @@ import {
   X,
   LucideBatteryWarning,
   FileText,
-  MessageSquare
+  MessageSquare,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
-// import { palette } from "../../theme/palette";
 import { palette } from '../theme/palette';
+
 interface StudentLayoutProps {
   children: ReactNode;
 }
@@ -29,7 +31,8 @@ interface StudentLayoutProps {
 const StudentLayout = ({ children }: StudentLayoutProps) => {
   const location = useLocation();
   const user = useStore((state) => state.user);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // mobile drawer open
+  const [collapsed, setCollapsed] = useState(false); // desktop collapsed
 
   const navigation = [
     { name: 'Dashboard', href: '/student', icon: Home },
@@ -38,13 +41,13 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
     { name: 'Assignments', href: '/student/assignments', icon: FileQuestion },
     { name: 'Quizzes', href: '/student/quizzes', icon: FileQuestion },
     { name: 'Arena', href: '/student/arena', icon: Trophy },
-    { name: 'Settings', href: '/student/settings', icon: Settings },
-    { name: 'History', href: '/student/hist', icon: History },
     { name: 'My Learning', href: '/student/learning', icon: LucideBatteryWarning },
     { name: 'Notes', href: '/student/notion', icon: FileText },
     { name: 'Forum', href: '/student/forum', icon: MessageSquare },
     { name: 'ChatBot', href: '/student/chatbot', icon: Bot },
-    { name: 'Store', href: '/student/store', icon: StoreIcon }
+    { name: 'Store', href: '/student/store', icon: StoreIcon },
+    { name: 'History', href: '/student/hist', icon: History },
+    { name: 'Settings', href: '/student/settings', icon: Settings },
   ];
 
   const isActive = (path: string) => {
@@ -53,59 +56,96 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
   };
 
   return (
-    <div className="flex h-screen bg-white flex-col md:flex-row">
+    <div className="flex h-screen bg-white">
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 border-b" style={{ background: palette.card }}>
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: palette.accent }}>
-            <Blocks className="w-6 h-6 text-white" />
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: palette.accent }}>
+            <Blocks className="w-4 h-4 text-white" />
           </div>
-          <span className="text-xl font-bold" style={{ color: palette.text }}>LearnNova</span>
+          <span className="text-lg font-bold" style={{ color: palette.text }}>LearnNova</span>
         </Link>
-
-        {/* Hamburger Button */}
         <button onClick={() => setOpen(!open)}>
-          {open ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+          {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed md:static top-0 left-0 h-full w-64 p-4 transition-transform duration-300 z-40 border-r',
+          'fixed md:relative top-0 left-0 h-full transition-all duration-300 z-40 border-r flex flex-col',
+          collapsed ? 'w-16' : 'w-64',
           open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         )}
         style={{ background: palette.card, borderColor: palette.border }}
       >
-        {/* Logo */}
-        <div className="p-6 border-b" style={{ borderColor: palette.border }}>
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: palette.accent }}>
-              <Blocks className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold" style={{ color: palette.text }}>LearnNova</span>
-          </Link>
+        {/* Logo Section */}
+        <div className={cn(
+          "p-4 border-b flex items-center justify-between",
+          collapsed && "flex-col gap-2 py-4"
+        )} style={{ borderColor: palette.border }}>
+          {!collapsed ? (
+            <>
+              <Link to="/" className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: palette.accent }}>
+                  <Blocks className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-lg font-bold" style={{ color: palette.text }}>LearnNova</span>
+              </Link>
+              <button 
+                onClick={() => setCollapsed(!collapsed)}
+                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/" className="flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: palette.accent }}>
+                  <Blocks className="w-4 h-4 text-white" />
+                </div>
+              </Link>
+              <button 
+                onClick={() => setCollapsed(!collapsed)}
+                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
           {navigation.map((item) => (
             <NavLink
               key={item.name}
               to={item.href}
               end={item.href === '/student'}
               className={cn(
-                'flex items-center gap-3 px-4 py-3 rounded-xl transition-all',
-                'hover:bg-gray-100'
+                'flex items-center transition-all group relative',
+                collapsed ? 'justify-center p-3 rounded-lg' : 'gap-3 px-3 py-2.5 rounded-xl'
               )}
               activeClassName="font-medium"
               style={{ color: palette.text2 }}
+              onClick={() => setOpen(false)}
             >
-              <item.icon className="w-5 h-5" />
-              <span>{item.name}</span>
+              <item.icon className={cn("w-5 h-5 flex-shrink-0", collapsed ? '' : '')} />
+              {!collapsed && <span className="flex-1">{item.name}</span>}
+              
+              {/* Tooltip for collapsed state */}
+              {collapsed && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                  {item.name}
+                </div>
+              )}
             </NavLink>
           ))}
         </nav>
+
+        {/* User Profile (Optional) */}
+       
       </aside>
 
       {/* Overlay for Mobile */}
@@ -117,7 +157,12 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-white w-full">{children}</main>
+      <main className={cn(
+        "flex-1 overflow-auto bg-white transition-all duration-300",
+        collapsed ? "md:ml-0" : "md:ml-0"
+      )}>
+        {children}
+      </main>
     </div>
   );
 };

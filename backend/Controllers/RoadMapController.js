@@ -210,101 +210,122 @@ export const deleteRoadmap = asyncHandler(async (req, res) => {
 
 export const createRoadmapWithAI = asyncHandler(async (req, res) => {
   const user = await authenticateUser(req);
-
   const { topic, level } = req.body;
+
   if (!topic || !level) {
-    res.status(400);
-    throw new Error("Topic and level are required");
+    return res.status(400).json({
+      success: false,
+      message: "Topic and level are required",
+    });
+  }
+
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(500).json({
+      success: false,
+      message: "Gemini API key missing",
+    });
   }
 
   try {
-    const model = getRoadmapModel();
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-    const prompt = `Return ONLY JSON. Create a tiny roadmap.
-      Topic: ${topic}
-      Level: ${level}
-      2 modules only, 3 topics each.
-      Format:
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-thinking", // ⚡ BEST FAST MODEL WITH DEEP OUTPUT
+    });
+
+    const prompt = `
+      You are an expert curriculum designer.
+
+      Return ONLY pure JSON. No descriptions, no markdown.
+
+      Generate a **full detailed learning roadmap** for:
+      Topic: "${topic}"
+      Level: "${level}"
+
+      Produce a DEEP and COMPLETE structure:
+
       {
         "title": "",
         "modules": [
-          { "name": "", "topics": [{ "name": "" }] }
+          {
+            "name": "",
+            "topics": [
+              {
+                "name": "",
+                "subtopics": [
+                  {"name": ""}
+                ]
+              }
+            ]
+          }
         ]
       }
+
+      RULES:
+      - Create **6 modules**
+      - Each module: **4–6 topics**
+      - Each topic: **2–3 subtopics**
+      - Keep names clean and concise
+      - Output must be 100% valid JSON
     `;
 
-    const response = await callGeminiWithRetry(model, prompt);
-    const raw = response?.response?.text?.() ?? "";
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    const roadmapJson = extractJSON(raw);
-
-    if (!roadmapJson) {
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch (err) {
+      console.log("❌ Gemini JSON Error:", text);
       return res.status(500).json({
         success: false,
-        error: "Invalid AI JSON output",
+        message: "AI returned invalid JSON",
       });
     }
 
-    const newRoadmap = await Roadmap.create({
-      title: roadmapJson.title || `${topic} Roadmap (${level})`,
-      modules: roadmapJson.modules || [],
+    // Save to DB
+    const roadmap = await Roadmap.create({
+      title: json.title || `${topic} Roadmap (${level})`,
+      modules: json.modules || [],
       createdBy: user._id,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "AI Roadmap created successfully",
-      roadmap: newRoadmap,
+      message: "AI roadmap created successfully",
+      roadmap,
     });
 
-  } catch (error) {
-    console.error("createRoadmapWithAI error:", error);
+  } catch (err) {
+    console.error("❌ AI Error:", err.message);
 
-    const overloaded =
-      error?.message === "Gemini API key missing — set GEMINI_API_KEY in your env"
-        ? false
-        : /overload|resource exhausted|429|503/i.test(error?.message ?? "");
+    // Fallback
+    const fallback = await Roadmap.create({
+      title: `${topic} Roadmap (${level}) — Fallback`,
+      modules: [
+        {
+          name: `${topic} Basics`,
+          topics: [
+            { name: `Introduction to ${topic}`, subtopics: [{ name: "Overview" }] },
+            { name: `${topic} core concepts`, subtopics: [{ name: "Key fundamentals" }] },
+          ],
+        },
+        {
+          name: `${topic} Advanced`,
+          topics: [
+            { name: `${topic} workflows`, subtopics: [{ name: "Real examples" }] },
+            { name: `${topic} project`, subtopics: [{ name: "Build something" }] },
+          ],
+        },
+      ],
+      createdBy: user._id,
+      fallback: true,
+    });
 
-    if (overloaded) {
-      const fallbackRoadmap = await Roadmap.create({
-        title: `${topic} Roadmap (${level}) — sample`,
-        modules: [
-          {
-            name: `${topic} Foundations`,
-            topics: [
-              { name: `Core concept 1 for ${topic}` },
-              { name: `Core concept 2 for ${topic}` },
-              { name: `Practice exercise for ${topic}` },
-            ],
-          },
-          {
-            name: `${topic} Next Steps`,
-            topics: [
-              { name: `Apply ${topic} in a project` },
-              { name: `Assess your ${level} understanding` },
-              { name: `Plan further learning` },
-            ],
-          },
-        ],
-        createdBy: user._id,
-        aiFallback: true,
-      });
-
-      return res.status(200).json({
-        success: true,
-        message:
-          "Gemini is overloaded, so a sample roadmap was generated instead.",
-        roadmap: fallbackRoadmap,
-        overloaded: true,
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      error:
-        error?.message === "Gemini API key missing — set GEMINI_API_KEY in your env"
-          ? error.message
-          : "AI generation failed",
+    return res.status(200).json({
+      success: true,
+      message: "Gemini overloaded — fallback roadmap created.",
+      roadmap: fallback,
     });
   }
 });

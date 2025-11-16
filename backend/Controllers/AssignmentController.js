@@ -312,10 +312,119 @@ export const getAdminAssignments = asyncHandler(async (req, res) => {
 // @route   GET /api/assignments/student
 // @access  Private (Student)
 //
+// export const getStudentAssignments = asyncHandler(async (req, res) => {
+//   try {
+//     // Extract JWT
+//     let token;
+//     if (req.cookies && req.cookies.jwt) {
+//       token = req.cookies.jwt;
+//     } else if (
+//       req.headers.authorization &&
+//       req.headers.authorization.startsWith("Bearer ")
+//     ) {
+//       token = req.headers.authorization.split(" ")[1];
+//     }
+
+//     if (!token) {
+//       return res.status(401).json({ message: "Not authorized, no token" });
+//     }
+
+//     // Verify token
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     const user = await User.findById(decoded.userId);
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     // Get enrolled course IDs
+//     const enrolledCourseIds = user.enrolledCourses
+//       .map((ec) => ec.courseId)
+//       .filter((id) => id != null); // Filter out null/undefined values
+
+//     console.log(`📚 User ${user._id} enrolled in ${enrolledCourseIds.length} courses`);
+
+//     if (enrolledCourseIds.length === 0) {
+//       return res.status(200).json({
+//         success: true,
+//         assignments: [],
+//         message: "No enrolled courses found",
+//       });
+//     }
+
+//     // Get assignments for enrolled courses
+//     const assignments = await Assignment.find({
+//       course: { $in: enrolledCourseIds },
+//       published: true,
+//     })
+//       .populate("course", "title")
+//       .select(
+//         "title description course dueDate totalMarks questions allowLateSubmission latePenalty submissions createdAt videoUrl"
+//       )
+//       .sort({ dueDate: 1 });
+
+//     console.log(`📝 Found ${assignments.length} published assignments for user ${user._id}`);
+
+//     // Format assignments with student submission status
+//     const formattedAssignments = assignments.map((assignment) => {
+//       const submission = assignment.submissions.find(
+//         (s) => s.studentId.toString() === user._id.toString()
+//       );
+
+//       const isOverdue = new Date(assignment.dueDate) < new Date();
+//       const isSubmitted = !!submission;
+//       const isGraded = submission?.status === "graded";
+
+//       return {
+//         _id: assignment._id,
+//         title: assignment.title,
+//         description: assignment.description,
+//         course: assignment.course?.title || "Unknown Course",
+//         courseId: assignment.course?._id,
+//         dueDate: assignment.dueDate,
+//         totalMarks: assignment.totalMarks,
+//         questionsCount: assignment.questions.length,
+//         questions: assignment.questions.map((q) => ({
+//           _id: q._id,
+//           questionText: q.questionText,
+//           questionType: q.questionType,
+//           marks: q.marks,
+//           required: q.required,
+//           order: q.order,
+//         })),
+//         allowLateSubmission: assignment.allowLateSubmission,
+//         latePenalty: assignment.latePenalty,
+//         videoUrl: assignment.videoUrl || "",
+//         isSubmitted,
+//         isGraded,
+//         isOverdue,
+//         submission: submission
+//           ? {
+//               grade: submission.grade,
+//               feedback: submission.feedback,
+//               submittedAt: submission.submittedAt,
+//               status: submission.status,
+//             }
+//           : null,
+//       };
+//     });
+
+//     res.status(200).json({
+//       success: true,
+//       assignments: formattedAssignments,
+//     });
+//   } catch (error) {
+//     console.error("Get Student Assignments Error:", error.message);
+//     res.status(500).json({
+//       message: "Server error while fetching assignments",
+//     });
+//   }
+// });
 export const getStudentAssignments = asyncHandler(async (req, res) => {
   try {
     // Extract JWT
     let token;
+
     if (req.cookies && req.cookies.jwt) {
       token = req.cookies.jwt;
     } else if (
@@ -329,7 +438,6 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
       return res.status(401).json({ message: "Not authorized, no token" });
     }
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
 
@@ -337,12 +445,18 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Get enrolled course IDs
+    // STRICT enrolled course IDs
     const enrolledCourseIds = user.enrolledCourses
-      .map((ec) => ec.courseId)
-      .filter((id) => id != null); // Filter out null/undefined values
+      .map((ec) =>
+        ec.courseId
+          ? ec.courseId._id
+            ? ec.courseId._id.toString()
+            : ec.courseId.toString()
+          : null
+      )
+      .filter((id) => id !== null);
 
-    console.log(`📚 User ${user._id} enrolled in ${enrolledCourseIds.length} courses`);
+    console.log("Student enrolled in:", enrolledCourseIds);
 
     if (enrolledCourseIds.length === 0) {
       return res.status(200).json({
@@ -352,7 +466,7 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
       });
     }
 
-    // Get assignments for enrolled courses
+    // ONLY assignments from enrolled courses
     const assignments = await Assignment.find({
       course: { $in: enrolledCourseIds },
       published: true,
@@ -363,17 +477,13 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
       )
       .sort({ dueDate: 1 });
 
-    console.log(`📝 Found ${assignments.length} published assignments for user ${user._id}`);
-
-    // Format assignments with student submission status
+    // FORMAT ANSWERS WITH CORRECT FILTERING
     const formattedAssignments = assignments.map((assignment) => {
       const submission = assignment.submissions.find(
         (s) => s.studentId.toString() === user._id.toString()
       );
 
       const isOverdue = new Date(assignment.dueDate) < new Date();
-      const isSubmitted = !!submission;
-      const isGraded = submission?.status === "graded";
 
       return {
         _id: assignment._id,
@@ -395,8 +505,8 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
         allowLateSubmission: assignment.allowLateSubmission,
         latePenalty: assignment.latePenalty,
         videoUrl: assignment.videoUrl || "",
-        isSubmitted,
-        isGraded,
+        isSubmitted: !!submission,
+        isGraded: submission?.status === "graded",
         isOverdue,
         submission: submission
           ? {
@@ -409,7 +519,7 @@ export const getStudentAssignments = asyncHandler(async (req, res) => {
       };
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       assignments: formattedAssignments,
     });
